@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer, useEffect, useRef, useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   examReducer,
   formatTime,
@@ -123,10 +124,17 @@ export function ExamClient({
     saveAnswer(qId, selectedKey, newFlagged);
   }
 
+  const router = useRouter();
+
   async function handleSubmit() {
     dispatch({ type: "SUBMIT" });
     await saveExamStateAction(attemptId, state.timeRemaining, state.scratchPad);
-    await submitExamAction(attemptId);
+    const result = await submitExamAction(attemptId);
+    if (result?.redirectTo) {
+      router.push(result.redirectTo);
+    } else if (result?.error) {
+      dispatch({ type: "RESUME" });
+    }
   }
 
   // Keyboard shortcuts

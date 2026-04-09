@@ -141,7 +141,7 @@ export async function saveExamStateAction(
 
 export async function submitExamAction(
   attemptId: number
-): Promise<{ error?: string }> {
+): Promise<{ error?: string; redirectTo?: string }> {
   const session = await getSession();
   if (!session) return { error: "Not authenticated" };
 
@@ -199,5 +199,5 @@ export async function submitExamAction(
     })
     .where(eq(attempts.id, attemptId));
 
-  redirect(`/exam/results/${attemptId}`);
+  return { redirectTo: `/exam/results/${attemptId}` };
 }
