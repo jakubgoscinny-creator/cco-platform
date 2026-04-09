@@ -2,10 +2,30 @@
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { attempts, answers, tests } from "@/lib/schema";
+import { attempts, answers, tests, contacts } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { syncQuestionsForTest } from "@/lib/sync";
+import { createItem, PODIO_APPS } from "@/lib/podio";
+
+// Podio Test Attempts app (30626082) field IDs
+const ATTEMPT_FIELDS = {
+  TEST: 275654681,                // app ref → Tests
+  DOMAINS: 275654682,             // app ref → Domains
+  STATUS: 275654686,              // category: In Progress, Completed, Abandoned
+  STARTED_AT: 275654688,          // date
+  COMPLETED_AT: 275654689,        // date
+  CONTACT_ITEM_ID: 275654684,     // number
+  ATTEMPT_NUMBER: 275654687,      // number
+  DURATION_MINUTES: 275654690,    // number
+  SCORE: 275654691,               // number
+  QUESTION_COUNT: 275654692,      // number
+  ATTEMPT_NAME: 275654680,        // text
+  CONTACT_NAME: 275654685,        // text
+  SERVED_QUESTION_IDS: 275654694, // text [H]
+  RESULT_SUMMARY: 275654697,      // text
+  NOTES: 275654698,               // text
+} as const;
 
 // ---------------------------------------------------------------------------
 // Start exam — creates an attempt and redirects to the exam page
@@ -196,15 +216,86 @@ export async function submitExamAction(
 
   const scorePercent = total > 0 ? Math.round((correct / total) * 10000) / 100 : 0;
 
+  const submittedAt = new Date();
+
   await db
     .update(attempts)
     .set({
       status: "submitted",
-      submittedAt: new Date(),
+      submittedAt,
       scorePercent: String(scorePercent),
       timeRemainingSeconds: 0,
     })
     .where(eq(attempts.id, attemptId));
 
+  // Write back to Podio (fire-and-forget — don't block the redirect)
+  writAttemptToPodio(attempt, submittedAt, scorePercent, total, correct, session.contactId).catch(
+    (err) => console.error("Podio write-back failed:", err)
+  );
+
   return { redirectTo: `/exam/results/${attemptId}` };
+}
+
+// ---------------------------------------------------------------------------
+// Podio write-back — creates a Test Attempt item in Podio
+// ---------------------------------------------------------------------------
+
+async function writAttemptToPodio(
+  attempt: { id: number; testPodioId: number; startedAt: Date | null; questionOrder: unknown; scratchPad: string | null },
+  submittedAt: Date,
+  scorePercent: number,
+  totalQuestions: number,
+  correctCount: number,
+  contactId: number
+): Promise<void> {
+  // Get contact name
+  const [contact] = await db
+    .select({ fullName: contacts.fullName })
+    .from(contacts)
+    .where(eq(contacts.podioItemId, contactId))
+    .limit(1);
+
+  // Get test name
+  const [test] = await db
+    .select({ testName: tests.testName })
+    .from(tests)
+    .where(eq(tests.podioItemId, attempt.testPodioId))
+    .limit(1);
+
+  const startedAt = attempt.startedAt ? new Date(attempt.startedAt) : submittedAt;
+  const durationMinutes = Math.round(
+    (submittedAt.getTime() - startedAt.getTime()) / 60000
+  );
+
+  const questionIds = (attempt.questionOrder as number[]) ?? [];
+
+  const fields: Record<string, unknown> = {
+    [ATTEMPT_FIELDS.TEST]: [attempt.testPodioId],
+    [ATTEMPT_FIELDS.STATUS]: 2, // "Completed" option ID (1=In Progress, 2=Completed, 3=Abandoned)
+    [ATTEMPT_FIELDS.STARTED_AT]: {
+      start: startedAt.toISOString(),
+    },
+    [ATTEMPT_FIELDS.COMPLETED_AT]: {
+      start: submittedAt.toISOString(),
+    },
+    [ATTEMPT_FIELDS.CONTACT_ITEM_ID]: contactId,
+    [ATTEMPT_FIELDS.DURATION_MINUTES]: durationMinutes,
+    [ATTEMPT_FIELDS.SCORE]: scorePercent,
+    [ATTEMPT_FIELDS.QUESTION_COUNT]: totalQuestions,
+    [ATTEMPT_FIELDS.ATTEMPT_NAME]: `${test?.testName ?? "Exam"} — ${contact?.fullName ?? "Student"} — ${submittedAt.toLocaleDateString("en-US")}`,
+    [ATTEMPT_FIELDS.CONTACT_NAME]: contact?.fullName ?? "",
+    [ATTEMPT_FIELDS.SERVED_QUESTION_IDS]: questionIds.join(","),
+    [ATTEMPT_FIELDS.RESULT_SUMMARY]: `Score: ${scorePercent}% (${correctCount}/${totalQuestions}). Duration: ${durationMinutes}m.`,
+    [ATTEMPT_FIELDS.NOTES]: attempt.scratchPad ?? "",
+  };
+
+  const result = await createItem(30626082, fields);
+
+  // Mark as synced in Neon
+  await db
+    .update(attempts)
+    .set({ podioSynced: true })
+    .where(eq(attempts.id, attempt.id));
+
+  console.log("Podio write-back OK: item", result.item_id, "for attempt", attempt.id);
 }
