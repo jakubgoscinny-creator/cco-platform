@@ -287,11 +287,14 @@ async function writAttemptToPodio(
     [ATTEMPT_FIELDS.SCORE]: scorePercent,
     [ATTEMPT_FIELDS.QUESTION_COUNT]: totalQuestions,
     [ATTEMPT_FIELDS.ATTEMPT_NAME]: `${test?.testName ?? "Exam"} — ${contact?.fullName ?? "Student"} — ${submittedAt.toLocaleDateString("en-US")}`,
-    [ATTEMPT_FIELDS.CONTACT_NAME]: contact?.fullName ?? "",
-    [ATTEMPT_FIELDS.SERVED_QUESTION_IDS]: questionIds.join(","),
+    [ATTEMPT_FIELDS.CONTACT_NAME]: contact?.fullName || "Student",
     [ATTEMPT_FIELDS.RESULT_SUMMARY]: `Score: ${scorePercent}% (${correctCount}/${totalQuestions}). Duration: ${durationMinutes}m.`,
-    [ATTEMPT_FIELDS.NOTES]: attempt.scratchPad ?? "",
   };
+
+  // Only add optional text fields if they have content (Podio rejects empty strings)
+  const qIds = questionIds.join(",");
+  if (qIds) fields[ATTEMPT_FIELDS.SERVED_QUESTION_IDS] = qIds;
+  if (attempt.scratchPad) fields[ATTEMPT_FIELDS.NOTES] = attempt.scratchPad;
 
   const result = await createItem(30626082, fields);
 
