@@ -60,6 +60,12 @@ export default async function ExamTakePage({
       initialAnswers={answerMap}
       initialTimeRemaining={attempt.timeRemainingSeconds ?? 3600}
       initialScratchPad={attempt.scratchPad ?? ""}
+      initialHighlights={
+        (attempt.highlights as Record<number, string>) ?? undefined
+      }
+      initialPaneWidth={
+        attempt.paneWidth ? Number(attempt.paneWidth) : undefined
+      }
     />
   );
 }

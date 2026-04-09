@@ -93,6 +93,8 @@ export const attempts = pgTable("attempts", {
   podioSynced: boolean("podio_synced").default(false),
   questionOrder: bigint("question_order", { mode: "number" }).array(),
   questionSnapshots: jsonb("question_snapshots"), // frozen question data at attempt time
+  highlights: jsonb("highlights"), // {questionId: highlightedHTML}
+  paneWidth: numeric("pane_width", { precision: 4, scale: 1 }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

@@ -115,7 +115,9 @@ export async function saveAnswerAction(
 export async function saveExamStateAction(
   attemptId: number,
   timeRemainingSeconds: number,
-  scratchPad: string
+  scratchPad: string,
+  highlights?: Record<number, string>,
+  paneWidth?: number
 ): Promise<void> {
   const session = await getSession();
   if (!session) return;
@@ -129,10 +131,15 @@ export async function saveExamStateAction(
   if (!attempt || attempt.contactId !== session.contactId) return;
   if (attempt.status !== "in_progress") return;
 
-  await db
-    .update(attempts)
-    .set({ timeRemainingSeconds, scratchPad })
-    .where(eq(attempts.id, attemptId));
+  const update: Record<string, unknown> = { timeRemainingSeconds, scratchPad };
+  if (highlights !== undefined) {
+    update.highlights = highlights as unknown;
+  }
+  if (paneWidth !== undefined) {
+    update.paneWidth = String(paneWidth);
+  }
+
+  await db.update(attempts).set(update).where(eq(attempts.id, attemptId));
 }
 
 // ---------------------------------------------------------------------------

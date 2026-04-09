@@ -23,6 +23,8 @@ export interface ExamState {
   timeRemaining: number; // seconds
   status: "active" | "paused" | "submitting" | "submitted";
   scratchPad: string;
+  highlights: Record<number, string>; // questionId → highlighted HTML
+  paneWidth: number; // 35-70, default 58
 }
 
 export type ExamAction =
@@ -37,7 +39,10 @@ export type ExamAction =
   | { type: "RESUME" }
   | { type: "SUBMIT" }
   | { type: "SUBMITTED" }
-  | { type: "UPDATE_SCRATCH_PAD"; content: string };
+  | { type: "UPDATE_SCRATCH_PAD"; content: string }
+  | { type: "SET_HIGHLIGHT"; questionId: number; html: string }
+  | { type: "CLEAR_HIGHLIGHT"; questionId: number }
+  | { type: "SET_PANE_WIDTH"; width: number };
 
 export function examReducer(state: ExamState, action: ExamAction): ExamState {
   switch (action.type) {
@@ -123,6 +128,24 @@ export function examReducer(state: ExamState, action: ExamAction): ExamState {
     case "UPDATE_SCRATCH_PAD":
       return { ...state, scratchPad: action.content };
 
+    case "SET_HIGHLIGHT": {
+      const next = { ...state.highlights };
+      next[action.questionId] = action.html;
+      return { ...state, highlights: next };
+    }
+
+    case "CLEAR_HIGHLIGHT": {
+      const next = { ...state.highlights };
+      delete next[action.questionId];
+      return { ...state, highlights: next };
+    }
+
+    case "SET_PANE_WIDTH":
+      return {
+        ...state,
+        paneWidth: Math.max(35, Math.min(70, action.width)),
+      };
+
     default:
       return state;
   }
@@ -149,6 +172,7 @@ export function formatTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  if (h > 0)
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   return `${m}:${String(s).padStart(2, "0")}`;
 }

@@ -12,9 +12,15 @@ import {
   type QuestionSnapshot,
   type AnswerState,
 } from "@/lib/exam-engine";
-import { saveAnswerAction, saveExamStateAction, submitExamAction } from "@/actions/exam";
+import {
+  saveAnswerAction,
+  saveExamStateAction,
+  submitExamAction,
+} from "@/actions/exam";
 import { QuestionGrid } from "./QuestionGrid";
 import { ScratchPad } from "./ScratchPad";
+import { PaneResizer } from "./PaneResizer";
+import { HighlightTools } from "./HighlightTools";
 import {
   ChevronLeft,
   ChevronRight,
@@ -34,6 +40,8 @@ interface ExamClientProps {
   initialAnswers: Record<number, AnswerState>;
   initialTimeRemaining: number;
   initialScratchPad: string;
+  initialHighlights?: Record<number, string>;
+  initialPaneWidth?: number;
 }
 
 export function ExamClient({
@@ -43,6 +51,8 @@ export function ExamClient({
   initialAnswers,
   initialTimeRemaining,
   initialScratchPad,
+  initialHighlights,
+  initialPaneWidth,
 }: ExamClientProps) {
   const initialState: ExamState = {
     attemptId,
@@ -52,14 +62,15 @@ export function ExamClient({
     timeRemaining: initialTimeRemaining,
     status: "active",
     scratchPad: initialScratchPad,
+    highlights: initialHighlights ?? {},
+    paneWidth: initialPaneWidth ?? 58,
   };
 
   const [state, dispatch] = useReducer(examReducer, initialState);
-  const [showGrid, setShowGrid] = useState(false);
-  const [showScratchPad, setShowScratchPad] = useState(false);
+  const [showMobileScratchPad, setShowMobileScratchPad] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const stateSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
 
   const currentQuestion = state.questions[state.currentIndex];
   const currentAnswer = currentQuestion
@@ -80,14 +91,27 @@ export function ExamClient({
     }
   }, [state.timeRemaining, state.status]);
 
-  // Persist timer + scratch pad every 30 seconds
+  // Persist state every 30 seconds
   useEffect(() => {
     if (state.status !== "active") return;
     const interval = setInterval(() => {
-      saveExamStateAction(attemptId, state.timeRemaining, state.scratchPad);
+      saveExamStateAction(
+        attemptId,
+        state.timeRemaining,
+        state.scratchPad,
+        state.highlights,
+        state.paneWidth
+      );
     }, 30000);
     return () => clearInterval(interval);
-  }, [attemptId, state.timeRemaining, state.scratchPad, state.status]);
+  }, [
+    attemptId,
+    state.timeRemaining,
+    state.scratchPad,
+    state.highlights,
+    state.paneWidth,
+    state.status,
+  ]);
 
   // Save answer with debounce
   const saveAnswer = useCallback(
@@ -105,7 +129,6 @@ export function ExamClient({
     const qId = currentQuestion.podioItemId;
     const currentKey = state.answers[qId]?.selectedKey;
     const flagged = state.answers[qId]?.flagged ?? false;
-
     if (currentKey === key) {
       dispatch({ type: "CLEAR_ANSWER", questionId: qId });
       saveAnswer(qId, null, flagged);
@@ -124,11 +147,53 @@ export function ExamClient({
     saveAnswer(qId, selectedKey, newFlagged);
   }
 
-  const router = useRouter();
+  function handleHighlight(questionId: number, html: string) {
+    dispatch({ type: "SET_HIGHLIGHT", questionId, html });
+    saveExamStateAction(
+      attemptId,
+      state.timeRemaining,
+      state.scratchPad,
+      { ...state.highlights, [questionId]: html },
+      state.paneWidth
+    );
+  }
+
+  function handleClearHighlight(questionId: number) {
+    dispatch({ type: "CLEAR_HIGHLIGHT", questionId });
+    const next = { ...state.highlights };
+    delete next[questionId];
+    saveExamStateAction(
+      attemptId,
+      state.timeRemaining,
+      state.scratchPad,
+      next,
+      state.paneWidth
+    );
+  }
+
+  function handlePaneResize(width: number) {
+    dispatch({ type: "SET_PANE_WIDTH", width });
+  }
+
+  function handlePaneResizeEnd() {
+    saveExamStateAction(
+      attemptId,
+      state.timeRemaining,
+      state.scratchPad,
+      state.highlights,
+      state.paneWidth
+    );
+  }
 
   async function handleSubmit() {
     dispatch({ type: "SUBMIT" });
-    await saveExamStateAction(attemptId, state.timeRemaining, state.scratchPad);
+    await saveExamStateAction(
+      attemptId,
+      state.timeRemaining,
+      state.scratchPad,
+      state.highlights,
+      state.paneWidth
+    );
     const result = await submitExamAction(attemptId);
     if (result?.redirectTo) {
       router.push(result.redirectTo);
@@ -142,7 +207,6 @@ export function ExamClient({
     function handleKey(e: KeyboardEvent) {
       if (state.status !== "active") return;
       if (e.target instanceof HTMLTextAreaElement) return;
-
       switch (e.key) {
         case "ArrowRight":
           dispatch({ type: "NEXT" });
@@ -180,8 +244,13 @@ export function ExamClient({
     return () => window.removeEventListener("keydown", handleKey);
   }, [state.status, state.currentIndex, state.answers]);
 
-  const isLowTime = state.timeRemaining < 300; // < 5 min
+  const isLowTime = state.timeRemaining < 300;
   const isSubmitting = state.status === "submitting";
+  const questionHtml =
+    currentQuestion &&
+    state.highlights[currentQuestion.podioItemId]
+      ? state.highlights[currentQuestion.podioItemId]
+      : currentQuestion?.questionText ?? "";
 
   return (
     <div className="flex flex-col h-[calc(100vh-65px)]">
@@ -195,7 +264,6 @@ export function ExamClient({
             {state.currentIndex + 1} / {state.questions.length}
           </span>
         </div>
-
         <div className="flex items-center gap-2">
           <div
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-mono font-semibold ${
@@ -207,38 +275,27 @@ export function ExamClient({
             <Clock size={14} />
             {formatTime(state.timeRemaining)}
           </div>
-
           <button
-            onClick={() => dispatch({ type: state.status === "paused" ? "RESUME" : "PAUSE" })}
+            onClick={() =>
+              dispatch({
+                type: state.status === "paused" ? "RESUME" : "PAUSE",
+              })
+            }
             className="p-2 rounded-full text-cco-muted hover:bg-cco-bg-soft transition"
-            title={state.status === "paused" ? "Resume" : "Pause"}
           >
-            {state.status === "paused" ? <Play size={16} /> : <Pause size={16} />}
+            {state.status === "paused" ? (
+              <Play size={16} />
+            ) : (
+              <Pause size={16} />
+            )}
           </button>
-
+          {/* Mobile-only scratch pad toggle */}
           <button
-            onClick={() => setShowGrid(!showGrid)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${
-              showGrid
-                ? "bg-cco-purple text-white"
-                : "bg-white border border-cco-border text-cco-muted hover:bg-cco-bg-soft"
-            }`}
-          >
-            Grid
-          </button>
-
-          <button
-            onClick={() => setShowScratchPad(!showScratchPad)}
-            className={`p-2 rounded-full transition ${
-              showScratchPad
-                ? "bg-cco-purple text-white"
-                : "text-cco-muted hover:bg-cco-bg-soft"
-            }`}
-            title="Scratch pad"
+            onClick={() => setShowMobileScratchPad(!showMobileScratchPad)}
+            className="md:hidden p-2 rounded-full text-cco-muted hover:bg-cco-bg-soft transition"
           >
             <StickyNote size={16} />
           </button>
-
           <button
             onClick={() => setShowSubmitConfirm(true)}
             disabled={isSubmitting}
@@ -272,12 +329,17 @@ export function ExamClient({
         </div>
       )}
 
-      {/* Main content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Question panel */}
-        <div className="flex-1 overflow-y-auto p-6">
+      {/* Main content — split pane on desktop, single column on mobile */}
+      <div
+        className="flex-1 overflow-hidden grid"
+        style={{
+          gridTemplateColumns: `minmax(0, ${state.paneWidth}%) 12px minmax(0, 1fr)`,
+        }}
+      >
+        {/* Left pane: question + options */}
+        <div className="overflow-y-auto p-6 md:block">
           {currentQuestion && (
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl">
               {/* Question text */}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -285,19 +347,32 @@ export function ExamClient({
                     {state.currentIndex + 1}
                   </span>
                   {currentAnswer?.flagged && (
-                    <Flag size={16} className="text-amber-500 fill-amber-500" />
+                    <Flag
+                      size={16}
+                      className="text-amber-500 fill-amber-500"
+                    />
                   )}
                 </div>
                 <div
+                  id={`tp-question-text-${currentQuestion.podioItemId}`}
                   className="text-cco-ink leading-relaxed prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: currentQuestion.questionText }}
+                  dangerouslySetInnerHTML={{ __html: questionHtml }}
+                />
+                <HighlightTools
+                  questionId={currentQuestion.podioItemId}
+                  onHighlight={handleHighlight}
+                  onClear={handleClearHighlight}
+                  hasHighlights={
+                    !!state.highlights[currentQuestion.podioItemId]
+                  }
                 />
               </div>
 
               {/* Options */}
               <div className="space-y-3">
                 {currentQuestion.options.map((opt) => {
-                  const isSelected = currentAnswer?.selectedKey === opt.key;
+                  const isSelected =
+                    currentAnswer?.selectedKey === opt.key;
                   return (
                     <button
                       key={opt.key}
@@ -318,7 +393,9 @@ export function ExamClient({
                       >
                         {opt.key}
                       </span>
-                      <span className="text-sm text-cco-ink pt-0.5">{stripHtml(opt.text)}</span>
+                      <span className="text-sm text-cco-ink pt-0.5">
+                        {stripHtml(opt.text)}
+                      </span>
                     </button>
                   );
                 })}
@@ -334,7 +411,6 @@ export function ExamClient({
                   <ChevronLeft size={16} />
                   Previous
                 </button>
-
                 <button
                   onClick={handleFlag}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
@@ -346,18 +422,17 @@ export function ExamClient({
                   <Flag size={12} />
                   {currentAnswer?.flagged ? "Flagged" : "Flag for review"}
                 </button>
-
                 <button
                   onClick={() => dispatch({ type: "NEXT" })}
-                  disabled={state.currentIndex === state.questions.length - 1}
+                  disabled={
+                    state.currentIndex === state.questions.length - 1
+                  }
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-cco-purple text-white hover:bg-cco-purple-600 transition disabled:opacity-30"
                 >
                   Next
                   <ChevronRight size={16} />
                 </button>
               </div>
-
-              {/* Keyboard hints */}
               <p className="text-center text-xs text-cco-muted mt-4">
                 Keyboard: A-D to answer, F to flag, arrows to navigate
               </p>
@@ -365,9 +440,22 @@ export function ExamClient({
           )}
         </div>
 
-        {/* Question grid sidebar */}
-        {showGrid && (
-          <div className="w-64 border-l border-cco-border bg-white overflow-y-auto p-4 shrink-0">
+        {/* Resizer */}
+        <PaneResizer
+          onResize={handlePaneResize}
+          onResizeEnd={handlePaneResizeEnd}
+        />
+
+        {/* Right pane: scratch pad + question grid */}
+        <div className="hidden md:flex flex-col gap-4 overflow-y-auto p-4 bg-white border-l border-cco-border">
+          <ScratchPad
+            value={state.scratchPad}
+            onChange={(content) =>
+              dispatch({ type: "UPDATE_SCRATCH_PAD", content })
+            }
+            mode="inline"
+          />
+          <div className="border-t border-cco-border pt-4">
             <QuestionGrid
               questions={state.questions}
               answers={state.answers}
@@ -375,23 +463,29 @@ export function ExamClient({
               onNavigate={(i) => dispatch({ type: "NAVIGATE", index: i })}
             />
             <div className="mt-4 space-y-1 text-xs text-cco-muted">
-              <p>Answered: {getAnsweredCount(state)}/{state.questions.length}</p>
+              <p>
+                Answered: {getAnsweredCount(state)}/
+                {state.questions.length}
+              </p>
               <p>Flagged: {getFlaggedCount(state)}</p>
               <p>Skipped: {getSkippedCount(state)}</p>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Scratch pad */}
-      {showScratchPad && (
-        <ScratchPad
-          value={state.scratchPad}
-          onChange={(content) =>
-            dispatch({ type: "UPDATE_SCRATCH_PAD", content })
-          }
-          onClose={() => setShowScratchPad(false)}
-        />
+      {/* Mobile scratch pad drawer */}
+      {showMobileScratchPad && (
+        <div className="md:hidden">
+          <ScratchPad
+            value={state.scratchPad}
+            onChange={(content) =>
+              dispatch({ type: "UPDATE_SCRATCH_PAD", content })
+            }
+            onClose={() => setShowMobileScratchPad(false)}
+            mode="drawer"
+          />
+        </div>
       )}
 
       {/* Submit confirmation modal */}
@@ -403,14 +497,18 @@ export function ExamClient({
               <h3 className="font-heading font-bold text-lg">Submit Exam?</h3>
             </div>
             <div className="text-sm text-cco-muted space-y-1">
-              <p>Answered: {getAnsweredCount(state)} / {state.questions.length}</p>
+              <p>
+                Answered: {getAnsweredCount(state)} /{" "}
+                {state.questions.length}
+              </p>
               <p>Flagged: {getFlaggedCount(state)}</p>
               <p>Unanswered: {getSkippedCount(state)}</p>
               <p>Time remaining: {formatTime(state.timeRemaining)}</p>
             </div>
             {getSkippedCount(state) > 0 && (
               <p className="text-sm text-amber-600 font-medium">
-                You have {getSkippedCount(state)} unanswered question{getSkippedCount(state) !== 1 ? "s" : ""}.
+                You have {getSkippedCount(state)} unanswered question
+                {getSkippedCount(state) !== 1 ? "s" : ""}.
               </p>
             )}
             <div className="flex gap-3">
