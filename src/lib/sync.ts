@@ -53,10 +53,15 @@ export async function getTests(): Promise<Test[]> {
   return cached;
 }
 
-/** Returns only tests with active statuses, for display in catalog. */
+/** Returns only tests with active statuses and at least one question. */
 export async function getActiveTests(): Promise<Test[]> {
   const all = await getTests();
-  return all.filter((t) => t.status && ACTIVE_TEST_STATUSES.has(t.status));
+  return all.filter(
+    (t) =>
+      t.status &&
+      ACTIVE_TEST_STATUSES.has(t.status) &&
+      (t.questionCount ?? 0) > 0
+  );
 }
 
 export async function syncTestsFromPodio(): Promise<void> {
