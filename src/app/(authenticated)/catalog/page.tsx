@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getTests, getDomainNames } from "@/lib/sync";
+import { getActiveTests, getDomainNames } from "@/lib/sync";
 import { TestGrid } from "@/components/catalog/TestGrid";
 import { CatalogFilters } from "@/components/catalog/CatalogFilters";
 import { DataLineage } from "@/components/shared/DataLineage";
@@ -12,9 +12,10 @@ export default async function CatalogPage({
 }) {
   const params = await searchParams;
   const typeFilter = typeof params?.type === "string" ? params.type : "";
-  const searchQuery = typeof params?.q === "string" ? params.q.toLowerCase() : "";
+  const searchQuery =
+    typeof params?.q === "string" ? params.q.toLowerCase() : "";
 
-  const allTests = await getTests();
+  const allTests = await getActiveTests();
 
   // Collect all domain IDs referenced by tests
   const allDomainIds = [
@@ -24,13 +25,12 @@ export default async function CatalogPage({
 
   // Filter
   let filtered = allTests.filter((t) => {
-    // Only show tests that have a name and some meaningful status
     if (!t.testName) return false;
     if (typeFilter && t.testType !== typeFilter) return false;
     if (
       searchQuery &&
       !t.testName.toLowerCase().includes(searchQuery) &&
-      !(t.description ?? "").toLowerCase().includes(searchQuery)
+      !stripHtml(t.description ?? "").toLowerCase().includes(searchQuery)
     )
       return false;
     return true;
@@ -59,6 +59,11 @@ export default async function CatalogPage({
     return !latest || d > latest ? d : latest;
   }, null);
 
+  // Collect unique type values for filters
+  const typeValues = [
+    ...new Set(allTests.map((t) => t.testType).filter(Boolean)),
+  ].sort() as string[];
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -69,7 +74,7 @@ export default async function CatalogPage({
       </div>
 
       <Suspense fallback={null}>
-        <CatalogFilters />
+        <CatalogFilters typeOptions={typeValues} />
       </Suspense>
 
       <p className="text-sm text-cco-muted mb-4">
@@ -79,4 +84,17 @@ export default async function CatalogPage({
       <TestGrid tests={cards} />
     </div>
   );
+}
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
 }

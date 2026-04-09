@@ -4,13 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { useTransition, useCallback } from "react";
 
-const TYPE_OPTIONS = [
-  { value: "", label: "All Types" },
-  { value: "Static", label: "Static" },
-  { value: "Random", label: "Custom" },
-];
-
-export function CatalogFilters() {
+export function CatalogFilters({ typeOptions }: { typeOptions: string[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -49,18 +43,28 @@ export function CatalogFilters() {
         />
       </div>
 
-      <div className="flex gap-1.5">
-        {TYPE_OPTIONS.map((opt) => (
+      <div className="flex gap-1.5 flex-wrap">
+        <button
+          onClick={() => updateParams("type", "")}
+          className={`px-3.5 py-2 rounded-full text-sm font-semibold transition ${
+            currentType === ""
+              ? "bg-cco-purple text-white"
+              : "bg-white border border-cco-border text-cco-muted hover:bg-cco-bg-soft hover:text-cco-purple"
+          }`}
+        >
+          All
+        </button>
+        {typeOptions.map((opt) => (
           <button
-            key={opt.value}
-            onClick={() => updateParams("type", opt.value)}
+            key={opt}
+            onClick={() => updateParams("type", opt)}
             className={`px-3.5 py-2 rounded-full text-sm font-semibold transition ${
-              currentType === opt.value
+              currentType === opt
                 ? "bg-cco-purple text-white"
                 : "bg-white border border-cco-border text-cco-muted hover:bg-cco-bg-soft hover:text-cco-purple"
             }`}
           >
-            {opt.label}
+            {opt}
           </button>
         ))}
       </div>

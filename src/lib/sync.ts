@@ -4,7 +4,7 @@
  */
 
 import { db } from "./db";
-import { tests, domains, questions } from "./schema";
+import { tests, domains } from "./schema";
 import type { Test, Domain } from "./schema";
 import {
   filterItems,
@@ -16,9 +16,10 @@ import {
   PODIO_APPS,
   TEST_FIELDS,
   DOMAIN_FIELDS,
+  ACTIVE_TEST_STATUSES,
   type PodioItem,
 } from "./podio";
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -38,13 +39,11 @@ export async function getTests(): Promise<Test[]> {
     );
 
   if (needsRefresh) {
-    // Fire-and-forget background refresh (don't await in the happy path)
     syncTestsFromPodio().catch((err) =>
       console.error("Background test sync failed:", err)
     );
   }
 
-  // If we have no data at all, we must wait for the sync
   if (cached.length === 0) {
     await syncTestsFromPodio();
     return db.select().from(tests);
@@ -53,16 +52,22 @@ export async function getTests(): Promise<Test[]> {
   return cached;
 }
 
+/** Returns only tests with active statuses, for display in catalog. */
+export async function getActiveTests(): Promise<Test[]> {
+  const all = await getTests();
+  return all.filter((t) => t.status && ACTIVE_TEST_STATUSES.has(t.status));
+}
+
 export async function syncTestsFromPodio(): Promise<void> {
   let offset = 0;
   const limit = 100;
   const allItems: PodioItem[] = [];
 
-  // Paginate through all tests
   while (true) {
     const result = await filterItems(PODIO_APPS.TESTS, {}, { limit, offset });
     allItems.push(...result.items);
-    if (allItems.length >= result.filtered || result.items.length < limit) break;
+    if (allItems.length >= result.filtered || result.items.length < limit)
+      break;
     offset += limit;
   }
 
@@ -84,10 +89,17 @@ function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
   const name = getTextValue(item, TEST_FIELDS.TEST_NAME);
   if (!name) return null;
 
+  // Use TYPE field (137578152) which is more reliably populated than TEST_TYPE (125981849)
+  // Falls back to TEST_TYPE if TYPE is empty
+  const typeVal =
+    getCategoryValue(item, TEST_FIELDS.TYPE) ||
+    getCategoryValue(item, TEST_FIELDS.TEST_TYPE) ||
+    null;
+
   return {
     podioItemId: item.item_id,
     testName: name,
-    testType: getCategoryValue(item, TEST_FIELDS.TEST_TYPE) || null,
+    testType: typeVal,
     description: getTextValue(item, TEST_FIELDS.TEST_DESCRIPTION) || null,
     domainIds: getAppReferenceIds(item, TEST_FIELDS.DOMAINS),
     questionCount: getNumberValue(item, TEST_FIELDS.NUMBER_OF_QUESTIONS),
@@ -133,9 +145,14 @@ export async function syncDomainsFromPodio(): Promise<void> {
   const allItems: PodioItem[] = [];
 
   while (true) {
-    const result = await filterItems(PODIO_APPS.DOMAINS, {}, { limit, offset });
+    const result = await filterItems(
+      PODIO_APPS.DOMAINS,
+      {},
+      { limit, offset }
+    );
     allItems.push(...result.items);
-    if (allItems.length >= result.filtered || result.items.length < limit) break;
+    if (allItems.length >= result.filtered || result.items.length < limit)
+      break;
     offset += limit;
   }
 
@@ -168,13 +185,17 @@ function mapPodioDomain(item: PodioItem): Omit<Domain, "syncedAt"> | null {
 }
 
 // ---------------------------------------------------------------------------
-// Resolve domain names for a list of domain IDs
+// Resolve domain names for a list of domain IDs.
+// Triggers domain sync if the domains table is empty.
 // ---------------------------------------------------------------------------
 
 export async function getDomainNames(
   domainIds: number[]
 ): Promise<Map<number, string>> {
   if (!domainIds.length) return new Map();
+
+  // Ensure domains are synced
+  await getDomains();
 
   const rows = await db
     .select({ podioItemId: domains.podioItemId, title: domains.title })

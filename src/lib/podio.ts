@@ -249,7 +249,7 @@ export const PODIO_APPS = {
 
 export const TEST_FIELDS = {
   TEST_NAME: 125981694,
-  TEST_TYPE: 125981849,
+  TEST_TYPE: 125981849,        // Static | Random (rarely populated)
   TEST_DESCRIPTION: 126284053,
   NUMBER_OF_QUESTIONS: 125981850,
   DOMAINS: 126809748,
@@ -257,9 +257,16 @@ export const TEST_FIELDS = {
   TIME_LIMIT: 125981853,
   PASSING_SCORE: 125981851,
   TEST_STATUS: 125981847,
-  TYPE: 137578152,
+  TYPE: 137578152,             // CEU Quiz | Domain Pool | Course Module | Blitz/Practice Exam | etc.
   TEST_RESULT_PROCESSING: 150300363,
 } as const;
+
+// Statuses that indicate a test is available for students
+export const ACTIVE_TEST_STATUSES = new Set([
+  "Active - In Xenforo",
+  "Active - In ProProfs",
+  "Approved- Reviewer",
+]);
 
 export const DOMAIN_FIELDS = {
   TITLE: 126809667,
