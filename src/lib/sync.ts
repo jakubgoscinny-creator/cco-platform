@@ -4,8 +4,8 @@
  */
 
 import { db } from "./db";
-import { tests, domains } from "./schema";
-import type { Test, Domain } from "./schema";
+import { tests, domains, questions } from "./schema";
+import type { Test, Domain, Question } from "./schema";
 import {
   filterItems,
   getTextValue,
@@ -16,10 +16,11 @@ import {
   PODIO_APPS,
   TEST_FIELDS,
   DOMAIN_FIELDS,
+  QUESTION_FIELDS,
   ACTIVE_TEST_STATUSES,
   type PodioItem,
 } from "./podio";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -203,4 +204,108 @@ export async function getDomainNames(
     .where(inArray(domains.podioItemId, domainIds));
 
   return new Map(rows.map((r) => [r.podioItemId, r.title]));
+}
+
+// ---------------------------------------------------------------------------
+// Questions sync — fetches questions linked to a specific test
+// ---------------------------------------------------------------------------
+
+export async function getQuestionsForTest(
+  testPodioId: number
+): Promise<Question[]> {
+  // Check local cache first
+  const cached = await db
+    .select()
+    .from(questions)
+    .where(
+      inArray(
+        questions.podioItemId,
+        db
+          .select({ id: questions.podioItemId })
+          .from(questions)
+          .where(eq(questions.payload as never, testPodioId as never))
+      )
+    );
+
+  // For now, always fetch from Podio (questions are test-specific and the
+  // relationship is stored on the question side via the Tests field)
+  return syncQuestionsForTest(testPodioId);
+}
+
+export async function syncQuestionsForTest(
+  testPodioId: number
+): Promise<Question[]> {
+  let offset = 0;
+  const limit = 100;
+  const allItems: PodioItem[] = [];
+
+  // Filter QB Multi Choice by the Tests field (app ref)
+  while (true) {
+    const result = await filterItems(
+      PODIO_APPS.QB_MULTI_CHOICE,
+      { [QUESTION_FIELDS.TESTS]: [testPodioId] },
+      { limit, offset }
+    );
+    allItems.push(...result.items);
+    if (allItems.length >= result.filtered || result.items.length < limit)
+      break;
+    offset += limit;
+  }
+
+  const records: Question[] = [];
+
+  for (const item of allItems) {
+    const record = mapPodioQuestion(item);
+    if (!record) continue;
+
+    await db
+      .insert(questions)
+      .values({ ...record, syncedAt: new Date() })
+      .onConflictDoUpdate({
+        target: questions.podioItemId,
+        set: { ...record, syncedAt: new Date() },
+      });
+
+    records.push({ ...record, syncedAt: new Date() });
+  }
+
+  return records;
+}
+
+function mapPodioQuestion(
+  item: PodioItem
+): Omit<Question, "syncedAt"> | null {
+  const questionText = getTextValue(item, QUESTION_FIELDS.QUESTION_TEXT);
+  if (!questionText) return null;
+
+  const optA = getTextValue(item, QUESTION_FIELDS.OPTION_A);
+  const optB = getTextValue(item, QUESTION_FIELDS.OPTION_B);
+  const optC = getTextValue(item, QUESTION_FIELDS.OPTION_C);
+  const optD = getTextValue(item, QUESTION_FIELDS.OPTION_D);
+  const correctKey = getCategoryValue(item, QUESTION_FIELDS.CORRECT_ANSWER);
+  const rationale = getTextValue(item, QUESTION_FIELDS.RATIONALE);
+  const disposition = getCategoryValue(item, QUESTION_FIELDS.DISPOSITION);
+  const status = getCategoryValue(item, QUESTION_FIELDS.STATUS);
+
+  const options = [
+    { key: "A", text: optA },
+    { key: "B", text: optB },
+    { key: "C", text: optC },
+    { key: "D", text: optD },
+  ].filter((o) => o.text); // only include non-empty options
+
+  if (!options.length || !correctKey) return null;
+
+  return {
+    podioItemId: item.item_id,
+    domainId: null, // domains are tracked at question level via separate field
+    questionText,
+    options: options as unknown as Record<string, unknown>,
+    correctKey,
+    rationale: rationale || null,
+    difficulty: null, // not reliably populated
+    disposition: disposition || null,
+    status: status || null,
+    payload: item.fields as unknown as Record<string, unknown>,
+  };
 }
