@@ -269,14 +269,18 @@ async function writAttemptToPodio(
 
   const questionIds = (attempt.questionOrder as number[]) ?? [];
 
+  // Podio requires "YYYY-MM-DD HH:MM:SS" — not ISO 8601
+  const podioDate = (d: Date) =>
+    d.toISOString().replace("T", " ").replace(/\.\d+Z$/, "");
+
   const fields: Record<string, unknown> = {
     [ATTEMPT_FIELDS.TEST]: [attempt.testPodioId],
     [ATTEMPT_FIELDS.STATUS]: 2, // "Completed" option ID (1=In Progress, 2=Completed, 3=Abandoned)
     [ATTEMPT_FIELDS.STARTED_AT]: {
-      start: startedAt.toISOString(),
+      start: podioDate(startedAt),
     },
     [ATTEMPT_FIELDS.COMPLETED_AT]: {
-      start: submittedAt.toISOString(),
+      start: podioDate(submittedAt),
     },
     [ATTEMPT_FIELDS.CONTACT_ITEM_ID]: contactId,
     [ATTEMPT_FIELDS.DURATION_MINUTES]: durationMinutes,
