@@ -263,9 +263,7 @@ export const TEST_FIELDS = {
 
 // Statuses that indicate a test is available for students
 export const ACTIVE_TEST_STATUSES = new Set([
-  "Active - In Xenforo",
-  "Active - In ProProfs",
-  "Approved- Reviewer",
+  "Active - In Portal",
 ]);
 
 export const DOMAIN_FIELDS = {
