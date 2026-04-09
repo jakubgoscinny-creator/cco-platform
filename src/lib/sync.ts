@@ -53,15 +53,25 @@ export async function getTests(): Promise<Test[]> {
   return cached;
 }
 
-/** Returns only tests with active statuses and at least one question. */
+// Phase 1: CEU tests whitelisted from Mary's todo item #3788
+// https://podio.com/ccous/cco-project-management/apps/todo/items/3788
+const PORTAL_TEST_IDS = new Set([
+  3274039891, // CCO Club Q&A #1734
+  3259482860, // CCO Club Q&A #1733
+  3238994303, // CCO Club Q&A #1732
+  3182920892, // 2026 CPT Update with Find-A-Code
+  3048229728, // 2026 ICD-10-CM Update with Find-A-Code
+  3046527757, // July 2025 CCO Club Q&A Webinar
+  3046279009, // June 2025 CCO Club Q&A Webinar
+  3046161632, // May 2025 CCO Club Q&A Webinar
+  3053018882, // Cell Rebellion: Neoplasms and Tumors (2A00-2F9Z)
+  3045188210, // April 2025 CCO Club Q&A Webinar (Live)
+]);
+
+/** Returns only the Phase 1 whitelisted CEU tests for the portal. */
 export async function getActiveTests(): Promise<Test[]> {
   const all = await getTests();
-  return all.filter(
-    (t) =>
-      t.status &&
-      ACTIVE_TEST_STATUSES.has(t.status) &&
-      (t.questionCount ?? 0) > 0
-  );
+  return all.filter((t) => PORTAL_TEST_IDS.has(t.podioItemId));
 }
 
 export async function syncTestsFromPodio(): Promise<void> {
