@@ -6,8 +6,9 @@ import { getSession } from "@/lib/auth";
 import { Card } from "@/components/shared/Card";
 import { Pill } from "@/components/shared/Pill";
 import Link from "next/link";
-import { ArrowLeft, Trophy, Clock, FileText, CheckCircle, XCircle, MinusCircle } from "lucide-react";
+import { ArrowLeft, Trophy, Clock, FileText, CheckCircle, XCircle, MinusCircle, Download, Award } from "lucide-react";
 import type { QuestionSnapshot } from "@/lib/exam-engine";
+import { issueCertificate, getCertificatesForAttempt } from "@/lib/certificate";
 
 export default async function ExamResultsPage({
   params,
@@ -31,7 +32,11 @@ export default async function ExamResultsPage({
   if (attempt.status === "in_progress") redirect(`/exam/take/${attemptId}`);
 
   const [test] = await db
-    .select({ testName: tests.testName })
+    .select({
+      testName: tests.testName,
+      passingScore: tests.passingScore,
+      ceuItemIds: tests.ceuItemIds,
+    })
     .from(tests)
     .where(eq(tests.podioItemId, attempt.testPodioId))
     .limit(1);
@@ -45,6 +50,17 @@ export default async function ExamResultsPage({
   const snapshotMap = new Map(snapshots.map((s) => [s.podioItemId, s]));
 
   const score = attempt.scorePercent ? Number(attempt.scorePercent) : 0;
+  const passingThreshold = test?.passingScore ?? 70;
+  const passed = score >= passingThreshold;
+
+  // Issue certificates if passing and test has CEU items (idempotent)
+  const hasCeu = (test?.ceuItemIds ?? []).length > 0;
+  if (passed && hasCeu) {
+    await issueCertificate(attemptId, session.contactId).catch((err) =>
+      console.error("Certificate issuance failed:", err)
+    );
+  }
+  const certs = hasCeu ? await getCertificatesForAttempt(attemptId) : [];
   const correct = allAnswers.filter((a) => a.isCorrect === true).length;
   const incorrect = allAnswers.filter((a) => a.isCorrect === false).length;
   const skipped = allAnswers.filter((a) => a.selectedKey === null).length;
@@ -84,11 +100,11 @@ export default async function ExamResultsPage({
           <div className="flex items-center gap-2">
             <Trophy
               size={24}
-              className={score >= 70 ? "text-cco-green" : "text-red-400"}
+              className={passed ? "text-cco-green" : "text-red-400"}
             />
             <span
               className={`text-3xl font-bold ${
-                score >= 70 ? "text-cco-green-600" : "text-red-600"
+                passed ? "text-cco-green-600" : "text-red-600"
               }`}
             >
               {score}%
@@ -119,6 +135,42 @@ export default async function ExamResultsPage({
           />
         </div>
       </Card>
+
+      {/* Certificate download */}
+      {certs.length > 0 && (
+        <Card className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Award size={20} className="text-cco-purple" />
+            <h2 className="font-heading text-lg font-bold text-cco-ink">
+              CEU Certificate{certs.length > 1 ? "s" : ""}
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {certs.map((cert) => (
+              <div key={cert.id} className="flex items-center justify-between gap-4 p-3 bg-cco-bg-soft rounded-xl">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-cco-ink truncate">{cert.eventTitle}</p>
+                  <p className="text-xs text-cco-muted mt-0.5">
+                    {cert.ceuValue ? `${cert.ceuValue} CEU` : ""}
+                    {cert.ceuIndexNumber ? ` · Index: ${cert.ceuIndexNumber}` : ""}
+                  </p>
+                </div>
+                <a
+                  href={`/api/certificate/${cert.id}`}
+                  className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-cco-green text-white text-sm font-semibold no-underline transition hover:bg-cco-green-600"
+                  download
+                >
+                  <Download size={14} />
+                  Download
+                </a>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-cco-muted mt-3">
+            Verification: {certs.map((c) => c.verificationCode).join(", ")}
+          </p>
+        </Card>
+      )}
 
       {/* Question review */}
       <h2 className="font-heading text-lg font-bold text-cco-ink mb-4">

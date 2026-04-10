@@ -4,17 +4,20 @@
  */
 
 import { db } from "./db";
-import { tests, domains, questions } from "./schema";
-import type { Test, Domain, Question } from "./schema";
+import { tests, domains, questions, ceuItems } from "./schema";
+import type { Test, Domain, Question, CeuItem } from "./schema";
 import {
   filterItems,
+  getItem,
   getTextValue,
   getCategoryValue,
   getCategoryValues,
   getNumberValue,
+  getDateValue,
   getAppReferenceIds,
   PODIO_APPS,
   TEST_FIELDS,
+  CEU_ITEM_FIELDS,
   DOMAIN_FIELDS,
   QUESTION_FIELDS,
   ACTIVE_TEST_STATUSES,
@@ -107,6 +110,7 @@ function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
     timeLimitMinutes: getNumberValue(item, TEST_FIELDS.TIME_LIMIT),
     passingScore: getNumberValue(item, TEST_FIELDS.PASSING_SCORE),
     status: getCategoryValue(item, TEST_FIELDS.TEST_STATUS) || null,
+    ceuItemIds: getAppReferenceIds(item, TEST_FIELDS.CEU_ITEMS),
     payload: item.fields as unknown as Record<string, unknown>,
   };
 }
@@ -306,6 +310,90 @@ function mapPodioQuestion(
     difficulty: null, // not reliably populated
     disposition: disposition || null,
     status: status || null,
+    payload: item.fields as unknown as Record<string, unknown>,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// CEU Items sync — fetches CEU items linked to a test
+// ---------------------------------------------------------------------------
+
+export async function getCeuItemsForTest(
+  testPodioId: number
+): Promise<CeuItem[]> {
+  const [test] = await db
+    .select({ ceuItemIds: tests.ceuItemIds })
+    .from(tests)
+    .where(eq(tests.podioItemId, testPodioId))
+    .limit(1);
+
+  const ids = test?.ceuItemIds ?? [];
+  if (!ids.length) return [];
+
+  // Check cache
+  const cached = await db
+    .select()
+    .from(ceuItems)
+    .where(inArray(ceuItems.podioItemId, ids));
+
+  const needsRefresh =
+    cached.length < ids.length ||
+    cached.some(
+      (c) =>
+        !c.syncedAt ||
+        Date.now() - new Date(c.syncedAt).getTime() > STALE_THRESHOLD_MS
+    );
+
+  if (needsRefresh) {
+    return syncCeuItems(ids);
+  }
+
+  return cached;
+}
+
+async function syncCeuItems(itemIds: number[]): Promise<CeuItem[]> {
+  const results: CeuItem[] = [];
+
+  for (const itemId of itemIds) {
+    try {
+      const item = await getItem(itemId);
+      const record = mapPodioCeuItem(item);
+      if (!record) continue;
+
+      await db
+        .insert(ceuItems)
+        .values({ ...record, syncedAt: new Date() })
+        .onConflictDoUpdate({
+          target: ceuItems.podioItemId,
+          set: { ...record, syncedAt: new Date() },
+        });
+
+      results.push({ ...record, syncedAt: new Date() });
+    } catch (err) {
+      console.error(`Failed to sync CEU item ${itemId}:`, err);
+    }
+  }
+
+  return results;
+}
+
+function mapPodioCeuItem(
+  item: PodioItem
+): Omit<CeuItem, "syncedAt"> | null {
+  const title = getTextValue(item, CEU_ITEM_FIELDS.TITLE);
+  if (!title) return null;
+
+  const relatedTestIds = getAppReferenceIds(item, CEU_ITEM_FIELDS.RELATED_TEST);
+
+  return {
+    podioItemId: item.item_id,
+    ceuIndexNumber: getTextValue(item, CEU_ITEM_FIELDS.CEU_INDEX_NUMBER) || null,
+    title,
+    aapcCeuTypes: getCategoryValues(item, CEU_ITEM_FIELDS.AAPC_CEU_TYPE),
+    ceuValue: getNumberValue(item, CEU_ITEM_FIELDS.CEU_VALUE)?.toString() ?? null,
+    dateExpires: getDateValue(item, CEU_ITEM_FIELDS.DATE_EXPIRES),
+    certificateStatus: getCategoryValue(item, CEU_ITEM_FIELDS.CERTIFICATE_STATUS) || null,
+    relatedTestPodioId: relatedTestIds[0] ?? null,
     payload: item.fields as unknown as Record<string, unknown>,
   };
 }

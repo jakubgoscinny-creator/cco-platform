@@ -25,6 +25,7 @@ export const tests = pgTable("tests", {
   timeLimitMinutes: integer("time_limit_minutes"),
   passingScore: integer("passing_score"),
   status: text("status"),
+  ceuItemIds: bigint("ceu_item_ids", { mode: "number" }).array(),
   payload: jsonb("payload"), // full Podio field snapshot
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
 });
@@ -49,6 +50,19 @@ export const domains = pgTable("domains", {
   credential: text("credential").array(), // ['CPC', 'COC', ...]
   status: text("status"),
   cpcQuestionCount: integer("cpc_question_count"),
+  payload: jsonb("payload"),
+  syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
+});
+
+export const ceuItems = pgTable("ceu_items", {
+  podioItemId: bigint("podio_item_id", { mode: "number" }).primaryKey(),
+  ceuIndexNumber: text("ceu_index_number"),
+  title: text("title").notNull(),
+  aapcCeuTypes: text("aapc_ceu_types").array(), // ["Core A", "Risk Adjustment - CRC"]
+  ceuValue: numeric("ceu_value", { precision: 4, scale: 2 }),
+  dateExpires: timestamp("date_expires", { withTimezone: true }),
+  certificateStatus: text("certificate_status"),
+  relatedTestPodioId: bigint("related_test_podio_id", { mode: "number" }),
   payload: jsonb("payload"),
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
 });
@@ -119,6 +133,29 @@ export const answers = pgTable(
   ]
 );
 
+export const certificates = pgTable(
+  "certificates",
+  {
+    id: serial("id").primaryKey(),
+    attemptId: integer("attempt_id").notNull(),
+    contactId: bigint("contact_id", { mode: "number" }).notNull(),
+    ceuItemPodioId: bigint("ceu_item_podio_id", { mode: "number" }).notNull(),
+    testPodioId: bigint("test_podio_id", { mode: "number" }).notNull(),
+    verificationCode: text("verification_code").notNull(),
+    studentName: text("student_name").notNull(),
+    eventTitle: text("event_title").notNull(),
+    ceuIndexNumber: text("ceu_index_number"),
+    ceuValue: numeric("ceu_value", { precision: 4, scale: 2 }),
+    aapcCeuTypes: text("aapc_ceu_types").array(),
+    completionDate: timestamp("completion_date", { withTimezone: true }).notNull(),
+    issuedAt: timestamp("issued_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("certificates_verification_code_idx").on(table.verificationCode),
+    uniqueIndex("certificates_attempt_ceu_idx").on(table.attemptId, table.ceuItemPodioId),
+  ]
+);
+
 export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   attemptId: integer("attempt_id").notNull(),
@@ -135,8 +172,10 @@ export const feedback = pgTable("feedback", {
 export type Test = typeof tests.$inferSelect;
 export type Question = typeof questions.$inferSelect;
 export type Domain = typeof domains.$inferSelect;
+export type CeuItem = typeof ceuItems.$inferSelect;
 export type Contact = typeof contacts.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type Attempt = typeof attempts.$inferSelect;
 export type Answer = typeof answers.$inferSelect;
+export type Certificate = typeof certificates.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;

@@ -245,6 +245,7 @@ export const PODIO_APPS = {
   PLATFORM_PROFILES: 30640719,
   PROFESSIONAL_CREDENTIALS: 19824388,
   CONTACTS: 14660191,
+  CEU_ITEMS: 14639788,
 } as const;
 
 export const TEST_FIELDS = {
@@ -259,12 +260,33 @@ export const TEST_FIELDS = {
   TEST_STATUS: 125981847,
   TYPE: 137578152,             // CEU Quiz | Domain Pool | Course Module | Blitz/Practice Exam | etc.
   TEST_RESULT_PROCESSING: 150300363,
+  CEU_ITEMS: 137578199,           // app ref → CEU Items in Hub
 } as const;
 
 // Statuses that indicate a test is available for students
 export const ACTIVE_TEST_STATUSES = new Set([
   "Active - In Portal",
 ]);
+
+export const CEU_ITEM_FIELDS = {
+  CEU_INDEX_NUMBER: 112490651,
+  AAPC_CEU_TYPE: 132842950,
+  CEU_VALUE: 112265218,
+  DATE_EXPIRES: 112265217,
+  CERTIFICATE_STATUS: 118758647,
+  TITLE: 112264098,
+  RELATED_TEST: 127191267,
+} as const;
+
+export function getDateValue(
+  item: PodioItem,
+  fieldId: number | string
+): Date | null {
+  const vals = getFieldValue(item, fieldId);
+  if (!Array.isArray(vals) || !vals.length) return null;
+  const start = (vals[0]?.value as { start?: string })?.start;
+  return start ? new Date(start) : null;
+}
 
 export const DOMAIN_FIELDS = {
   TITLE: 126809667,
