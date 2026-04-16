@@ -3,12 +3,21 @@ import { attempts, answers, tests } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
-import { Card } from "@/components/shared/Card";
-import { Pill } from "@/components/shared/Pill";
 import Link from "next/link";
-import { ArrowLeft, Trophy, Clock, FileText, CheckCircle, XCircle, MinusCircle, Download, Award, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Download,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import type { QuestionSnapshot } from "@/lib/exam-engine";
-import { issueCertificate, getCertificatesForAttempt } from "@/lib/certificate";
+import {
+  issueCertificate,
+  getCertificatesForAttempt,
+} from "@/lib/certificate";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { ResultsReview, type ResultQuestion } from "@/components/results/ResultsReview";
 
 export default async function ExamResultsPage({
   params,
@@ -45,6 +54,7 @@ export default async function ExamResultsPage({
     .select()
     .from(answers)
     .where(eq(answers.attemptId, attemptId));
+  const answerMap = new Map(allAnswers.map((a) => [a.questionPodioId, a]));
 
   const snapshots = (attempt.questionSnapshots ?? []) as QuestionSnapshot[];
   const snapshotMap = new Map(snapshots.map((s) => [s.podioItemId, s]));
@@ -61,9 +71,10 @@ export default async function ExamResultsPage({
     );
   }
   const certs = hasCeu ? await getCertificatesForAttempt(attemptId) : [];
+
   const correct = allAnswers.filter((a) => a.isCorrect === true).length;
   const incorrect = allAnswers.filter((a) => a.isCorrect === false).length;
-  const skipped = allAnswers.filter((a) => a.selectedKey === null).length;
+  const flaggedCount = allAnswers.filter((a) => a.flagged === true).length;
 
   const timeTaken =
     attempt.startedAt && attempt.submittedAt
@@ -74,76 +85,90 @@ export default async function ExamResultsPage({
         )
       : null;
 
+  const questionOrder = (attempt.questionOrder as number[]) ?? [];
+  const reviewQuestions: ResultQuestion[] = questionOrder
+    .map((qId) => {
+      const snap = snapshotMap.get(qId);
+      if (!snap) return null;
+      const ans = answerMap.get(qId);
+      return {
+        podioItemId: qId,
+        questionText: snap.questionText,
+        options: snap.options,
+        correctKey: snap.correctKey,
+        rationale: snap.rationale ?? null,
+        selectedKey: ans?.selectedKey ?? null,
+        isCorrect: ans?.isCorrect ?? null,
+        flagged: ans?.flagged ?? false,
+      };
+    })
+    .filter((q): q is ResultQuestion => q !== null);
+
+  const completedOn = attempt.submittedAt
+    ? new Date(attempt.submittedAt).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div>
       <Link
         href="/gradebook"
-        className="inline-flex items-center gap-1.5 text-sm text-cco-muted no-underline hover:text-cco-purple transition mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-cco-muted no-underline hover:text-cco-purple transition mb-4"
       >
         <ArrowLeft size={14} />
         Back to Gradebook
       </Link>
 
-      {/* Score summary */}
-      <Card className="mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p
-              className={`text-[11px] uppercase tracking-[0.2em] font-semibold mb-1.5 ${
-                passed ? "text-cco-green-600" : "text-cco-muted"
-              }`}
-            >
-              {passed ? "You passed · well done" : "Exam results"}
-            </p>
-            <h1 className="font-heading text-2xl font-bold text-cco-ink">
-              {test?.testName ?? "Exam Results"}
-            </h1>
-            <p className="text-sm text-cco-muted mt-1">
-              {attempt.submittedAt
-                ? `Completed ${new Date(attempt.submittedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`
-                : ""}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Trophy
-              size={24}
-              className={passed ? "text-cco-green" : "text-red-400"}
-            />
-            <span
-              className={`text-3xl font-bold ${
-                passed ? "text-cco-green-600" : "text-red-600"
-              }`}
-            >
-              {score}%
-            </span>
-          </div>
-        </div>
+      <PageHeader
+        gradient
+        eyebrow={passed ? "You passed · well done" : "Exam results"}
+        title={test?.testName ?? "Your Results"}
+        subtitle={
+          passed
+            ? `Finished on ${completedOn}. Nice work — your certificate${
+                certs.length > 1 ? "s are" : " is"
+              } ready below.`
+            : `Finished on ${completedOn}. Review your answers and try again when you're ready.`
+        }
+      />
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-4 border-t border-cco-border">
-          <Stat
-            icon={<CheckCircle size={16} className="text-cco-green" />}
-            label="Correct"
-            value={`${correct}`}
-          />
-          <Stat
-            icon={<XCircle size={16} className="text-red-400" />}
-            label="Incorrect"
-            value={`${incorrect}`}
-          />
-          <Stat
-            icon={<MinusCircle size={16} className="text-cco-muted" />}
-            label="Skipped"
-            value={`${skipped}`}
-          />
-          <Stat
-            icon={<Clock size={16} className="text-cco-muted" />}
-            label="Time"
-            value={timeTaken ? `${timeTaken}m` : "--"}
-          />
-        </div>
-      </Card>
+      {/* Stat tiles */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <StatTile
+          label="Score"
+          value={`${score}%`}
+          color={passed ? "green" : "red"}
+          sublabel={`Pass mark ${passingThreshold}%`}
+        />
+        <StatTile
+          label="Correct"
+          value={`${correct} / ${reviewQuestions.length}`}
+          sublabel={
+            incorrect > 0
+              ? `${incorrect} incorrect`
+              : correct === reviewQuestions.length
+                ? "Perfect"
+                : undefined
+          }
+        />
+        <StatTile
+          label="Duration"
+          value={timeTaken != null ? formatDuration(timeTaken) : "--"}
+          sublabel="Start to finish"
+        />
+        <StatTile
+          label="Flagged"
+          value={`${flaggedCount}`}
+          sublabel={
+            flaggedCount === 0 ? "None flagged" : "Marked for review"
+          }
+        />
+      </div>
 
-      {/* Certificate downloads */}
+      {/* Certificates */}
       {certs.length > 0 && (
         <div className="mb-6 space-y-4">
           {certs
@@ -152,7 +177,6 @@ export default async function ExamResultsPage({
             .map((cert) => {
               const isAapc = cert.type === "aapc_ceu";
               return isAapc ? (
-                // ---- AAPC CEU Certificate — clinical, official, green ----
                 <div
                   key={cert.id}
                   className="relative rounded-2xl bg-white border border-cco-border p-5 shadow-[0_6px_16px_rgba(15,23,42,0.06)]"
@@ -198,7 +222,6 @@ export default async function ExamResultsPage({
                   </div>
                 </div>
               ) : (
-                // ---- CCO Certificate — premium, purple/gold, signature piece ----
                 <div
                   key={cert.id}
                   className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-cco-purple via-[#6c3f6f] to-[#5f3c60] p-5 shadow-[0_10px_24px_rgba(129,84,129,0.25)]"
@@ -237,8 +260,7 @@ export default async function ExamResultsPage({
                   </div>
                   <p className="text-xs text-white/70 mt-3 pt-3 border-t border-white/10 leading-relaxed">
                     Your personal CCO credential — share on your CV, LinkedIn,
-                    or frame it on your wall. This is your achievement from
-                    Certification Coaching Organization.
+                    or frame it on your wall.
                   </p>
                 </div>
               );
@@ -247,143 +269,68 @@ export default async function ExamResultsPage({
       )}
 
       {/* Question review */}
-      <h2 className="font-heading text-lg font-bold text-cco-ink mb-4">
-        Question Review
-      </h2>
-      <div className="space-y-4">
-        {(attempt.questionOrder as number[] ?? []).map((qId, i) => {
-          const snapshot = snapshotMap.get(qId);
-          const answer = allAnswers.find((a) => a.questionPodioId === qId);
-          if (!snapshot) return null;
-
-          const isCorrect = answer?.isCorrect === true;
-          const isIncorrect = answer?.isCorrect === false;
-          const isSkipped = answer?.selectedKey === null;
-
-          return (
-            <Card
-              key={qId}
-              className={`border-l-4 ${
-                isCorrect
-                  ? "border-l-cco-green"
-                  : isIncorrect
-                    ? "border-l-red-400"
-                    : "border-l-gray-300"
-              }`}
-            >
-              <div className="flex items-start gap-3 mb-3">
-                <span className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-full bg-cco-bg-soft text-cco-muted text-xs font-bold">
-                  {i + 1}
-                </span>
-                <div>
-                  <div
-                    className="text-sm text-cco-ink prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: snapshot.questionText }}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2 ml-10">
-                {snapshot.options.map((opt) => {
-                  const isSelected = answer?.selectedKey === opt.key;
-                  const isCorrectOption = opt.key === snapshot.correctKey;
-                  let optClass = "border-cco-border bg-white";
-                  if (isCorrectOption) optClass = "border-cco-green bg-green-50";
-                  if (isSelected && !isCorrectOption)
-                    optClass = "border-red-400 bg-red-50";
-
-                  return (
-                    <div
-                      key={opt.key}
-                      className={`flex items-start gap-2.5 p-3 rounded-lg border ${optClass}`}
-                    >
-                      <span
-                        className={`shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                          isCorrectOption
-                            ? "bg-cco-green text-white"
-                            : isSelected
-                              ? "bg-red-400 text-white"
-                              : "bg-cco-bg-soft text-cco-muted"
-                        }`}
-                      >
-                        {opt.key}
-                      </span>
-                      <span className="text-sm text-cco-ink">{stripHtml(opt.text)}</span>
-                      {isCorrectOption && (
-                        <CheckCircle size={14} className="text-cco-green ml-auto shrink-0" />
-                      )}
-                      {isSelected && !isCorrectOption && (
-                        <XCircle size={14} className="text-red-400 ml-auto shrink-0" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {snapshot.rationale && (
-                <div className="ml-10 mt-3 p-3 bg-cco-bg-soft rounded-lg">
-                  <p className="text-xs font-semibold text-cco-muted mb-1">
-                    Rationale
-                  </p>
-                  <div
-                    className="text-sm text-cco-ink prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: snapshot.rationale }}
-                  />
-                </div>
-              )}
-
-              <div className="ml-10 mt-2">
-                {isCorrect && <Pill variant="green">Correct</Pill>}
-                {isIncorrect && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border border-red-200 bg-red-50 text-red-700">
-                    Incorrect
-                  </span>
-                )}
-                {isSkipped && <Pill>Skipped</Pill>}
-              </div>
-            </Card>
-          );
-        })}
+      <div className="mb-4 flex items-end justify-between">
+        <h2 className="font-heading text-xl font-bold text-cco-ink">
+          Question Review
+        </h2>
+        <p className="text-xs text-cco-muted">
+          Click any question to jump — rationale shown for every answer
+        </p>
       </div>
+      <ResultsReview
+        questions={reviewQuestions}
+        scratchPad={attempt.scratchPad}
+      />
 
-      <div className="mt-8 text-center">
+      <div className="mt-10 text-center">
         <Link
           href="/catalog"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600"
         >
           <FileText size={16} />
-          Take Another Exam
+          Take another exam
         </Link>
       </div>
     </div>
   );
 }
 
-function Stat({
-  icon,
+function StatTile({
   label,
   value,
+  sublabel,
+  color = "default",
 }: {
-  icon: React.ReactNode;
   label: string;
   value: string;
+  sublabel?: string;
+  color?: "default" | "green" | "red";
 }) {
+  const valueColor =
+    color === "green"
+      ? "text-cco-green-600"
+      : color === "red"
+        ? "text-red-600"
+        : "text-cco-ink";
+
   return (
-    <div className="flex items-center gap-2">
-      {icon}
-      <div>
-        <p className="text-xs text-cco-muted">{label}</p>
-        <p className="text-lg font-bold text-cco-ink">{value}</p>
-      </div>
+    <div className="bg-white border border-cco-border rounded-2xl p-4 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
+      <p className="text-[10px] uppercase tracking-[0.15em] font-semibold text-cco-muted mb-2">
+        {label}
+      </p>
+      <p className={`font-heading text-3xl font-bold ${valueColor}`}>
+        {value}
+      </p>
+      {sublabel && (
+        <p className="text-[11px] text-cco-muted mt-1">{sublabel}</p>
+      )}
     </div>
   );
 }
 
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h}h ${m}m` : `${h}h`;
 }

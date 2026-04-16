@@ -94,6 +94,7 @@ export default async function GradebookPage() {
   return (
     <div>
       <PageHeader
+        gradient
         eyebrow={greet ? `${greet}'s Progress` : "Your Progress"}
         title="Your gradebook"
         subtitle={subtitle}

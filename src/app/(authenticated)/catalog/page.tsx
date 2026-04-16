@@ -72,6 +72,7 @@ export default async function CatalogPage({
   return (
     <div>
       <PageHeader
+        gradient
         eyebrow="Your Study Portal"
         title={greet ? `${timeOfDayGreeting()}, ${greet}` : "Your exam catalog"}
         subtitle="Pick up where you left off, or start a new CEU quiz. Every exam you complete brings you closer to certified."
