@@ -29,6 +29,21 @@ async function getTemplate(fileId: number): Promise<Uint8Array> {
   return bytes;
 }
 
+/** Shrink font size until the text fits within maxWidth (down to minSize). */
+function fitFontSize(
+  font: import("pdf-lib").PDFFont,
+  text: string,
+  maxWidth: number,
+  preferredSize: number,
+  minSize: number
+): number {
+  let size = preferredSize;
+  while (size > minSize && font.widthOfTextAtSize(text, size) > maxWidth) {
+    size -= 1;
+  }
+  return size;
+}
+
 export async function renderAapcCertificate(
   props: AapcCertificateProps
 ): Promise<Uint8Array> {
@@ -38,33 +53,34 @@ export async function renderAapcCertificate(
   const page = pdfDoc.getPages()[0];
   const { width } = page.getSize();
 
-  const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  // Name — centered horizontally, positioned above the "Name" line
+  // NAME — bold, prominent. Auto-shrinks for long names.
+  // Preferred 24pt, min 13pt. Name line is ~520pt wide.
   const name = props.studentName;
-  const nameSize = 16;
-  const nameWidth = helv.widthOfTextAtSize(name, nameSize);
+  const nameSize = fitFontSize(helvBold, name, 520, 24, 13);
+  const nameWidth = helvBold.widthOfTextAtSize(name, nameSize);
   page.drawText(name, {
     x: (width - nameWidth) / 2,
-    y: 345,
+    y: 355, // breathing room above the line
     size: nameSize,
-    font: helv,
+    font: helvBold,
     color: rgb(0, 0, 0),
   });
 
-  // Date — centered around x=380, above the "Date" line
+  // DATE — bold, prominent. Centered around x=380 (under the Index block).
   const dateStr = props.completionDate.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
   });
-  const dateSize = 12;
-  const dateWidth = helv.widthOfTextAtSize(dateStr, dateSize);
+  const dateSize = 16;
+  const dateWidth = helvBold.widthOfTextAtSize(dateStr, dateSize);
   page.drawText(dateStr, {
     x: 380 - dateWidth / 2,
-    y: 130,
+    y: 140,
     size: dateSize,
-    font: helv,
+    font: helvBold,
     color: rgb(0, 0, 0),
   });
 
