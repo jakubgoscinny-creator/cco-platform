@@ -138,7 +138,7 @@ export default async function ExamResultsPage({
 
       {/* Certificate downloads */}
       {certs.length > 0 && (
-        <div className="mb-6 grid md:grid-cols-2 gap-4">
+        <div className="mb-6 space-y-4">
           {certs
             .slice()
             .sort((a, b) => (a.type === "cco_credential" ? -1 : 1))
@@ -150,48 +150,45 @@ export default async function ExamResultsPage({
                   key={cert.id}
                   className="relative rounded-2xl bg-white border border-cco-border p-5 shadow-[0_6px_16px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-lg bg-cco-green/10 flex items-center justify-center">
-                        <ShieldCheck size={20} className="text-cco-green-600" />
-                      </div>
-                      <div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-cco-green/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={24} className="text-cco-green-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
                         <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-cco-green-600">
                           Official AAPC
                         </p>
-                        <h3 className="font-heading text-base font-bold text-cco-ink">
-                          CEU Certificate
-                        </h3>
+                        <span className="text-[10px] text-cco-muted">·</span>
+                        <p className="text-[10px] text-cco-muted">
+                          Submit to AAPC for CEU credit
+                        </p>
                       </div>
+                      <h3 className="font-heading text-base font-bold text-cco-ink">
+                        AAPC CEU Certificate
+                      </h3>
+                      <p className="text-xs text-cco-muted mt-1 truncate">
+                        {cert.eventTitle}
+                        {cert.ceuValue ? ` · ${cert.ceuValue} CEU` : ""}
+                        {cert.ceuIndexNumber
+                          ? ` · Index: ${cert.ceuIndexNumber}`
+                          : ""}
+                      </p>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      <a
+                        href={`/api/certificate/${cert.id}`}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cco-green text-white text-sm font-semibold no-underline transition hover:bg-cco-green-600"
+                        download
+                      >
+                        <Download size={14} />
+                        Download
+                      </a>
+                      <p className="text-[9px] text-cco-muted font-mono tracking-wider">
+                        {cert.verificationCode}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-xs text-cco-muted mb-3 leading-relaxed">
-                    Submit this to AAPC as proof of continuing education credit.
-                  </p>
-                  <div className="text-xs space-y-1 mb-4 bg-cco-bg-soft rounded-lg p-3">
-                    <p className="text-cco-ink font-semibold truncate">
-                      {cert.eventTitle}
-                    </p>
-                    <div className="flex gap-3 text-cco-muted">
-                      {cert.ceuValue && <span>{cert.ceuValue} CEU</span>}
-                      {cert.ceuIndexNumber && (
-                        <span className="truncate">
-                          Index: {cert.ceuIndexNumber}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <a
-                    href={`/api/certificate/${cert.id}`}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-cco-green text-white text-sm font-semibold no-underline transition hover:bg-cco-green-600"
-                    download
-                  >
-                    <Download size={14} />
-                    Download AAPC Certificate
-                  </a>
-                  <p className="text-[9px] text-cco-muted mt-2 text-center font-mono tracking-wider">
-                    {cert.verificationCode}
-                  </p>
                 </div>
               ) : (
                 // ---- CCO Certificate — premium, purple/gold, signature piece ----
@@ -203,42 +200,42 @@ export default async function ExamResultsPage({
                   <div className="absolute top-0 right-0 bg-[#fcb900] text-[#5f3c60] text-[9px] font-bold uppercase tracking-[0.15em] px-3 py-1 rounded-bl-xl">
                     ★ Your CCO Credential
                   </div>
-                  <div className="flex items-start gap-3 mb-4 mt-4">
-                    <div className="w-12 h-12 rounded-full bg-[#fcb900] flex items-center justify-center border-2 border-[#e09b00] shrink-0">
-                      <Sparkles size={22} className="text-white" />
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="w-14 h-14 rounded-full bg-[#fcb900] flex items-center justify-center border-2 border-[#e09b00] shrink-0">
+                      <Sparkles size={26} className="text-white" />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#fcb900]">
-                        Certificate of Achievement
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#fcb900] mb-0.5">
+                        Certificate of Achievement · Signed by Laureen Jandroep
                       </p>
-                      <h3 className="font-heading text-lg font-bold text-white">
+                      <h3 className="font-heading text-xl font-bold text-white">
                         CCO Certificate
                       </h3>
+                      <p className="text-xs text-white/80 mt-1 truncate">
+                        {cert.eventTitle} · Awarded to{" "}
+                        <span className="font-semibold text-white">
+                          {cert.studentName}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      <a
+                        href={`/api/certificate/${cert.id}`}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#fcb900] text-[#5f3c60] text-sm font-bold no-underline transition hover:bg-[#ffcc33]"
+                        download
+                      >
+                        <Download size={14} />
+                        Download
+                      </a>
+                      <p className="text-[9px] text-white/60 font-mono tracking-wider">
+                        {cert.verificationCode}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-xs text-white/80 mb-4 leading-relaxed">
-                    Your personal credential from Certification Coaching
-                    Organization — signed by Laureen Jandroep. Share it on your
-                    CV, LinkedIn, or wall.
-                  </p>
-                  <div className="text-xs space-y-1 mb-4 bg-white/10 rounded-lg p-3 backdrop-blur-sm">
-                    <p className="text-white font-semibold truncate">
-                      {cert.eventTitle}
-                    </p>
-                    <p className="text-white/70 text-[11px]">
-                      Awarded to {cert.studentName}
-                    </p>
-                  </div>
-                  <a
-                    href={`/api/certificate/${cert.id}`}
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-[#fcb900] text-[#5f3c60] text-sm font-bold no-underline transition hover:bg-[#ffcc33]"
-                    download
-                  >
-                    <Download size={14} />
-                    Download CCO Certificate
-                  </a>
-                  <p className="text-[9px] text-white/60 mt-2 text-center font-mono tracking-wider">
-                    {cert.verificationCode}
+                  <p className="text-xs text-white/70 mt-3 pt-3 border-t border-white/10 leading-relaxed">
+                    Your personal CCO credential — share on your CV, LinkedIn,
+                    or frame it on your wall. This is your achievement from
+                    Certification Coaching Organization.
                   </p>
                 </div>
               );
