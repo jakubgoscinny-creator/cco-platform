@@ -1,13 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 // Public paths. `/api/sso/` must be public:
-//   - /api/sso/token & /api/sso/userinfo are server-to-server calls from
-//     Circle and will never carry a cco_session cookie
-//   - /api/sso/authorize may be reached without a session; its route
-//     handler does its own auth check and redirects to
-//     /sign-in?return_to=... preserving Circle's OAuth state. If the
-//     proxy redirected here first it would strip the return_to and
-//     break the OAuth dance.
+//   - /api/sso/circle is the inbound Circle SSO entry point. Users arrive
+//     here without a cco_session yet — the route handler creates one
+//     after verifying the Circle JWT.
+//   - /api/sso/circle-link is an operator-facing JSON spec endpoint used
+//     by Laureen when configuring the cco.academy-side signer.
 const PUBLIC_PATHS = ["/sign-in", "/api/health", "/api/sso/"];
 
 export function proxy(request: NextRequest) {

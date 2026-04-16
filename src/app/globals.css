@@ -56,19 +56,7 @@ body {
   background: var(--color-cco-gold);
 }
 
-/* User-applied highlights on exam questions. The inline background color
- * is set by HighlightTools (yellow / green / pink). We force-override
- * Tailwind Typography's default `prose mark { background: #fef08a }`
- * so all three colors render correctly even inside `.prose` containers. */
-mark.tp-inline-highlight {
-  background-color: inherit;
-  color: inherit;
-  padding: 0.05em 0.15em;
-  border-radius: 0.2em;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-.prose :where(mark.tp-inline-highlight):not(:where([class~="not-prose"] *)) {
-  background-color: inherit;
-  color: inherit;
-}
+/* User-applied highlights on exam questions.
+ * The per-color background is set inline with !important by HighlightTools,
+ * so we don't need a stylesheet rule competing with Tailwind Typography's
+ * `prose mark` default. Any CSS rule here would be overridden anyway. */

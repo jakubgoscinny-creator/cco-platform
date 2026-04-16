@@ -40,12 +40,15 @@ export function HighlightTools({
       const mark = document.createElement("mark");
       mark.className = "tp-inline-highlight";
       mark.dataset.color = color.id;
-      mark.style.background = color.bg;
-      mark.style.color = "inherit";
-      mark.style.borderRadius = "0.2em";
-      mark.style.padding = "0.05em 0.15em";
-      mark.style.boxDecorationBreak = "clone";
-      (mark.style as CSSStyleDeclaration & { WebkitBoxDecorationBreak?: string }).WebkitBoxDecorationBreak = "clone";
+      // setProperty with "important" guarantees this wins over any
+      // stylesheet rule — Tailwind Typography's prose default otherwise
+      // paints every <mark> the same yellow regardless of inline style.
+      mark.style.setProperty("background-color", color.bg, "important");
+      mark.style.setProperty("color", "inherit", "important");
+      mark.style.setProperty("padding", "0.05em 0.2em", "important");
+      mark.style.setProperty("border-radius", "0.2em", "important");
+      mark.style.setProperty("box-decoration-break", "clone");
+      mark.style.setProperty("-webkit-box-decoration-break", "clone");
 
       try {
         range.surroundContents(mark);
