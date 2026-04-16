@@ -1,19 +1,25 @@
 /**
- * Circle SSO — OAuth 2.0 endpoints where Circle is the client and
- * the portal is the authorization server.
+ * Circle SSO — OAuth 2.0 where the portal is the identity provider
+ * and Circle (cco.academy) is the client.
  *
  * Flow:
- *   1. Circle redirects the user's browser to /api/sso/authorize with
- *      a short-lived JWT that Circle signed with SSO_CIRCLE_JWT_SECRET.
- *   2. We verify the JWT, upsert the user in Podio + Neon, set the
- *      cco_session cookie, and redirect back to Circle with a `code`.
- *   3. Circle calls /api/sso/token server-to-server to exchange the
+ *   1. User clicks "Continue with CCO Test Portal" on cco.academy.
+ *   2. Circle redirects the browser to /api/sso/authorize?client_id=...
+ *      &redirect_uri=https://www.cco.academy/oauth2/callback&state=...
+ *      &response_type=code&scope=email+profile
+ *   3. /authorize checks for a cco_session cookie:
+ *        - If present → mark the contact as circle_member and issue an
+ *          authorization code (signed JWT), then 302 back to redirect_uri.
+ *        - If absent → 302 to /sign-in?return_to=<full authorize URL>.
+ *          After login, the user lands back on /authorize with a session
+ *          and the code is issued.
+ *   4. Circle calls /api/sso/token server-to-server to exchange the
  *      code for an access_token.
- *   4. Circle calls /api/sso/userinfo with the bearer token.
+ *   5. Circle calls /api/sso/userinfo with Authorization: Bearer <token>.
  *
- * `code` and `access_token` are both signed HS256 JWTs. No storage
- * table needed; they verify themselves on the return leg. This works
- * on Vercel serverless (no shared memory).
+ * Both `code` and `access_token` are signed HS256 JWTs. No storage table
+ * needed; they verify themselves. This works on Vercel serverless
+ * (no shared memory).
  */
 
 import jwt, { type JwtPayload } from "jsonwebtoken";
@@ -21,13 +27,6 @@ import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { contacts } from "./schema";
-import {
-  createItem,
-  filterItems,
-  getTextValue,
-  PODIO_APPS,
-  PROFILE_FIELDS,
-} from "./podio";
 
 // ---------------------------------------------------------------------------
 // Env helpers
@@ -42,67 +41,17 @@ function requireEnv(name: string): string {
 export const SSO_CODE_TTL_SECONDS = 60;
 export const SSO_ACCESS_TOKEN_TTL_SECONDS = 3600;
 
-// ---------------------------------------------------------------------------
-// Circle JWT (inbound on /authorize)
-// ---------------------------------------------------------------------------
-
-export interface CircleJwtPayload extends JwtPayload {
-  email?: string;
-  name?: string;
-  first_name?: string;
-  last_name?: string;
-  avatar_url?: string;
-  picture?: string;
-  // Membership signal — Circle JWTs vary; we accept any of these
-  space_ids?: number[] | string[];
-  spaces?: unknown[];
-  roles?: string[];
-  is_member?: boolean;
-  membership_active?: boolean;
-}
-
-export function verifyCircleJwt(token: string): CircleJwtPayload {
-  const secret = requireEnv("SSO_CIRCLE_JWT_SECRET");
-  // Circle signs with HS256 using the shared secret from cco.academy/settings/sso
-  const decoded = jwt.verify(token, secret, { algorithms: ["HS256"] });
-  if (typeof decoded === "string") {
-    throw new Error("Circle JWT payload is not a JSON object");
-  }
-  return decoded as CircleJwtPayload;
-}
-
-/**
- * Determine whether the Circle user has an active space membership.
- * Conservative heuristic: if any positive signal is present, return true.
- * If nothing membership-shaped is present, return true (the user authed
- * via Circle at all, which is itself membership evidence) — Laureen can
- * tighten this once we know the exact JWT shape Circle emits.
- */
-export function circleJwtImpliesMembership(payload: CircleJwtPayload): boolean {
-  if (payload.is_member === false) return false;
-  if (payload.membership_active === false) return false;
-  if (Array.isArray(payload.space_ids) && payload.space_ids.length > 0) return true;
-  if (Array.isArray(payload.spaces) && payload.spaces.length > 0) return true;
-  if (Array.isArray(payload.roles) && payload.roles.length > 0) return true;
-  // Default: user came through Circle SSO => treat as member
-  return true;
-}
-
-export function extractName(payload: CircleJwtPayload): string {
-  if (payload.name && payload.name.trim()) return payload.name.trim();
-  const parts = [payload.first_name, payload.last_name]
-    .filter((p): p is string => typeof p === "string" && p.trim().length > 0)
-    .map((p) => p.trim());
-  if (parts.length) return parts.join(" ");
-  return "";
-}
-
-export function extractAvatar(payload: CircleJwtPayload): string | undefined {
-  return payload.avatar_url ?? payload.picture ?? undefined;
-}
+// Hosts we accept as Circle's OAuth redirect_uri. Circle's current
+// callback is https://www.cco.academy/oauth2/callback; we also accept
+// the apex in case Circle ever drops the www. We compare on full
+// URL.origin to block subdomain tricks like cco.academy.evil.com.
+export const ALLOWED_REDIRECT_ORIGINS = new Set([
+  "https://cco.academy",
+  "https://www.cco.academy",
+]);
 
 // ---------------------------------------------------------------------------
-// Authorization code (outbound on /authorize, inbound on /token)
+// Authorization code (outbound from /authorize, inbound to /token)
 // ---------------------------------------------------------------------------
 
 interface AuthCodePayload extends JwtPayload {
@@ -117,7 +66,8 @@ export function issueAuthorizationCode(email: string, contactId: number): string
   return jwt.sign(payload, secret, {
     algorithm: "HS256",
     expiresIn: SSO_CODE_TTL_SECONDS,
-    // Add a random jti so the same code can't be re-used as a token by accident
+    // Random jti so an intercepted code can't be replayed twice
+    // (though the 60s TTL already keeps the window tiny)
     jwtid: randomBytes(16).toString("hex"),
   });
 }
@@ -132,7 +82,7 @@ export function verifyAuthorizationCode(code: string): AuthCodePayload {
 }
 
 // ---------------------------------------------------------------------------
-// Access token (outbound on /token, inbound on /userinfo)
+// Access token (outbound from /token, inbound to /userinfo)
 // ---------------------------------------------------------------------------
 
 interface AccessTokenPayload extends JwtPayload {
@@ -182,100 +132,39 @@ export function validateClientCredentials(
 }
 
 // ---------------------------------------------------------------------------
-// Upsert Circle user into Podio Platform Profiles + Neon contacts mirror
+// Membership flag
 // ---------------------------------------------------------------------------
 
 /**
- * Sentinel password for Circle-only users. Cannot match bcrypt ($2...),
- * cannot match MD5 (not 32 hex chars), and is too long to be a plaintext
- * password anyone typed — so password-based login will always fail for
- * these rows, which is what we want.
+ * Mark the contact as a Circle member. Called from /authorize when a
+ * Circle-driven OAuth dance starts with a valid local session — reaching
+ * /authorize via a Circle redirect is itself evidence the user is on
+ * cco.academy, so they're a Circle member. Idempotent.
  */
-function ssoSentinelPasswordHash(): string {
-  return `sso:${randomBytes(48).toString("hex")}`;
+export async function markAsCircleMember(contactId: number): Promise<void> {
+  await db
+    .update(contacts)
+    .set({ circleMember: true })
+    .where(eq(contacts.podioItemId, contactId));
 }
 
-export interface UpsertResult {
-  contactId: number;
-  email: string;
-  fullName: string | null;
-  circleMember: boolean;
-}
+// ---------------------------------------------------------------------------
+// redirect_uri validation
+// ---------------------------------------------------------------------------
 
 /**
- * Find or create a Podio Platform Profile by email, mirror into Neon
- * contacts, and set circle_member flag based on the Circle JWT payload.
- *
- * Idempotent: calling twice with the same email returns the same contactId.
+ * Validate redirect_uri:
+ *  - Must parse as a URL
+ *  - Origin (scheme + host + port) must be in ALLOWED_REDIRECT_ORIGINS
+ * Returns the parsed URL or null if invalid.
  */
-export async function upsertCircleUser(params: {
-  email: string;
-  fullName: string;
-  circleMember: boolean;
-}): Promise<UpsertResult> {
-  const email = params.email.toLowerCase().trim();
-  const fullName = params.fullName.trim();
-
-  // 1) Find existing Podio profile
-  const result = await filterItems(
-    PODIO_APPS.PLATFORM_PROFILES,
-    { [PROFILE_FIELDS.EMAIL]: email },
-    { limit: 1 }
-  );
-
-  let podioItemId: number;
-  let passwordHash: string;
-
-  if (result.items?.length) {
-    const item = result.items[0];
-    podioItemId = item.item_id;
-    passwordHash = getTextValue(item, PROFILE_FIELDS.PASSWORD) || ssoSentinelPasswordHash();
-  } else {
-    // 2) Create minimal Podio profile. We only have field IDs for
-    //    EMAIL and PASSWORD exposed via PROFILE_FIELDS — the Podio
-    //    app's title / name fields are not mirrored here, so we
-    //    cannot set them. That is acceptable for SSO-first users;
-    //    the name lives in Neon (fullName below) and in Circle.
-    const sentinel = ssoSentinelPasswordHash();
-    const created = await createItem(PODIO_APPS.PLATFORM_PROFILES, {
-      [PROFILE_FIELDS.EMAIL]: email,
-      [PROFILE_FIELDS.PASSWORD]: sentinel,
-    });
-    podioItemId = created.item_id;
-    passwordHash = sentinel;
+export function parseAllowedRedirectUri(raw: string): URL | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
   }
-
-  // 3) Upsert Neon mirror — this is the row getSession() reads from
-  await db
-    .insert(contacts)
-    .values({
-      podioItemId,
-      email,
-      passwordHash,
-      fullName: fullName || null,
-      circleMember: params.circleMember,
-      payload: {},
-      syncedAt: new Date(),
-    })
-    .onConflictDoUpdate({
-      target: contacts.podioItemId,
-      set: {
-        email,
-        fullName: fullName || null,
-        circleMember: params.circleMember,
-        syncedAt: new Date(),
-      },
-    });
-
-  // Also backfill by-email in case an older row predates the Podio ID change
-  const existing = await db.query.contacts.findFirst({
-    where: eq(contacts.podioItemId, podioItemId),
-  });
-
-  return {
-    contactId: podioItemId,
-    email,
-    fullName: existing?.fullName ?? null,
-    circleMember: existing?.circleMember ?? params.circleMember,
-  };
+  if (!ALLOWED_REDIRECT_ORIGINS.has(url.origin)) return null;
+  return url;
 }

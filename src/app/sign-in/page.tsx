@@ -1,10 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { loginAction } from "@/actions/auth";
 
 export default function SignInPage() {
   const [state, formAction, pending] = useActionState(loginAction, null);
+  // SSO flows redirect here with ?return_to=/api/sso/authorize?...
+  // after which loginAction sends the user back to complete the OAuth dance.
+  const returnTo = useSearchParams().get("return_to") ?? "";
 
   return (
     <div className="min-h-full flex items-center justify-center px-4 py-12">
@@ -22,6 +26,7 @@ export default function SignInPage() {
           action={formAction}
           className="bg-white border border-cco-border rounded-2xl shadow-sm p-6 space-y-4"
         >
+          <input type="hidden" name="return_to" value={returnTo} />
           {state?.error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
               {state.error}

@@ -1,31 +1,37 @@
 /**
  * GET /api/sso/authorize
  *
- * Entry point for Circle SSO. Circle's browser redirect lands here with:
- *   - client_id      (must match SSO_CLIENT_ID)
- *   - redirect_uri   (must be on cco.academy)
- *   - state          (opaque, passed through)
- *   - response_type  (must be "code")
- *   - jwt            (Circle-signed HS256 JWT with the user's identity)
+ * OAuth 2.0 authorization endpoint. Circle (cco.academy) sends users
+ * here to obtain an authorization code.
  *
- * On success we upsert the user, set the cco_session cookie so they land
- * on the portal authenticated, then 302 back to redirect_uri?code=...&state=...
+ * Query params (standard OAuth):
+ *   - client_id       must match SSO_CLIENT_ID
+ *   - redirect_uri    must resolve to an origin in ALLOWED_REDIRECT_ORIGINS
+ *   - state           opaque, passed back unchanged
+ *   - response_type   must be "code"
+ *   - scope           (ignored — we always return email + name)
+ *
+ * Behavior:
+ *   - No cco_session cookie → 302 to /sign-in?return_to=<this URL>. After
+ *     login, the user lands back here with a session and the dance
+ *     completes without them re-entering any Circle state.
+ *   - Valid cco_session → mark contact as circle_member, issue a signed
+ *     60s code JWT, and 302 to redirect_uri?code=...&state=...
  */
 
 import type { NextRequest } from "next/server";
-import { createSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { contacts } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import {
-  circleJwtImpliesMembership,
-  extractName,
   issueAuthorizationCode,
-  upsertCircleUser,
+  markAsCircleMember,
+  parseAllowedRedirectUri,
   validateClientId,
-  verifyCircleJwt,
 } from "@/lib/sso";
 
 export const runtime = "nodejs";
-
-const ALLOWED_REDIRECT_ORIGIN = "https://cco.academy";
 
 function badRequest(msg: string): Response {
   return new Response(msg, { status: 400 });
@@ -37,8 +43,8 @@ export async function GET(request: NextRequest): Promise<Response> {
   const redirectUri = params.get("redirect_uri");
   const state = params.get("state") ?? "";
   const responseType = params.get("response_type");
-  const circleToken = params.get("jwt");
 
+  // --- Validate the OAuth request -----------------------------------------
   if (!clientId || !validateClientId(clientId)) {
     return badRequest("invalid client_id");
   }
@@ -48,57 +54,49 @@ export async function GET(request: NextRequest): Promise<Response> {
   if (!redirectUri) {
     return badRequest("missing redirect_uri");
   }
-  // Strict allowlist: scheme + host, not just startsWith on the full string,
-  // to block tricks like https://cco.academy.evil.com/ or path-prefix smuggles.
-  let parsedRedirect: URL;
-  try {
-    parsedRedirect = new URL(redirectUri);
-  } catch {
-    return badRequest("invalid redirect_uri");
-  }
-  if (parsedRedirect.origin !== ALLOWED_REDIRECT_ORIGIN) {
-    return badRequest("redirect_uri must be on cco.academy");
-  }
-  if (!circleToken) {
-    return badRequest("missing jwt");
+  const parsedRedirect = parseAllowedRedirectUri(redirectUri);
+  if (!parsedRedirect) {
+    return badRequest("redirect_uri origin not allowed");
   }
 
-  // Verify the Circle-signed JWT
-  let payload;
-  try {
-    payload = verifyCircleJwt(circleToken);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "jwt verification failed";
-    return new Response(`invalid jwt: ${msg}`, { status: 401 });
+  // --- Authenticate the user ----------------------------------------------
+  const session = await getSession();
+  if (!session) {
+    // Not logged in. Send them through the normal portal login, asking
+    // the login action to return here when done. `return_to` is a
+    // relative path so loginAction's allowlist (must start with /) passes.
+    const returnTo = request.nextUrl.pathname + request.nextUrl.search;
+    const signInUrl = new URL("/sign-in", request.nextUrl);
+    signInUrl.searchParams.set("return_to", returnTo);
+    return new Response(null, {
+      status: 302,
+      headers: { Location: signInUrl.toString() },
+    });
   }
 
-  const email = typeof payload.email === "string" ? payload.email.trim() : "";
-  if (!email) {
-    return badRequest("jwt missing email");
+  // Resolve the contact's email (needed in the code payload + later in
+  // /userinfo). We re-read from the mirror instead of trusting the
+  // cookie, so a stale cookie can't smuggle a stale email.
+  const contact = await db.query.contacts.findFirst({
+    where: eq(contacts.podioItemId, session.contactId),
+  });
+  if (!contact) {
+    // Session cookie references a contact that no longer exists in the
+    // mirror — treat as unauthenticated rather than leak an error.
+    return badRequest("session references unknown contact");
   }
 
-  const fullName = extractName(payload);
-  const circleMember = circleJwtImpliesMembership(payload);
+  // Reaching this endpoint via a Circle-issued redirect is itself
+  // evidence the user is on cco.academy → mark them as a Circle member.
+  // Idempotent; cheap.
+  await markAsCircleMember(contact.podioItemId);
 
-  // Upsert in Podio Platform Profiles + Neon contacts mirror
-  const user = await upsertCircleUser({ email, fullName, circleMember });
-
-  // Create a cco_session row + set the cookie so when the user eventually
-  // lands on /catalog (after Circle's callback forwards them), the
-  // existing getSession() in auth.ts authenticates them without a re-login.
-  await createSession(user.contactId);
-
-  // Issue the short-lived authorization code (60s TTL)
-  const code = issueAuthorizationCode(user.email, user.contactId);
-
-  // Redirect back to Circle's callback
+  // Issue the authorization code and send the browser back to Circle.
+  const code = issueAuthorizationCode(contact.email, contact.podioItemId);
   const back = new URL(parsedRedirect.toString());
   back.searchParams.set("code", code);
   if (state) back.searchParams.set("state", state);
 
-  // Plain 302 + Location — Next.js attaches the Set-Cookie headers from
-  // cookies().set(...) inside createSession() to whatever response we return.
-  // (Response.redirect() returns a locked response we can't augment.)
   return new Response(null, {
     status: 302,
     headers: { Location: back.toString() },
