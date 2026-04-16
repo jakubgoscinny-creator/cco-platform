@@ -136,39 +136,79 @@ export default async function ExamResultsPage({
         </div>
       </Card>
 
-      {/* Certificate download */}
+      {/* Certificate downloads */}
       {certs.length > 0 && (
         <Card className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-4">
             <Award size={20} className="text-cco-purple" />
             <h2 className="font-heading text-lg font-bold text-cco-ink">
-              CEU Certificate{certs.length > 1 ? "s" : ""}
+              Your Certificates
             </h2>
           </div>
           <div className="space-y-3">
-            {certs.map((cert) => (
-              <div key={cert.id} className="flex items-center justify-between gap-4 p-3 bg-cco-bg-soft rounded-xl">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-cco-ink truncate">{cert.eventTitle}</p>
-                  <p className="text-xs text-cco-muted mt-0.5">
-                    {cert.ceuValue ? `${cert.ceuValue} CEU` : ""}
-                    {cert.ceuIndexNumber ? ` · Index: ${cert.ceuIndexNumber}` : ""}
-                  </p>
-                </div>
-                <a
-                  href={`/api/certificate/${cert.id}`}
-                  className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-cco-green text-white text-sm font-semibold no-underline transition hover:bg-cco-green-600"
-                  download
+            {certs.map((cert) => {
+              const isAapc = cert.type === "aapc_ceu";
+              return (
+                <div
+                  key={cert.id}
+                  className={`flex items-center justify-between gap-4 p-4 rounded-xl border ${
+                    isAapc
+                      ? "bg-cco-bg-soft border-cco-border"
+                      : "bg-gradient-to-br from-[#f5efff] to-[#f0faea] border-cco-purple/20"
+                  }`}
                 >
-                  <Download size={14} />
-                  Download
-                </a>
-              </div>
-            ))}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span
+                        className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                          isAapc
+                            ? "bg-cco-green/15 text-cco-green-600"
+                            : "bg-cco-purple/15 text-cco-purple-700"
+                        }`}
+                      >
+                        {isAapc ? "AAPC CEU" : "CCO Certificate"}
+                      </span>
+                      {!isAapc && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[#fcb900]/20 text-[#a37400]">
+                          Achievement
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-semibold text-cco-ink truncate">
+                      {cert.eventTitle}
+                    </p>
+                    <p className="text-xs text-cco-muted mt-0.5">
+                      {isAapc
+                        ? [
+                            cert.ceuValue ? `${cert.ceuValue} CEU` : null,
+                            cert.ceuIndexNumber
+                              ? `Index: ${cert.ceuIndexNumber}`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
+                        : "CCO's own Certificate of Achievement"}
+                    </p>
+                    <p className="text-[10px] text-cco-muted mt-1 font-mono">
+                      {cert.verificationCode}
+                    </p>
+                  </div>
+                  <a
+                    href={`/api/certificate/${cert.id}`}
+                    className={`shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-semibold no-underline transition ${
+                      isAapc
+                        ? "bg-cco-green hover:bg-cco-green-600"
+                        : "bg-cco-purple hover:bg-cco-purple-700"
+                    }`}
+                    download
+                  >
+                    <Download size={14} />
+                    Download
+                  </a>
+                </div>
+              );
+            })}
           </div>
-          <p className="text-xs text-cco-muted mt-3">
-            Verification: {certs.map((c) => c.verificationCode).join(", ")}
-          </p>
         </Card>
       )}
 

@@ -144,6 +144,7 @@ export const certificates = pgTable(
     ceuItemPodioId: bigint("ceu_item_podio_id", { mode: "number" }).notNull(),
     testPodioId: bigint("test_podio_id", { mode: "number" }).notNull(),
     verificationCode: text("verification_code").notNull(),
+    type: text("type").notNull().default("aapc_ceu"), // 'aapc_ceu' | 'cco_credential'
     templateFileId: bigint("template_file_id", { mode: "number" }), // Podio file_id of AAPC PDF template
     studentName: text("student_name").notNull(),
     eventTitle: text("event_title").notNull(),
@@ -155,7 +156,11 @@ export const certificates = pgTable(
   },
   (table) => [
     uniqueIndex("certificates_verification_code_idx").on(table.verificationCode),
-    uniqueIndex("certificates_attempt_ceu_idx").on(table.attemptId, table.ceuItemPodioId),
+    uniqueIndex("certificates_attempt_ceu_type_idx").on(
+      table.attemptId,
+      table.ceuItemPodioId,
+      table.type
+    ),
   ]
 );
 

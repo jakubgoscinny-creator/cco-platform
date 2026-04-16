@@ -74,45 +74,64 @@ export async function issueCertificate(
 
   const issued: Certificate[] = [];
 
+  // Types to issue per CEU item:
+  // - "aapc_ceu"       — AAPC-approved CEU certificate (from Podio template)
+  // - "cco_credential" — CCO's own branded Certificate of Achievement
+  // The AAPC cert is only issued when the CEU has a template file attached.
+  // The CCO cert is always issued (builds CCO's own credential credibility).
+  const typesToIssue: Array<{
+    type: "aapc_ceu" | "cco_credential";
+    requiresTemplate: boolean;
+  }> = [
+    { type: "aapc_ceu", requiresTemplate: true },
+    { type: "cco_credential", requiresTemplate: false },
+  ];
+
   for (const ceu of ceuItemList) {
-    // Check if already issued (idempotent)
-    const [existing] = await db
-      .select()
-      .from(certificates)
-      .where(
-        and(
-          eq(certificates.attemptId, attemptId),
-          eq(certificates.ceuItemPodioId, ceu.podioItemId)
+    for (const { type, requiresTemplate } of typesToIssue) {
+      if (requiresTemplate && !ceu.certificateTemplateFileId) continue;
+
+      // Idempotent: skip if already issued for this (attempt, ceu, type)
+      const [existing] = await db
+        .select()
+        .from(certificates)
+        .where(
+          and(
+            eq(certificates.attemptId, attemptId),
+            eq(certificates.ceuItemPodioId, ceu.podioItemId),
+            eq(certificates.type, type)
+          )
         )
-      )
-      .limit(1);
+        .limit(1);
 
-    if (existing) {
-      issued.push(existing);
-      continue;
+      if (existing) {
+        issued.push(existing);
+        continue;
+      }
+
+      const cert: typeof certificates.$inferInsert = {
+        attemptId,
+        contactId,
+        ceuItemPodioId: ceu.podioItemId,
+        testPodioId: attempt.testPodioId,
+        verificationCode: generateVerificationCode(),
+        type,
+        templateFileId: type === "aapc_ceu" ? ceu.certificateTemplateFileId : null,
+        studentName,
+        eventTitle: ceu.title,
+        ceuIndexNumber: ceu.ceuIndexNumber,
+        ceuValue: ceu.ceuValue,
+        aapcCeuTypes: ceu.aapcCeuTypes,
+        completionDate: attempt.submittedAt ?? new Date(),
+      };
+
+      const [inserted] = await db
+        .insert(certificates)
+        .values(cert)
+        .returning();
+
+      issued.push(inserted);
     }
-
-    const cert: typeof certificates.$inferInsert = {
-      attemptId,
-      contactId,
-      ceuItemPodioId: ceu.podioItemId,
-      testPodioId: attempt.testPodioId,
-      verificationCode: generateVerificationCode(),
-      templateFileId: ceu.certificateTemplateFileId,
-      studentName,
-      eventTitle: ceu.title,
-      ceuIndexNumber: ceu.ceuIndexNumber,
-      ceuValue: ceu.ceuValue,
-      aapcCeuTypes: ceu.aapcCeuTypes,
-      completionDate: attempt.submittedAt ?? new Date(),
-    };
-
-    const [inserted] = await db
-      .insert(certificates)
-      .values(cert)
-      .returning();
-
-    issued.push(inserted);
   }
 
   return issued;
