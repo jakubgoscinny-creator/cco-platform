@@ -168,100 +168,108 @@ export default async function ExamResultsPage({
         />
       </div>
 
-      {/* Certificates */}
+      {/* Certificates — stacked on mobile, 2-up on desktop (CCO left, AAPC right) */}
       {certs.length > 0 && (
-        <div className="mb-6 space-y-4">
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
           {certs
             .slice()
             .sort((a, b) => (a.type === "cco_credential" ? -1 : 1))
             .map((cert) => {
               const isAapc = cert.type === "aapc_ceu";
               return isAapc ? (
+                // AAPC — clean white card
                 <div
                   key={cert.id}
-                  className="relative rounded-2xl bg-white border border-cco-border p-5 shadow-[0_6px_16px_rgba(15,23,42,0.06)]"
+                  className="relative rounded-2xl bg-white border border-cco-border p-5 shadow-[0_4px_12px_rgba(15,23,42,0.04)] flex flex-col"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-cco-green/10 flex items-center justify-center shrink-0">
-                      <ShieldCheck size={24} className="text-cco-green-600" />
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-cco-green/10 flex items-center justify-center shrink-0">
+                      <ShieldCheck size={22} className="text-cco-green-600" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-cco-green-600">
-                          Official AAPC
-                        </p>
-                        <span className="text-[10px] text-cco-muted">·</span>
-                        <p className="text-[10px] text-cco-muted">
-                          Submit to AAPC for CEU credit
-                        </p>
-                      </div>
-                      <h3 className="font-heading text-base font-bold text-cco-ink">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-cco-green-600">
+                        Official AAPC
+                      </p>
+                      <h3 className="font-heading text-base font-bold text-cco-ink mt-0.5">
                         AAPC CEU Certificate
                       </h3>
-                      <p className="text-xs text-cco-muted mt-1 truncate">
-                        {cert.eventTitle}
-                        {cert.ceuValue ? ` · ${cert.ceuValue} CEU` : ""}
-                        {cert.ceuIndexNumber
-                          ? ` · Index: ${cert.ceuIndexNumber}`
-                          : ""}
-                      </p>
                     </div>
-                    <div className="shrink-0 flex flex-col items-end gap-1">
-                      <a
-                        href={`/api/certificate/${cert.id}`}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cco-green text-white text-sm font-semibold no-underline transition hover:bg-cco-green-600"
-                        download
-                      >
-                        <Download size={14} />
-                        Download
-                      </a>
-                      <p className="text-[9px] text-cco-muted font-mono tracking-wider">
-                        {cert.verificationCode}
-                      </p>
-                    </div>
+                  </div>
+                  <p className="text-xs text-cco-muted mb-3 leading-relaxed">
+                    Submit this as proof of continuing education credit with AAPC.
+                  </p>
+                  <div className="rounded-lg bg-cco-bg-soft p-3 mb-4 text-xs space-y-0.5">
+                    <p className="text-cco-ink font-semibold line-clamp-2">
+                      {cert.eventTitle}
+                    </p>
+                    <p className="text-cco-muted">
+                      {cert.ceuValue ? `${cert.ceuValue} CEU` : ""}
+                      {cert.ceuIndexNumber
+                        ? ` · ${cert.ceuIndexNumber}`
+                        : ""}
+                    </p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between gap-3">
+                    <a
+                      href={`/api/certificate/${cert.id}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cco-green text-white text-sm font-semibold no-underline transition hover:bg-cco-green-600"
+                      download
+                    >
+                      <Download size={14} />
+                      Download
+                    </a>
+                    <p className="text-[9px] text-cco-muted font-mono tracking-wider">
+                      {cert.verificationCode}
+                    </p>
                   </div>
                 </div>
               ) : (
+                // CCO — premium purple gradient
                 <div
                   key={cert.id}
-                  className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-cco-purple via-[#6c3f6f] to-[#5f3c60] p-5 shadow-[0_10px_24px_rgba(129,84,129,0.25)]"
+                  className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-cco-purple via-[#6c3f6f] to-[#5f3c60] p-5 shadow-[0_10px_24px_rgba(129,84,129,0.25)] flex flex-col"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-[#fcb900] flex items-center justify-center border-2 border-[#e09b00] shrink-0">
-                      <Sparkles size={26} className="text-white" />
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-[#fcb900] flex items-center justify-center border-2 border-[#e09b00] shrink-0">
+                      <Sparkles size={22} className="text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#fcb900] mb-0.5">
-                        Certificate of Achievement · Signed by Laureen Jandroep
+                      <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#fcb900]">
+                        Certificate of Achievement
                       </p>
-                      <h3 className="font-heading text-xl font-bold text-white">
+                      <h3 className="font-heading text-lg font-bold text-white mt-0.5">
                         CCO Certificate
                       </h3>
-                      <p className="text-xs text-white/80 mt-1 truncate">
-                        {cert.eventTitle} · Awarded to{" "}
-                        <span className="font-semibold text-white">
-                          {cert.studentName}
-                        </span>
-                      </p>
-                    </div>
-                    <div className="shrink-0 flex flex-col items-end gap-1">
-                      <a
-                        href={`/api/certificate/${cert.id}`}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#fcb900] text-[#5f3c60] text-sm font-bold no-underline transition hover:bg-[#ffcc33]"
-                        download
-                      >
-                        <Download size={14} />
-                        Download
-                      </a>
-                      <p className="text-[9px] text-white/60 font-mono tracking-wider">
-                        {cert.verificationCode}
-                      </p>
                     </div>
                   </div>
-                  <p className="text-xs text-white/70 mt-3 pt-3 border-t border-white/10 leading-relaxed">
-                    Your personal CCO credential — share on your CV, LinkedIn,
-                    or frame it on your wall.
+                  <p className="text-xs text-white/80 mb-3 leading-relaxed">
+                    Your personal credential, signed by Laureen Jandroep. Share
+                    it on LinkedIn, your CV, or frame it on your wall.
                   </p>
+                  <div className="rounded-lg bg-white/10 backdrop-blur-sm p-3 mb-4 text-xs space-y-0.5">
+                    <p className="text-white font-semibold line-clamp-2">
+                      {cert.eventTitle}
+                    </p>
+                    <p className="text-white/70">
+                      Awarded to{" "}
+                      <span className="font-semibold text-white">
+                        {cert.studentName}
+                      </span>
+                    </p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between gap-3">
+                    <a
+                      href={`/api/certificate/${cert.id}`}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#fcb900] text-[#5f3c60] text-sm font-bold no-underline transition hover:bg-[#ffcc33]"
+                      download
+                    >
+                      <Download size={14} />
+                      Download
+                    </a>
+                    <p className="text-[9px] text-white/60 font-mono tracking-wider">
+                      {cert.verificationCode}
+                    </p>
+                  </div>
                 </div>
               );
             })}

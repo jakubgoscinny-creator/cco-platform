@@ -31,49 +31,61 @@ export function ResultsReview({ questions, scratchPad }: ResultsReviewProps) {
     );
   }
 
+  const currentIsSkipped = current.selectedKey == null;
+  const currentIsCorrect = !currentIsSkipped && current.isCorrect === true;
+  const currentIsIncorrect = !currentIsSkipped && current.isCorrect === false;
+
   return (
-    <div className="grid gap-4 lg:grid-cols-[88px_1fr_300px]">
-      {/* LEFT — vertical question navigator */}
+    <div className="grid gap-4 lg:grid-cols-[72px_1fr_280px]">
+      {/* LEFT (or TOP on mobile) — question navigator */}
       <nav
         aria-label="Jump to question"
-        className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0"
+        className="flex lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x lg:snap-none scrollbar-thin"
       >
         {questions.map((q, i) => {
           const isCurrent = i === index;
-          const isCorrect = q.isCorrect === true;
-          const isIncorrect = q.isCorrect === false;
+          // CRITICAL ORDER: check skipped first. Historical data stores
+          // isCorrect=false for null selectedKey, so isIncorrect would
+          // wrongly match for skipped answers.
           const isSkipped = q.selectedKey == null;
+          const isCorrect = !isSkipped && q.isCorrect === true;
+          const isIncorrect = !isSkipped && q.isCorrect === false;
 
           const base =
-            "shrink-0 w-16 lg:w-full py-2.5 rounded-xl text-sm font-bold transition relative";
+            "shrink-0 snap-start w-12 sm:w-14 lg:w-full py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition relative";
 
-          let state = "bg-white border border-cco-border text-cco-muted hover:border-cco-purple/40";
-          if (isCorrect)
-            state = "bg-cco-green/10 border border-cco-green/40 text-cco-green-600";
-          if (isIncorrect)
+          let state =
+            "bg-white border border-cco-border text-cco-muted hover:border-cco-purple/40";
+          if (isSkipped)
+            state =
+              "bg-cco-bg-soft border border-dashed border-cco-border text-cco-muted";
+          else if (isCorrect)
+            state =
+              "bg-cco-green/10 border border-cco-green/40 text-cco-green-600";
+          else if (isIncorrect)
             state = "bg-red-50 border border-red-200 text-red-600";
-          if (isSkipped && !isCorrect && !isIncorrect)
-            state = "bg-cco-bg-soft border border-dashed border-cco-border text-cco-muted";
           if (isCurrent)
-            state = state + " ring-2 ring-cco-purple ring-offset-2 ring-offset-cco-bg";
+            state =
+              state + " ring-2 ring-cco-purple ring-offset-2 ring-offset-cco-bg";
+
+          const label = isSkipped
+            ? `Q${i + 1} — Skipped`
+            : isCorrect
+              ? `Q${i + 1} — Correct`
+              : `Q${i + 1} — Incorrect`;
 
           return (
             <button
               key={q.podioItemId}
               onClick={() => setIndex(i)}
               className={`${base} ${state}`}
-              title={
-                isCorrect
-                  ? `Q${i + 1} — Correct`
-                  : isIncorrect
-                    ? `Q${i + 1} — Incorrect`
-                    : `Q${i + 1} — Skipped`
-              }
+              title={label}
+              aria-label={label}
             >
               Q{i + 1}
               {q.flagged && (
                 <Flag
-                  size={10}
+                  size={9}
                   className="absolute top-1 right-1 text-amber-500 fill-amber-500"
                 />
               )}
@@ -83,7 +95,7 @@ export function ResultsReview({ questions, scratchPad }: ResultsReviewProps) {
       </nav>
 
       {/* CENTER — current question detail */}
-      <div className="bg-white border border-cco-border rounded-2xl p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
+      <div className="bg-white border border-cco-border rounded-2xl p-4 sm:p-6 shadow-[0_4px_12px_rgba(15,23,42,0.04)]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="shrink-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-cco-purple text-white text-sm font-bold">
@@ -94,9 +106,9 @@ export function ResultsReview({ questions, scratchPad }: ResultsReviewProps) {
             </h3>
           </div>
           <ResultBadge
-            isCorrect={current.isCorrect === true}
-            isIncorrect={current.isCorrect === false}
-            isSkipped={current.selectedKey == null}
+            isCorrect={currentIsCorrect}
+            isIncorrect={currentIsIncorrect}
+            isSkipped={currentIsSkipped}
           />
         </div>
 

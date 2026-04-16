@@ -329,15 +329,44 @@ export function ExamClient({
         </div>
       )}
 
+      {/* Mobile question strip — horizontal scroll, tap to jump */}
+      <div className="md:hidden bg-white border-b border-cco-border shrink-0">
+        <div className="flex gap-1.5 px-4 py-2.5 overflow-x-auto snap-x">
+          {state.questions.map((q, i) => {
+            const a = state.answers[q.podioItemId];
+            const isCurrent = i === state.currentIndex;
+            const answered = a?.selectedKey != null;
+            const flagged = a?.flagged;
+            let cls = "bg-cco-bg-soft text-cco-muted border-cco-border";
+            if (answered) cls = "bg-cco-green/15 text-cco-green-600 border-cco-green/30";
+            if (flagged) cls = "bg-amber-100 text-amber-700 border-amber-200";
+            if (isCurrent) cls += " ring-2 ring-cco-purple";
+            return (
+              <button
+                key={q.podioItemId}
+                onClick={() => dispatch({ type: "NAVIGATE", index: i })}
+                className={`shrink-0 snap-start w-9 h-9 rounded-lg border text-xs font-bold transition ${cls}`}
+                aria-label={`Question ${i + 1}`}
+              >
+                {i + 1}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main content — split pane on desktop, single column on mobile */}
       <div
-        className="flex-1 overflow-hidden grid"
-        style={{
-          gridTemplateColumns: `minmax(0, ${state.paneWidth}%) 12px minmax(0, 1fr)`,
-        }}
+        className="flex-1 overflow-hidden md:grid block"
+        style={
+          // Only apply grid columns on md+ screens; on mobile the single column flows naturally
+          {
+            gridTemplateColumns: `minmax(0, ${state.paneWidth}%) 12px minmax(0, 1fr)`,
+          } as React.CSSProperties
+        }
       >
         {/* Left pane: question + options */}
-        <div className="overflow-y-auto p-6 md:block">
+        <div className="overflow-y-auto p-4 sm:p-6">
           {currentQuestion && (
             <div className="max-w-3xl">
               {/* Question text */}
@@ -440,11 +469,13 @@ export function ExamClient({
           )}
         </div>
 
-        {/* Resizer */}
-        <PaneResizer
-          onResize={handlePaneResize}
-          onResizeEnd={handlePaneResizeEnd}
-        />
+        {/* Resizer — desktop only */}
+        <div className="hidden md:block">
+          <PaneResizer
+            onResize={handlePaneResize}
+            onResizeEnd={handlePaneResizeEnd}
+          />
+        </div>
 
         {/* Right pane: scratch pad + question grid */}
         <div className="hidden md:flex flex-col gap-4 overflow-y-auto p-4 bg-white border-l border-cco-border">

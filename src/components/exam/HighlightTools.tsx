@@ -74,10 +74,21 @@ export function HighlightTools({
       {COLORS.map((color) => (
         <button
           key={color.id}
-          onClick={() => handleHighlight(color)}
+          // CRITICAL: preventDefault on mousedown so the selection survives the click.
+          // Without this the browser focuses the button and clears window.getSelection()
+          // before our handler runs — highlights would silently fail.
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleHighlight(color);
+          }}
+          onTouchStart={(e) => {
+            // On iOS Safari, tapping a button also clears selection. Fire on touchstart.
+            e.preventDefault();
+            handleHighlight(color);
+          }}
           title={`Highlight selection in ${color.label.toLowerCase()}`}
           aria-label={`Highlight ${color.label}`}
-          className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition hover:shadow-sm"
+          className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition hover:shadow-sm active:scale-95"
           style={{
             borderColor: color.border,
             background: `${color.bg}40`,
@@ -100,8 +111,11 @@ export function HighlightTools({
       ))}
       {hasHighlights && (
         <button
-          onClick={handleClear}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border border-cco-border text-cco-muted hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleClear();
+          }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border border-cco-border text-cco-muted hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition active:scale-95"
         >
           <Eraser size={11} />
           Clear all
