@@ -385,6 +385,15 @@ function mapPodioCeuItem(
 
   const relatedTestIds = getAppReferenceIds(item, CEU_ITEM_FIELDS.RELATED_TEST);
 
+  // Find the AAPC certificate template PDF.
+  // Prefer files with "certificate" in the name; otherwise fall back to the first PDF.
+  const certificatePdf =
+    item.files?.find(
+      (f) =>
+        f.mimetype === "application/pdf" && /certificate/i.test(f.name)
+    ) ??
+    item.files?.find((f) => f.mimetype === "application/pdf");
+
   return {
     podioItemId: item.item_id,
     ceuIndexNumber: getTextValue(item, CEU_ITEM_FIELDS.CEU_INDEX_NUMBER) || null,
@@ -394,6 +403,7 @@ function mapPodioCeuItem(
     dateExpires: getDateValue(item, CEU_ITEM_FIELDS.DATE_EXPIRES),
     certificateStatus: getCategoryValue(item, CEU_ITEM_FIELDS.CERTIFICATE_STATUS) || null,
     relatedTestPodioId: relatedTestIds[0] ?? null,
+    certificateTemplateFileId: certificatePdf?.file_id ?? null,
     payload: item.fields as unknown as Record<string, unknown>,
   };
 }

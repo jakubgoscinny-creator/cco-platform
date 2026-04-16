@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth";
 import { getCertificateById } from "@/lib/certificate";
 import { renderCertificatePdf } from "@/lib/certificate-pdf";
+import { renderAapcCertificate } from "@/lib/certificate-aapc";
 
 export const runtime = "nodejs";
 
@@ -29,17 +30,33 @@ export async function GET(
     return new Response("Forbidden", { status: 403 });
   }
 
-  const pdf = await renderCertificatePdf({
-    studentName: cert.studentName,
-    eventTitle: cert.eventTitle,
-    ceuIndexNumber: cert.ceuIndexNumber,
-    ceuValue: cert.ceuValue,
-    aapcCeuTypes: cert.aapcCeuTypes,
-    completionDate: new Date(cert.completionDate),
-    verificationCode: cert.verificationCode,
-  });
+  let pdfBytes: Uint8Array;
 
-  return new Response(new Uint8Array(pdf), {
+  if (cert.templateFileId) {
+    // Use the AAPC-approved template from Podio with name + date overlay
+    pdfBytes = await renderAapcCertificate({
+      templateFileId: cert.templateFileId,
+      studentName: cert.studentName,
+      completionDate: new Date(cert.completionDate),
+    });
+  } else {
+    // Fallback: CCO-branded certificate (for CEUs without an AAPC template)
+    const buf = await renderCertificatePdf({
+      studentName: cert.studentName,
+      eventTitle: cert.eventTitle,
+      ceuIndexNumber: cert.ceuIndexNumber,
+      ceuValue: cert.ceuValue,
+      aapcCeuTypes: cert.aapcCeuTypes,
+      completionDate: new Date(cert.completionDate),
+      verificationCode: cert.verificationCode,
+    });
+    pdfBytes = new Uint8Array(buf);
+  }
+
+  // Copy into a fresh Uint8Array backed by a standard ArrayBuffer for type compatibility
+  const outBuf = new Uint8Array(pdfBytes.byteLength);
+  outBuf.set(pdfBytes);
+  return new Response(new Blob([outBuf]), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="CEU-Certificate-${cert.verificationCode}.pdf"`,

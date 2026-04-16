@@ -63,6 +63,7 @@ export const ceuItems = pgTable("ceu_items", {
   dateExpires: timestamp("date_expires", { withTimezone: true }),
   certificateStatus: text("certificate_status"),
   relatedTestPodioId: bigint("related_test_podio_id", { mode: "number" }),
+  certificateTemplateFileId: bigint("certificate_template_file_id", { mode: "number" }),
   payload: jsonb("payload"),
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
 });
@@ -74,6 +75,7 @@ export const contacts = pgTable(
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
     fullName: text("full_name"),
+    circleMember: boolean("circle_member").default(false).notNull(),
     payload: jsonb("payload"),
     syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
   },
@@ -142,6 +144,7 @@ export const certificates = pgTable(
     ceuItemPodioId: bigint("ceu_item_podio_id", { mode: "number" }).notNull(),
     testPodioId: bigint("test_podio_id", { mode: "number" }).notNull(),
     verificationCode: text("verification_code").notNull(),
+    templateFileId: bigint("template_file_id", { mode: "number" }), // Podio file_id of AAPC PDF template
     studentName: text("student_name").notNull(),
     eventTitle: text("event_title").notNull(),
     ceuIndexNumber: text("ceu_index_number"),

@@ -98,6 +98,15 @@ export async function getItem(itemId: number): Promise<PodioItem> {
   return res.json();
 }
 
+export async function downloadFile(fileId: number): Promise<Uint8Array> {
+  const res = await podioFetch(`/file/${fileId}/raw`);
+  if (!res.ok) {
+    throw new Error(`Podio downloadFile ${fileId} failed (${res.status})`);
+  }
+  const buf = await res.arrayBuffer();
+  return new Uint8Array(buf);
+}
+
 export async function filterItems(
   appId: number,
   filters: Record<string, unknown> = {},
@@ -323,8 +332,17 @@ export interface PodioItem {
   app_item_id: number;
   title: string;
   fields: PodioField[];
+  files?: PodioFile[];
   created_on: string;
   last_event_on: string;
+}
+
+export interface PodioFile {
+  file_id: number;
+  name: string;
+  mimetype: string;
+  size?: number;
+  link?: string;
 }
 
 export interface PodioField {

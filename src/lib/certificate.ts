@@ -98,6 +98,7 @@ export async function issueCertificate(
       ceuItemPodioId: ceu.podioItemId,
       testPodioId: attempt.testPodioId,
       verificationCode: generateVerificationCode(),
+      templateFileId: ceu.certificateTemplateFileId,
       studentName,
       eventTitle: ceu.title,
       ceuIndexNumber: ceu.ceuIndexNumber,

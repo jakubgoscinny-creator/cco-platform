@@ -91,12 +91,14 @@ async function fetchProfileFromPodio(
 
     if (!emailVal || !passwordVal) return null;
 
-    // Upsert into local mirror
+    // Upsert into local mirror. circleMember defaults to false — this path
+    // only runs for password-based login, not Circle SSO.
     const record = {
       podioItemId: item.item_id,
       email: emailVal.toLowerCase().trim(),
       passwordHash: passwordVal,
       fullName: nameVal,
+      circleMember: false,
       payload: item.fields as unknown as Record<string, unknown>,
       syncedAt: new Date(),
     };
