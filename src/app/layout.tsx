@@ -14,8 +14,12 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "CCO Test Platform",
-  description: "Practice exam simulator for medical coding certification",
+  title: {
+    default: "CCO Portal · Learn it. Get certified. Stay certified.",
+    template: "%s · CCO Portal",
+  },
+  description:
+    "Your medical coding study portal from Certification Coaching Organization. Practice exams, CEU quizzes, and certificates — learn it, get certified, stay certified.",
 };
 
 export default function RootLayout({

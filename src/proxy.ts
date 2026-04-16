@@ -1,6 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/sign-in", "/api/health"];
+// Public paths. `/api/sso/` must be public:
+//   - /api/sso/token & /api/sso/userinfo are server-to-server calls from
+//     Circle and will never carry a cco_session cookie
+//   - /api/sso/authorize may be reached without a session; its route
+//     handler does its own auth check and redirects to
+//     /sign-in?return_to=... preserving Circle's OAuth state. If the
+//     proxy redirected here first it would strip the return_to and
+//     break the OAuth dance.
+const PUBLIC_PATHS = ["/sign-in", "/api/health", "/api/sso/"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
