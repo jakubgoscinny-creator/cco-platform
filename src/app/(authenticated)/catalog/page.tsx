@@ -3,6 +3,8 @@ import { getActiveTests, getDomainNames } from "@/lib/sync";
 import { TestGrid } from "@/components/catalog/TestGrid";
 import { CatalogFilters } from "@/components/catalog/CatalogFilters";
 import { DataLineage } from "@/components/shared/DataLineage";
+import { PageHeader, timeOfDayGreeting, firstName } from "@/components/shared/PageHeader";
+import { getSessionContact } from "@/lib/auth";
 import type { TestCardProps } from "@/components/catalog/TestCard";
 
 export default async function CatalogPage({
@@ -14,6 +16,9 @@ export default async function CatalogPage({
   const typeFilter = typeof params?.type === "string" ? params.type : "";
   const searchQuery =
     typeof params?.q === "string" ? params.q.toLowerCase() : "";
+
+  const user = await getSessionContact();
+  const greet = user?.fullName ? firstName(user.fullName) : null;
 
   const allTests = await getActiveTests();
 
@@ -66,19 +71,19 @@ export default async function CatalogPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-bold text-cco-ink">
-          Test Catalog
-        </h1>
-        <DataLineage syncedAt={latestSync} />
-      </div>
+      <PageHeader
+        eyebrow="Your Study Portal"
+        title={greet ? `${timeOfDayGreeting()}, ${greet}` : "Your exam catalog"}
+        subtitle="Pick up where you left off, or start a new CEU quiz. Every exam you complete brings you closer to certified."
+        right={<DataLineage syncedAt={latestSync} />}
+      />
 
       <Suspense fallback={null}>
         <CatalogFilters typeOptions={typeValues} />
       </Suspense>
 
       <p className="text-sm text-cco-muted mb-4">
-        {filtered.length} exam{filtered.length !== 1 ? "s" : ""} available
+        {filtered.length} exam{filtered.length !== 1 ? "s" : ""} ready for you
       </p>
 
       <TestGrid tests={cards} />

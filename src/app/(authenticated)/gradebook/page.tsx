@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { GradebookTable, type GradebookRow } from "@/components/gradebook/GradebookTable";
 import { DomainSummary } from "@/components/gradebook/DomainSummary";
 import { DataLineage } from "@/components/shared/DataLineage";
+import { PageHeader, firstName } from "@/components/shared/PageHeader";
 
 export default async function GradebookPage() {
   const user = await getSessionContact();
@@ -77,14 +78,27 @@ export default async function GradebookPage() {
       return pctA - pctB; // weakest first
     });
 
+  const greet = user.fullName ? firstName(user.fullName) : null;
+  const completed = rows.filter((r) => r.status === "submitted").length;
+  const passedCount = rows.filter(
+    (r) => r.status === "submitted" && (r.scorePercent ?? 0) >= 70
+  ).length;
+
+  const subtitle =
+    completed === 0
+      ? "Every attempt teaches you something. Start your first exam whenever you're ready."
+      : passedCount > 0
+        ? `You've passed ${passedCount} exam${passedCount > 1 ? "s" : ""} so far. Keep going.`
+        : `${completed} attempt${completed > 1 ? "s" : ""} in the books. Every one is progress.`;
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-bold text-cco-ink">
-          Gradebook
-        </h1>
-        <DataLineage syncedAt={new Date()} />
-      </div>
+      <PageHeader
+        eyebrow={greet ? `${greet}'s Progress` : "Your Progress"}
+        title="Your gradebook"
+        subtitle={subtitle}
+        right={<DataLineage syncedAt={new Date()} />}
+      />
 
       <DomainSummary scores={domainScores} />
 

@@ -88,7 +88,14 @@ export default async function ExamResultsPage({
       <Card className="mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-heading text-xl font-bold text-cco-ink">
+            <p
+              className={`text-[11px] uppercase tracking-[0.2em] font-semibold mb-1.5 ${
+                passed ? "text-cco-green-600" : "text-cco-muted"
+              }`}
+            >
+              {passed ? "You passed · well done" : "Exam results"}
+            </p>
+            <h1 className="font-heading text-2xl font-bold text-cco-ink">
               {test?.testName ?? "Exam Results"}
             </h1>
             <p className="text-sm text-cco-muted mt-1">
@@ -196,11 +203,7 @@ export default async function ExamResultsPage({
                   key={cert.id}
                   className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-cco-purple via-[#6c3f6f] to-[#5f3c60] p-5 shadow-[0_10px_24px_rgba(129,84,129,0.25)]"
                 >
-                  {/* Gold corner ribbon */}
-                  <div className="absolute top-0 right-0 bg-[#fcb900] text-[#5f3c60] text-[9px] font-bold uppercase tracking-[0.15em] px-3 py-1 rounded-bl-xl">
-                    ★ Your CCO Credential
-                  </div>
-                  <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-full bg-[#fcb900] flex items-center justify-center border-2 border-[#e09b00] shrink-0">
                       <Sparkles size={26} className="text-white" />
                     </div>
