@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s · CCO Portal",
   },
   description:
-    "Your medical coding study portal from Certification Coaching Organization. Practice exams, CEU quizzes, and certificates — learn it, get certified, stay certified.",
+    "Your medical coding study portal from CCO Academy. Practice exams, CEU quizzes, and certificates — learn it, get certified, stay certified.",
 };
 
 export default function RootLayout({

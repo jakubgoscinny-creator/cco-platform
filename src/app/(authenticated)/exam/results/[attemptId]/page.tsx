@@ -238,7 +238,7 @@ export default async function ExamResultsPage({
                         Certificate of Achievement
                       </p>
                       <h3 className="font-heading text-lg font-bold text-white mt-0.5">
-                        CCO Certificate
+                        CCO Academy
                       </h3>
                     </div>
                   </div>

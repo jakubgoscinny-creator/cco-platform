@@ -392,7 +392,7 @@ function CertificateDocument(props: CertificateProps) {
             {LOGO_BYTES ? <Image src={LOGO_BYTES} style={s.logo} /> : null}
           </View>
           <View style={s.headerTextBlock}>
-            <Text style={s.headerTitle}>CERTIFICATION COACHING ORGANIZATION</Text>
+            <Text style={s.headerTitle}>CCO ACADEMY</Text>
             <Text style={s.headerSubtitle}>LEARN IT · GET CERTIFIED · STAY CERTIFIED</Text>
           </View>
           <View style={s.headerAccent} />
@@ -409,7 +409,7 @@ function CertificateDocument(props: CertificateProps) {
         {/* Body */}
         <View style={s.body}>
           <Text style={s.certType}>Certificate of Achievement</Text>
-          <Text style={s.certTitle}>CCO Certificate</Text>
+          <Text style={s.certTitle}>CCO Academy</Text>
 
           <Text style={s.presentedPhrase}>This certificate is proudly presented to</Text>
 
@@ -464,7 +464,7 @@ function CertificateDocument(props: CertificateProps) {
         <View style={s.verifBar}>
           <Text style={s.verifText}>Verify at cco.us/verify</Text>
           <Text style={s.verifCode}>{verificationCode}</Text>
-          <Text style={s.verifText}>Certification Coaching Organization · cco.us</Text>
+          <Text style={s.verifText}>CCO Academy · cco.us</Text>
         </View>
       </Page>
     </Document>

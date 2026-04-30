@@ -44,7 +44,7 @@ export async function GET(
     });
     filenameSuffix = "AAPC-CEU";
   } else {
-    // CCO Certificate — branded React-PDF design
+    // CCO Academy — branded React-PDF design
     // Fetch the score from the attempt for display on the certificate
     const [attempt] = await db
       .select({ scorePercent: attempts.scorePercent })
