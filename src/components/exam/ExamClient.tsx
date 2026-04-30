@@ -486,17 +486,26 @@ export function ExamClient({
                     </>
                   )}
                 </button>
-                <button
-                  onClick={() => dispatch({ type: "NEXT" })}
-                  disabled={
-                    state.currentIndex === state.questions.length - 1
-                  }
-                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-sm font-semibold bg-cco-purple text-white hover:bg-cco-purple-600 transition disabled:opacity-30"
-                  aria-label="Next question"
-                >
-                  <span className="hidden sm:inline">Next</span>
-                  <ChevronRight size={16} />
-                </button>
+                {state.currentIndex === state.questions.length - 1 ? (
+                  <button
+                    onClick={() => setShowSubmitConfirm(true)}
+                    disabled={isSubmitting}
+                    aria-label="Submit exam"
+                    className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-sm font-semibold bg-cco-green text-white hover:bg-cco-green-600 transition disabled:opacity-50"
+                  >
+                    <span className="hidden sm:inline">Submit</span>
+                    <Send size={16} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => dispatch({ type: "NEXT" })}
+                    aria-label="Next question"
+                    className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-sm font-semibold bg-cco-purple text-white hover:bg-cco-purple-600 transition"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight size={16} />
+                  </button>
+                )}
               </div>
               <p className="hidden md:block text-center text-xs text-cco-muted mt-4">
                 Keyboard: A-D to answer, F to flag, arrows to navigate
