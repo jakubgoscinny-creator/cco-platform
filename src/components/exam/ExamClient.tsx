@@ -70,6 +70,7 @@ export function ExamClient({
   const [showMobileScratchPad, setShowMobileScratchPad] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mobileStripRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const currentQuestion = state.questions[state.currentIndex];
@@ -90,6 +91,20 @@ export function ExamClient({
       handleSubmit();
     }
   }, [state.timeRemaining, state.status]);
+
+  // Keep the active mobile question button in view as the user navigates.
+  useEffect(() => {
+    const strip = mobileStripRef.current;
+    if (!strip) return;
+    const active = strip.querySelector<HTMLButtonElement>(
+      `button[data-q-index="${state.currentIndex}"]`
+    );
+    active?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [state.currentIndex]);
 
   // Persist state every 30 seconds
   useEffect(() => {
@@ -331,7 +346,10 @@ export function ExamClient({
 
       {/* Mobile question strip — horizontal scroll, tap to jump */}
       <div className="md:hidden bg-white border-b border-cco-border shrink-0">
-        <div className="flex gap-1.5 px-4 py-2.5 overflow-x-auto snap-x">
+        <div
+          ref={mobileStripRef}
+          className="flex gap-1.5 px-4 py-2.5 overflow-x-auto snap-x"
+        >
           {state.questions.map((q, i) => {
             const a = state.answers[q.podioItemId];
             const isCurrent = i === state.currentIndex;
@@ -344,6 +362,7 @@ export function ExamClient({
             return (
               <button
                 key={q.podioItemId}
+                data-q-index={i}
                 onClick={() => dispatch({ type: "NAVIGATE", index: i })}
                 className={`shrink-0 snap-start w-9 h-9 rounded-lg border text-xs font-bold transition ${cls}`}
                 aria-label={`Question ${i + 1}`}
@@ -431,14 +450,15 @@ export function ExamClient({
               </div>
 
               {/* Navigation + flag */}
-              <div className="flex items-center justify-between mt-8 pt-4 border-t border-cco-border">
+              <div className="flex items-center justify-between gap-2 mt-8 pt-4 border-t border-cco-border">
                 <button
                   onClick={() => dispatch({ type: "PREV" })}
                   disabled={state.currentIndex === 0}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-cco-muted hover:bg-cco-bg-soft transition disabled:opacity-30"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-sm font-semibold text-cco-muted hover:bg-cco-bg-soft transition disabled:opacity-30"
+                  aria-label="Previous question"
                 >
                   <ChevronLeft size={16} />
-                  Previous
+                  <span className="hidden sm:inline">Previous</span>
                 </button>
                 <button
                   onClick={handleFlag}
@@ -449,20 +469,27 @@ export function ExamClient({
                   }`}
                 >
                   <Flag size={12} />
-                  {currentAnswer?.flagged ? "Flagged" : "Flag for review"}
+                  {currentAnswer?.flagged ? (
+                    "Flagged"
+                  ) : (
+                    <>
+                      Flag<span className="hidden sm:inline"> for review</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => dispatch({ type: "NEXT" })}
                   disabled={
                     state.currentIndex === state.questions.length - 1
                   }
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-cco-purple text-white hover:bg-cco-purple-600 transition disabled:opacity-30"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-full text-sm font-semibold bg-cco-purple text-white hover:bg-cco-purple-600 transition disabled:opacity-30"
+                  aria-label="Next question"
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
                   <ChevronRight size={16} />
                 </button>
               </div>
-              <p className="text-center text-xs text-cco-muted mt-4">
+              <p className="hidden md:block text-center text-xs text-cco-muted mt-4">
                 Keyboard: A-D to answer, F to flag, arrows to navigate
               </p>
             </div>

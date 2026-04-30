@@ -70,8 +70,8 @@ export function HighlightTools({
   }, [questionId, onClear]);
 
   return (
-    <div className="flex items-center gap-2 mt-3 flex-wrap">
-      <span className="text-[11px] uppercase tracking-wider text-cco-muted font-semibold mr-1">
+    <div className="flex items-center gap-1.5 sm:gap-2 mt-3 flex-wrap">
+      <span className="text-[11px] uppercase tracking-wider text-cco-muted font-semibold mr-0.5 sm:mr-1">
         Highlight
       </span>
       {COLORS.map((color) => (
@@ -91,21 +91,21 @@ export function HighlightTools({
           }}
           title={`Highlight selection in ${color.label.toLowerCase()}`}
           aria-label={`Highlight ${color.label}`}
-          className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border transition hover:shadow-sm active:scale-95"
+          className="group inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded-full border transition hover:shadow-sm active:scale-95"
           style={{
             borderColor: color.border,
             background: `${color.bg}40`,
           }}
         >
           <span
-            className="w-3 h-3 rounded-full ring-1 ring-inset"
+            className="w-4 h-4 sm:w-3 sm:h-3 rounded-full ring-1 ring-inset"
             style={{
               background: color.bg,
               boxShadow: `inset 0 0 0 1px ${color.border}`,
             }}
           />
           <span
-            className="text-[11px] font-semibold"
+            className="hidden sm:inline text-[11px] font-semibold"
             style={{ color: color.border }}
           >
             {color.label}
@@ -118,10 +118,11 @@ export function HighlightTools({
             e.preventDefault();
             handleClear();
           }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border border-cco-border text-cco-muted hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition active:scale-95"
+          aria-label="Clear all highlights"
+          className="inline-flex items-center gap-1.5 px-2 py-1.5 sm:px-2.5 rounded-full text-[11px] font-semibold border border-cco-border text-cco-muted hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition active:scale-95"
         >
-          <Eraser size={11} />
-          Clear all
+          <Eraser size={12} />
+          <span className="hidden sm:inline">Clear all</span>
         </button>
       )}
     </div>
