@@ -318,9 +318,17 @@ export const QUESTION_FIELDS = {
   DISPOSITION: 273026086,
 } as const;
 
+// Podio Platform Profiles has TWO password-related fields:
+//   - "password-2" (field_id 275832539) is a CALCULATION field — readable
+//     via getTextValue, but Podio rejects writes to it.
+//   - "password"   (field_id 275832540, labeled "Password [H]") is the
+//     underlying TEXT field where the actual hash lives.
+// Read from PASSWORD; write to PASSWORD_STORAGE. Conflating the two
+// breaks createItem with `invalid_value ... 275832539` (see docs/).
 export const PROFILE_FIELDS = {
   EMAIL: "email-2",
   PASSWORD: "password-2",
+  PASSWORD_STORAGE: "password",
 } as const;
 
 // ---------------------------------------------------------------------------

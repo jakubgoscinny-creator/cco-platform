@@ -185,14 +185,16 @@ export async function upsertCircleUser(params: {
     passwordHash =
       getTextValue(item, PROFILE_FIELDS.PASSWORD) || ssoSentinelPasswordHash();
   } else {
-    // Create a minimal Podio profile. Only EMAIL and PASSWORD are in
-    // PROFILE_FIELDS; the title/name fields on the Podio app are not
-    // exposed so we can't populate them here. The Circle-provided name
-    // lives in Neon's contacts.fullName instead.
+    // Create a minimal Podio profile. Write password to PASSWORD_STORAGE
+    // (the text field), not PASSWORD (a calculation). Only EMAIL + the
+    // password hash are supplied here — other fields on the app are
+    // either optional or required-but-category-typed and need explicit
+    // option IDs we don't have. New-user creation may still fail on
+    // those required fields; see docs/CIRCLE_SSO_SETUP.md.
     const sentinel = ssoSentinelPasswordHash();
     const created = await createItem(PODIO_APPS.PLATFORM_PROFILES, {
       [PROFILE_FIELDS.EMAIL]: email,
-      [PROFILE_FIELDS.PASSWORD]: sentinel,
+      [PROFILE_FIELDS.PASSWORD_STORAGE]: sentinel,
     });
     podioItemId = created.item_id;
     passwordHash = sentinel;
