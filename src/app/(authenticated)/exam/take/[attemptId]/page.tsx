@@ -53,10 +53,12 @@ export default async function ExamTakePage({
   const questionSnapshots = (attempt.questionSnapshots ?? []) as QuestionSnapshot[];
 
   // Break out of the authenticated layout's <main> padding (px-clamp + py-8
-  // + max-w) so the exam UI is edge-to-edge. Without this, the mobile topbar
-  // doesn't fit and content gets clipped on narrow viewports.
+  // + max-w) so the exam UI is edge-to-edge on mobile. Without this, the
+  // mobile topbar overflows the viewport and clips content. Above md the
+  // main's padding is fine and the breakout would cause a desktop horizontal
+  // scrollbar — so it's mobile-only.
   return (
-    <div className="w-screen relative left-1/2 -translate-x-1/2 -my-8">
+    <div className="-my-8 w-screen relative left-1/2 -translate-x-1/2 md:my-0 md:w-auto md:left-auto md:translate-x-0">
       <ExamClient
         attemptId={attemptId}
         testName={test?.testName ?? "Exam"}
