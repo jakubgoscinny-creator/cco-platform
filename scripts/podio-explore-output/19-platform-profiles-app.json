@@ -1,0 +1,1557 @@
+{
+  "app_id": 30640719,
+  "config": {
+    "allow_attachments": true,
+    "allow_comments": true,
+    "allow_create": true,
+    "allow_edit": true,
+    "allow_tags": false,
+    "app_item_id_padding": 1,
+    "app_item_id_prefix": "",
+    "approved": false,
+    "calendar_color_category_field_id": null,
+    "default_view": "table",
+    "description": "",
+    "disable_notifications": false,
+    "external_id": null,
+    "fivestar": false,
+    "fivestar_label": null,
+    "icon": "275.png",
+    "icon_id": 275,
+    "item_name": "CCO Platform Profiles",
+    "name": "CCO Platform Profiles",
+    "rsvp": false,
+    "rsvp_label": null,
+    "show_app_item_id": false,
+    "silent_creates": false,
+    "silent_edits": false,
+    "tasks": [],
+    "thumbs": false,
+    "thumbs_label": null,
+    "type": "standard",
+    "usage": "",
+    "yesno": false,
+    "yesno_label": null
+  },
+  "current_revision": 3,
+  "default_view_id": null,
+  "fields": [
+    {
+      "config": {
+        "default_value": null,
+        "delta": 0,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Full Name",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[All of Name](out_112436965_275832534).toString()",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "full-name",
+      "field_id": 275832532,
+      "label": "Full Name",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 1,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "-",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var $title   = \"Basic Details\";  \nvar $subtext = \"This section has general details\";\n\n\n\"---\\n\" + \n\"|\" + $title + \"|\\n\" +\n\"|:---:|\\n\" +\n\"|\" + $subtext + \"|\\n\" +\n\"---\\n\" +\n@[navBar [H]](field_275832569)\n\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "section-1",
+      "field_id": 275832533,
+      "label": "-",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 2,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Person",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "apps": [
+            {
+              "app_id": 14660191,
+              "config": {
+                "icon": "30.png",
+                "icon_id": 30,
+                "item_name": "Contact",
+                "name": "Contacts",
+                "type": "contact"
+              },
+              "current_revision": 660,
+              "default_view_id": null,
+              "icon": "30.png",
+              "icon_id": 30,
+              "is_default": false,
+              "item_accounting_info": null,
+              "item_name": "Contact",
+              "link": "https://podio.com/ccous/hub/apps/contacts",
+              "link_add": "https://podio.com/ccous/hub/apps/contacts/items/new",
+              "name": "Contacts",
+              "rights": [
+                "subscribe",
+                "manage_public_views",
+                "export",
+                "view",
+                "add_widget",
+                "reference",
+                "add_advanced_flow",
+                "delete",
+                "share",
+                "grant_view",
+                "install",
+                "report_visualization",
+                "update",
+                "add_integration",
+                "add_hook",
+                "add_item",
+                "grant",
+                "add_task",
+                "view_structure",
+                "add_flow"
+              ],
+              "sharefile_vault_url": null,
+              "space": {
+                "item_accounting_info": null,
+                "name": "-CCO Main Hub",
+                "org_id": 1067986,
+                "sharefile_vault_url": null,
+                "space_id": 4201014,
+                "task_accounting_info": null,
+                "type": "regular",
+                "url": "https://podio.com/ccous/hub",
+                "url_label": "hub",
+                "v8_engine_updated": false,
+                "workflow_accounting_info": null
+              },
+              "space_id": 4201014,
+              "status": "active",
+              "task_accounting_info": null,
+              "url_add": "https://podio.com/ccous/hub/apps/contacts/items/new",
+              "url": "https://podio.com/ccous/hub/apps/contacts",
+              "url_label": "contacts",
+              "workflow_accounting_info": null
+            }
+          ],
+          "multiple": true,
+          "referenceable_types": [
+            14660191
+          ],
+          "referenced_apps": [
+            {
+              "app": {
+                "app_id": 14660191,
+                "config": {
+                  "icon": "30.png",
+                  "icon_id": 30,
+                  "item_name": "Contact",
+                  "name": "Contacts",
+                  "type": "contact"
+                },
+                "current_revision": 660,
+                "default_view_id": null,
+                "icon": "30.png",
+                "icon_id": 30,
+                "is_default": false,
+                "item_accounting_info": null,
+                "item_name": "Contact",
+                "link": "https://podio.com/ccous/hub/apps/contacts",
+                "link_add": "https://podio.com/ccous/hub/apps/contacts/items/new",
+                "name": "Contacts",
+                "rights": [
+                  "subscribe",
+                  "manage_public_views",
+                  "export",
+                  "view",
+                  "add_widget",
+                  "reference",
+                  "add_advanced_flow",
+                  "delete",
+                  "share",
+                  "grant_view",
+                  "install",
+                  "report_visualization",
+                  "update",
+                  "add_integration",
+                  "add_hook",
+                  "add_item",
+                  "grant",
+                  "add_task",
+                  "view_structure",
+                  "add_flow"
+                ],
+                "sharefile_vault_url": null,
+                "space": {
+                  "item_accounting_info": null,
+                  "name": "-CCO Main Hub",
+                  "org_id": 1067986,
+                  "sharefile_vault_url": null,
+                  "space_id": 4201014,
+                  "task_accounting_info": null,
+                  "type": "regular",
+                  "url": "https://podio.com/ccous/hub",
+                  "url_label": "hub",
+                  "v8_engine_updated": false,
+                  "workflow_accounting_info": null
+                },
+                "space_id": 4201014,
+                "status": "active",
+                "task_accounting_info": null,
+                "url_add": "https://podio.com/ccous/hub/apps/contacts/items/new",
+                "url": "https://podio.com/ccous/hub/apps/contacts",
+                "url_label": "contacts",
+                "workflow_accounting_info": null
+              },
+              "app_id": 14660191,
+              "view": null,
+              "view_id": null
+            }
+          ]
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "person",
+      "field_id": 275832534,
+      "label": "Person",
+      "status": "active",
+      "type": "app"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 3,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Name",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[All of Name](out_112436965_275832534).toString()",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "name",
+      "field_id": 275832535,
+      "label": "Name",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 4,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "First Name",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "first-name",
+      "field_id": 275832536,
+      "label": "First Name",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 5,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Last Name",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "last-name",
+      "field_id": 275832537,
+      "label": "Last Name",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 6,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Email",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "email-2",
+      "field_id": 275832538,
+      "label": "Email",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 7,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Password",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[Password](field_275832540).toString() ",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "password-2",
+      "field_id": 275832539,
+      "label": "Password",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 8,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Password [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "password",
+      "field_id": 275832540,
+      "label": "Password [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 9,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Confirm Password [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "confirm-password-h",
+      "field_id": 275832541,
+      "label": "Confirm Password [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 10,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Phone",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "possible_types": [
+            "home",
+            "main",
+            "mobile",
+            "other",
+            "private_fax",
+            "work",
+            "work_fax"
+          ],
+          "call_link_scheme": "callto"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "phone",
+      "field_id": 275832542,
+      "label": "Phone",
+      "status": "active",
+      "type": "phone"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 11,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Status",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "deleted",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "deleted",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "deleted",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "deleted",
+              "text": "Error",
+              "color": "E3D6FF"
+            },
+            {
+              "id": 5,
+              "status": "deleted",
+              "text": "Not Applicable",
+              "color": "F3F3F3"
+            },
+            {
+              "id": 6,
+              "status": "deleted",
+              "text": "Archive",
+              "color": "BDF0ED"
+            },
+            {
+              "id": 7,
+              "status": "active",
+              "text": "Active",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 8,
+              "status": "active",
+              "text": "Disabled",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 9,
+              "status": "active",
+              "text": "Locked",
+              "color": "B5E3FF"
+            },
+            {
+              "id": 10,
+              "status": "active",
+              "text": "Archived",
+              "color": "BDF0ED"
+            },
+            {
+              "id": 11,
+              "status": "active",
+              "text": "Duplicate",
+              "color": "E3D6FF"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "status",
+      "field_id": 275832543,
+      "label": "Status",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 12,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "-",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var $title   = \"Authentication\";\nvar $subtext = \"This section is about their login\";\n\n\n\"---\\n\" + \n\"|\" + $title + \"|\\n\" +\n\"|:---:|\\n\" +\n\"|\" + $subtext + \"|\\n\" +\n\"---\\n\" +\n@[navBar [H]](field_275832569)\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "section-2",
+      "field_id": 275832544,
+      "label": "-",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 13,
+        "description": "Please create one portal type at a time",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Select Portal Type to Create ",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Intern",
+              "color": "BDF0ED"
+            },
+            {
+              "id": 2,
+              "status": "deleted",
+              "text": "Contract",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 3,
+              "status": "deleted",
+              "text": "Dealer",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 4,
+              "status": "deleted",
+              "text": "Foreman",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 6,
+              "status": "deleted",
+              "text": "Engineer",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 5,
+              "status": "deleted",
+              "text": "Contracts Manager",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "portal-type",
+      "field_id": 275832545,
+      "label": "Select Portal Type to Create ",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 14,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Create Portal Type",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Error",
+              "color": "E3D6FF"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "create-portal-types",
+      "field_id": 275832546,
+      "label": "Create Portal Type",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 15,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Portal Created",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Yes",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "portal-created",
+      "field_id": 275832547,
+      "label": "Portal Created",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 16,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Send Portal Invitation",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Error",
+              "color": "E3D6FF"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "send-portal-invitation",
+      "field_id": 275832548,
+      "label": "Send Portal Invitation",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 17,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Re-send Password",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Error",
+              "color": "E3D6FF"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "reset-password",
+      "field_id": 275832549,
+      "label": "Re-send Password",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 18,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Section 3",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var $title   = \"Account Activity\";\nvar $subtext = \"This section is about activity that has happened on the account\";\n\n\"---\\n\" + \n\"|\" + $title + \"|\\n\" +\n\"|:---:|\\n\" +\n\"|\" + $subtext + \"|\\n\" +\n\"---\\n\" +\n@[navBar [H]](field_275832569)\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "section-3",
+      "field_id": 275832550,
+      "label": "Section 3",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 19,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Last Login Date",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "calendar": false,
+          "end": "enabled",
+          "time": "enabled",
+          "color": "DCEBD8"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "last-login-date",
+      "field_id": 275832551,
+      "label": "Last Login Date",
+      "status": "active",
+      "type": "date"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 20,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Last Lock Out Date",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "calendar": false,
+          "end": "enabled",
+          "time": "enabled",
+          "color": "DCEBD8"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "last-lock-out-date",
+      "field_id": 275832552,
+      "label": "Last Lock Out Date",
+      "status": "active",
+      "type": "date"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 21,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Date of Last Reset",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "calendar": false,
+          "end": "disabled",
+          "time": "disabled",
+          "color": "DCEBD8"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "date-of-last-reset",
+      "field_id": 275832553,
+      "label": "Date of Last Reset",
+      "status": "active",
+      "type": "date"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 22,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Date of Last Change",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "calendar": false,
+          "end": "disabled",
+          "time": "enabled",
+          "color": "DCEBD8"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "date-of-last-change",
+      "field_id": 275832554,
+      "label": "Date of Last Change",
+      "status": "active",
+      "type": "date"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 23,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Backlink",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Error",
+              "color": "E3D6FF"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "backlink",
+      "field_id": 275832555,
+      "label": "Backlink",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 24,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Section 4",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var $title   = \"Water\";\nvar $subtext = \"This section is about water\";\n\n@[navBar [H]](field_275832569) +\n\"---\\n\" + \n\"|\" + $title + \"|\\n\" +\n\"|:---:|\\n\" +\n\"|\" + $subtext + \"|\\n\" +\n\"---\\n\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "section-4",
+      "field_id": 275832556,
+      "label": "Section 4",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 25,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Created On",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": "enabled",
+          "calendar": false,
+          "color": "DCEBD8",
+          "expression": null,
+          "script": "@[Created On](item_created_on)",
+          "return_type": "date"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "created-on",
+      "field_id": 275832557,
+      "label": "Created On",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 26,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Master Portal Profile Migration",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "master-portal-profile-migration",
+      "field_id": 275832558,
+      "label": "Master Portal Profile Migration",
+      "status": "active",
+      "type": "category"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 27,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "b64unique [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "b64emailaddresses",
+      "field_id": 275832559,
+      "label": "b64unique [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 28,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "contactPid [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[All of Podio Item ID Text [H]](out_208299021_275832534).join()",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "contactpid-h",
+      "field_id": 275832560,
+      "label": "contactPid [H]",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 29,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "internPid [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[All of internPid [H]](out_267073781_275832534).toString() || \"\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "internpid-h",
+      "field_id": 275832561,
+      "label": "internPid [H]",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 30,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "internTotalHours [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[All of internsTotalHours [H]](out_267239858_275832534).toString() || \"0\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "interntotalhours-h",
+      "field_id": 275832562,
+      "label": "internTotalHours [H]",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 31,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "totalHours [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "totalhours-h",
+      "field_id": 275832563,
+      "label": "totalHours [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 32,
+        "description": "Podio Item ID",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "pid [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "pid",
+      "field_id": 275832564,
+      "label": "pid [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 33,
+        "description": "App Item ID",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "aid [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "aid",
+      "field_id": 275832565,
+      "label": "aid [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 34,
+        "description": "App ID",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "appid [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "appid",
+      "field_id": 275832566,
+      "label": "appid [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 35,
+        "description": "Refresh Toggle",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "togl [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "togl",
+      "field_id": 275832567,
+      "label": "togl [H]",
+      "status": "active",
+      "type": "text"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 36,
+        "description": "Link to this Item",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "ltti [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"https://podio.com/ccous/cco-portal/apps/master-portal-profiles/items/\" + @[aid [H]](field_275832565)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "ltti",
+      "field_id": 275832568,
+      "label": "ltti [H]",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 37,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "navBar [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"**[Basic Details](#section-1) / [Authentication](#section-2) / [Account Activity](#section-3)**\"+\n\"\\n\\n---\"\n\n//@[Unique ID](item_app_item_id)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "navbar",
+      "field_id": 275832569,
+      "label": "navBar [H]",
+      "status": "active",
+      "type": "calculation"
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 38,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "initMessage",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "initmessage",
+      "field_id": 275832570,
+      "label": "initMessage",
+      "status": "active",
+      "type": "text"
+    }
+  ],
+  "integration": null,
+  "is_default": false,
+  "item_accounting_info": null,
+  "layouts": {
+    "badge_v2": {
+      "default": false,
+      "fields": {
+        "header": {
+          "id": 275832536,
+          "type": "field"
+        },
+        "content": {
+          "id": 275832553,
+          "type": "field"
+        },
+        "details_1": {
+          "id": 275832543,
+          "type": "field"
+        },
+        "details_2": null,
+        "details_3": null,
+        "footer_1": {
+          "id": "created_on",
+          "type": "virtual"
+        },
+        "footer_2": {
+          "id": "created_by",
+          "type": "virtual"
+        },
+        "footer_3": {
+          "id": "comment_count",
+          "type": "virtual"
+        }
+      }
+    },
+    "badge": {
+      "default": false,
+      "fields": {
+        "header": {
+          "id": 275832536,
+          "type": "field"
+        },
+        "content": {
+          "id": 275832553,
+          "type": "field"
+        },
+        "details_1": {
+          "id": 275832543,
+          "type": "field"
+        },
+        "details_2": null,
+        "details_3": null,
+        "footer_1": {
+          "id": "created_on",
+          "type": "virtual"
+        },
+        "footer_2": {
+          "id": "created_by",
+          "type": "virtual"
+        },
+        "footer_3": {
+          "id": "comment_count",
+          "type": "virtual"
+        }
+      }
+    },
+    "relationship": {
+      "default": false,
+      "fields": {
+        "header": {
+          "id": 275832532,
+          "type": "field"
+        },
+        "details_1": {
+          "id": 275832538,
+          "type": "field"
+        },
+        "details_2": {
+          "id": 275832542,
+          "type": "field"
+        },
+        "details_3": null,
+        "details_4": null
+      }
+    },
+    "card": {
+      "default": false,
+      "fields": {
+        "header": {
+          "id": 275832536,
+          "type": "field"
+        },
+        "content": {
+          "id": 275832553,
+          "type": "field"
+        },
+        "details_1": {
+          "id": 275832543,
+          "type": "field"
+        },
+        "details_2": null,
+        "details_3": null
+      }
+    }
+  },
+  "link": "https://podio.com/ccous/cco-portal/apps/cco-platform-profiles",
+  "link_add": "https://podio.com/ccous/cco-portal/apps/cco-platform-profiles/items/new",
+  "original": 29540037,
+  "original_revision": 17,
+  "owner": {
+    "image": {
+      "external_file_id": null,
+      "file_id": 2422685620,
+      "hosted_by": "podio",
+      "hosted_by_humanized_name": "Podio",
+      "link": "https://files.podio.com/2422685620",
+      "link_target": "_blank",
+      "thumbnail_link": "https://files.podio.com/2422685620",
+      "uuid_link": "https://files.podio.com/e09ca662-c0f9-43aa-b320-8ef27952037f"
+    },
+    "last_seen_on": "2026-04-30 08:18:02",
+    "link": "https://podio.com/users/6047669",
+    "org_id": null,
+    "profile_id": 199475933,
+    "type": "user",
+    "space_id": null,
+    "user_id": 6047669,
+    "avatar": 2422685620,
+    "name": "Jakub Goscinny"
+  },
+  "rights": [
+    "subscribe",
+    "manage_public_views",
+    "export",
+    "view",
+    "add_widget",
+    "reference",
+    "add_advanced_flow",
+    "delete",
+    "share",
+    "grant_view",
+    "install",
+    "report_visualization",
+    "update",
+    "add_integration",
+    "add_hook",
+    "add_item",
+    "grant",
+    "add_task",
+    "view_structure",
+    "add_flow"
+  ],
+  "sharefile_vault_url": null,
+  "space_id": 10191082,
+  "status": "active",
+  "subscribed": false,
+  "task_accounting_info": null,
+  "url_add": "https://podio.com/ccous/cco-portal/apps/cco-platform-profiles/items/new",
+  "url": "https://podio.com/ccous/cco-portal/apps/cco-platform-profiles",
+  "url_label": "cco-platform-profiles",
+  "workflow_accounting_info": null,
+  "token": null,
+  "mailbox": null
+}

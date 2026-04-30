@@ -1,0 +1,3834 @@
+{
+  "app": {
+    "app_id": 14660191,
+    "config": {
+      "icon": "30.png",
+      "icon_id": 30,
+      "item_name": "Contact",
+      "name": "Contacts",
+      "type": "contact"
+    },
+    "current_revision": 660,
+    "default_view_id": null,
+    "icon": "30.png",
+    "icon_id": 30,
+    "is_default": false,
+    "item_accounting_info": null,
+    "item_name": "Contact",
+    "link": "https://podio.com/ccous/hub/apps/contacts",
+    "link_add": "https://podio.com/ccous/hub/apps/contacts/items/new",
+    "name": "Contacts",
+    "sharefile_vault_url": null,
+    "space_id": 4201014,
+    "status": "active",
+    "task_accounting_info": null,
+    "url_add": "https://podio.com/ccous/hub/apps/contacts/items/new",
+    "url": "https://podio.com/ccous/hub/apps/contacts",
+    "url_label": "contacts",
+    "workflow_accounting_info": null
+  },
+  "app_item_id": 96011,
+  "app_item_id_formatted": "Contact-096011",
+  "comments": [
+    {
+      "comment_id": 1976411669,
+      "created_by": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "created_on": "2026-03-23 20:51:20",
+      "created_via": {
+        "auth_client_id": 9107,
+        "display": true,
+        "id": 9107,
+        "name": "Globi Mail",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": null,
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "GlobiMail Activated\n\n---------------------------------------\n\n*Fwd to: CCO.J3K.3275345593@globimail.com*\n[Compose New Message >](http://www.globimail.com/l2/NEW.AMlp.o74N.nVE2JLE/)",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "value": "GlobiMail Activated\n\n---------------------------------------\n\n*Fwd to: CCO.J3K.3275345593@globimail.com*\n[Compose New Message >](http://www.globimail.com/l2/NEW.AMlp.o74N.nVE2JLE/)"
+    },
+    {
+      "comment_id": 1976412116,
+      "created_by": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "created_on": "2026-03-23 20:52:04",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": null,
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "*Triggering Xenforo API...*",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "value": "*Triggering Xenforo API...*"
+    },
+    {
+      "comment_id": 1976412173,
+      "created_by": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "created_on": "2026-03-23 20:52:09",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": null,
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "**Xenforo** User ID: 40446",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "value": "**Xenforo** User ID: 40446"
+    },
+    {
+      "comment_id": 1976412185,
+      "created_by": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "created_on": "2026-03-23 20:52:10",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": null,
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "Triggering \"Send Default Systems Welcome Email\"",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "value": "Triggering \"Send Default Systems Welcome Email\""
+    },
+    {
+      "comment_id": 1976412215,
+      "created_by": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "created_on": "2026-03-23 20:52:12",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": null,
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "*Triggering Circle API...*",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "value": "*Triggering Circle API...*"
+    },
+    {
+      "comment_id": 1976412244,
+      "created_by": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "created_on": "2026-03-23 20:52:14",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": null,
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "**INFORMATION**\r\nThe Circle User ID \"78764927\" is already linked to this Contact.  If this is incorrect, please clear the appropriate field and try again.",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "value": "**INFORMATION**\r\nThe Circle User ID \"78764927\" is already linked to this Contact.  If this is incorrect, please clear the appropriate field and try again."
+    },
+    {
+      "comment_id": 1976412256,
+      "created_by": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "created_on": "2026-03-23 20:52:15",
+      "created_via": {
+        "auth_client_id": 9107,
+        "display": true,
+        "id": 9107,
+        "name": "Globi Mail",
+        "url": null
+      },
+      "embed": null,
+      "embed_file": null,
+      "external_id": null,
+      "files": [],
+      "is_liked": false,
+      "last_edit_on": "2026-03-23 21:06:46",
+      "like_count": 0,
+      "questions": [],
+      "ref": {
+        "type": "item",
+        "id": 3275345593
+      },
+      "rich_value": "**Email Message**\n\n---------------------------------------\n\nFrom: \"CCO\" (helpdesk@cco.us)\nTo: reneebusacca@gmail.com\nDate: Mon, 23 Mar 2026 16:52:15 -0400\nStatus: OPENED *(read 14 min later)*\nSubject: CCO Academy Login Details\n\n---------------------------------------\n\nHi Renee Busacca,\n\nWe’re thrilled to welcome you to the CCO Academy, our newly launched community platform as of July 4th, 2025! 🎉\n\nCCO ACADEMY\n\nOur new home is hosted on the Circle platform at [www.cco.academy](https://www.cco.academy/). This platform now brings together all of our community activities, discussions, course materials, calendars, Blitzes, and more—all in one place. It’s designed to be mobile-friendly, intuitive, and seamless, so you can focus on learning and engaging without distractions.\n\nCCO Acadamy Platorm Login:\n\nURL: [www.cco.academy](http://www.cco.academy/)\nEmail: reneebusacca@gmail.com\nInitial Password (you may have changed this already - we only provide this initially):RB5593!\n\nCCO EXAM PLATFORM\n\nOur legacy platform ([cco.community](https://cco.community/)) will now be used only for exam access and CEU certificates.\n\nExam Platform Login Credentials:\n\nURL: [www.cco.community](http://www.cco.community/)\nEmail: reneebusacca@gmail.com\nUsername: ReneeB_96011\nPassword: RB5593!\n\nImportant Notes:\n\nYour username—for [cco.community](https://cco.community/)— is fixed and was created to provide anonymity.\nYour password must include a special character at the end. Please check carefully when logging in.\n\nCCO SUPPORT\n\nFor any billing, technical, or login issues, please reach out to the CCO Academy Help Desk at [https://www.cco.academy/u/b722268f](https://www.cco.academy/u/b722268f) or, if you are a coaching student, in your PS room (Private Support Direct Message) area. Alternative you may use our helpdesk ticketing system at [https://helpdesk.cco.us](https://helpdesk.cco.us/).\n\nWe’re excited to have you join us on this new platform and look forward to seeing you thrive in the CCO Academy community!\n\nWarm regards,\nThe CCO Academy Team.\n\n[![](https://files.podio.com/2446889343/extra_large)](https://files.podio.com/2446889343/extra_large)\n\nThis message was sent using [Podio workflow automation](https://workflow-automation.podio.com). If this message is SPAM, please [report abuse](https://workflow-automation.podio.com/abuse.php?foo=eyJwa0N1c3RvbWVycyI6NTYyOSwicGtGbG93cyI6MTU3NzQxNywicmVjaXBpZW50IjoicmVuZWVidXNhY2NhQGdtYWlsLmNvbSJ9)\n\n---------------------------------------\n\n\n[< Reply](http://www.globimail.com/l2/RPY.AMlp.o74N.nVE2JLE.1zG7rR/) | [Fwd >](http://www.globimail.com/l2/FWD.AMlp.o74N.nVE2JLE.1zG7rR/) | [*](https://secure.globimail.com/moderate/o74N/61137027/1zG7rR/)",
+      "rights": [
+        "view",
+        "rate"
+      ],
+      "user": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "value": "**Email Message**\n\n---------------------------------------\n\nFrom: \"CCO\" (helpdesk@cco.us)\nTo: reneebusacca@gmail.com\nDate: Mon, 23 Mar 2026 16:52:15 -0400\nStatus: OPENED *(read 14 min later)*\nSubject: CCO Academy Login Details\n\n---------------------------------------\n\nHi Renee Busacca,\n\nWe’re thrilled to welcome you to the CCO Academy, our newly launched community platform as of July 4th, 2025! 🎉\n\nCCO ACADEMY\n\nOur new home is hosted on the Circle platform at [www.cco.academy](https://www.cco.academy/). This platform now brings together all of our community activities, discussions, course materials, calendars, Blitzes, and more—all in one place. It’s designed to be mobile-friendly, intuitive, and seamless, so you can focus on learning and engaging without distractions.\n\nCCO Acadamy Platorm Login:\n\nURL: [www.cco.academy](http://www.cco.academy/)\nEmail: reneebusacca@gmail.com\nInitial Password (you may have changed this already - we only provide this initially):RB5593!\n\nCCO EXAM PLATFORM\n\nOur legacy platform ([cco.community](https://cco.community/)) will now be used only for exam access and CEU certificates.\n\nExam Platform Login Credentials:\n\nURL: [www.cco.community](http://www.cco.community/)\nEmail: reneebusacca@gmail.com\nUsername: ReneeB_96011\nPassword: RB5593!\n\nImportant Notes:\n\nYour username—for [cco.community](https://cco.community/)— is fixed and was created to provide anonymity.\nYour password must include a special character at the end. Please check carefully when logging in.\n\nCCO SUPPORT\n\nFor any billing, technical, or login issues, please reach out to the CCO Academy Help Desk at [https://www.cco.academy/u/b722268f](https://www.cco.academy/u/b722268f) or, if you are a coaching student, in your PS room (Private Support Direct Message) area. Alternative you may use our helpdesk ticketing system at [https://helpdesk.cco.us](https://helpdesk.cco.us/).\n\nWe’re excited to have you join us on this new platform and look forward to seeing you thrive in the CCO Academy community!\n\nWarm regards,\nThe CCO Academy Team.\n\n[![](https://files.podio.com/2446889343/extra_large)](https://files.podio.com/2446889343/extra_large)\n\nThis message was sent using [Podio workflow automation](https://workflow-automation.podio.com). If this message is SPAM, please [report abuse](https://workflow-automation.podio.com/abuse.php?foo=eyJwa0N1c3RvbWVycyI6NTYyOSwicGtGbG93cyI6MTU3NzQxNywicmVjaXBpZW50IjoicmVuZWVidXNhY2NhQGdtYWlsLmNvbSJ9)\n\n---------------------------------------\n\n\n[< Reply](http://www.globimail.com/l2/RPY.AMlp.o74N.nVE2JLE.1zG7rR/) | [Fwd >](http://www.globimail.com/l2/FWD.AMlp.o74N.nVE2JLE.1zG7rR/) | [*](https://secure.globimail.com/moderate/o74N/61137027/1zG7rR/)"
+    }
+  ],
+  "created_by": {
+    "avatar": 235168937,
+    "avatar_id": 235168937,
+    "avatar_type": "file",
+    "image": {
+      "external_file_id": null,
+      "file_id": 235168937,
+      "hosted_by": "podio",
+      "hosted_by_humanized_name": "Podio",
+      "link": "https://files.podio.com/235168937",
+      "link_target": "_blank",
+      "thumbnail_link": "https://files.podio.com/235168937",
+      "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+    },
+    "last_seen_on": "2026-04-30 08:12:04",
+    "name": "CCO AI",
+    "id": 3507081,
+    "type": "user",
+    "url": "https://podio.com/users/3507081",
+    "user_id": 3507081
+  },
+  "created_on": "2026-03-23 20:51:18",
+  "created_via": {
+    "auth_client_id": 9108,
+    "display": true,
+    "id": 9108,
+    "name": "Workflow automation",
+    "url": null
+  },
+  "external_id": null,
+  "fields": [
+    {
+      "config": {
+        "default_value": null,
+        "delta": 0,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Contact",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var $output = @[Name](field_112436965) + \"\";\nif(@[Status/Action](field_125701761) == \"SUSPECTED DUPLICATE\") {\n  $output += \"*\";\n};\n\nif(@[Duplicate Status](field_125701761) == \"CONFIRMED DUPLICATE\") {\n  $output += \"**\";\n};\n\n$output;\n\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "contact",
+      "field_id": 127886375,
+      "label": "Contact",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Renee Busacca"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 2,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Name & Club",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[Contact](field_127886375) + \" | Club Status: \" + @[CCO Club Subscription Status](field_134218375)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "name-status-for-reference-layout",
+      "field_id": 236064524,
+      "label": "Name & Club",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Renee Busacca | Club Status: Not Active"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 3,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# MAIN CONTACT DETAILS \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-5",
+      "field_id": 133631783,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# MAIN CONTACT DETAILS \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 5,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Name",
+        "mapping": "contact_name",
+        "required": true,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "name",
+      "field_id": 112436965,
+      "label": "Name",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "Renee Busacca"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 9,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Circle Profile Link",
+        "mapping": null,
+        "required": false,
+        "settings": null,
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "circle-profile-link",
+      "field_id": 273667474,
+      "label": "Circle Profile Link",
+      "status": "active",
+      "type": "embed",
+      "values": [
+        {
+          "embed": {
+            "description": null,
+            "embed_height": null,
+            "embed_html": null,
+            "embed_id": 1374308679,
+            "embed_width": null,
+            "hostname": "cco.academy",
+            "original_url": "https://www.cco.academy/u/e6801a48",
+            "resolved_url": "https://www.cco.academy/u/e6801a48",
+            "title": "CCO Academy",
+            "type": "link",
+            "url": "https://www.cco.academy/u/e6801a48"
+          },
+          "file": null
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 14,
+        "description": "Sign in as Help Desk to click this link to connect with this contact.",
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Circle HD Direct Message Link",
+        "mapping": null,
+        "required": false,
+        "settings": null,
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "circle-hd-direct-message-link",
+      "field_id": 273577244,
+      "label": "Circle HD Direct Message Link",
+      "status": "active",
+      "type": "embed",
+      "values": [
+        {
+          "embed": {
+            "description": "CCO Academy community home page",
+            "embed_height": null,
+            "embed_html": null,
+            "embed_id": 1375256074,
+            "embed_width": null,
+            "hostname": "cco.academy",
+            "original_url": "https://www.cco.academy/messages/f90cd6ad-0d2a-4aa6-a8c7-dade012982cb",
+            "resolved_url": "https://www.cco.academy/messages/f90cd6ad-0d2a-4aa6-a8c7-dade012982cb",
+            "title": "CCO Academy community",
+            "type": "link",
+            "url": "https://www.cco.academy/messages/f90cd6ad-0d2a-4aa6-a8c7-dade012982cb"
+          },
+          "file": {
+            "external_file_id": null,
+            "file_id": 2449075723,
+            "hosted_by": "podio",
+            "hosted_by_humanized_name": "Podio",
+            "link": "https://files.podio.com/2449075723",
+            "link_target": "_blank",
+            "thumbnail_link": "https://files.podio.com/2449075723",
+            "uuid_link": null
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 16,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Email Address",
+        "mapping": "contact_email",
+        "required": true,
+        "settings": {
+          "include_in_cc": false,
+          "include_in_bcc": false,
+          "possible_types": [
+            "home",
+            "other",
+            "work"
+          ]
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "email-address",
+      "field_id": 112436968,
+      "label": "Email Address",
+      "status": "active",
+      "type": "email",
+      "values": [
+        {
+          "value": "reneebusacca@gmail.com",
+          "type": "work"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 17,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Email Address Status",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Unknown",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Valid",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Bounced",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Unsubscribed",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "Spam",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "dropdown"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "email-address-status",
+      "field_id": 208298886,
+      "label": "Email Address Status",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 2,
+            "status": "active",
+            "text": "Valid",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 22,
+        "description": null,
+        "hidden": true,
+        "hidden_create_view_edit": false,
+        "label": "Credentials",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "credentials",
+      "field_id": 125311532,
+      "label": "Credentials",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "CPB, CPC-A"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 25,
+        "description": null,
+        "hidden": true,
+        "hidden_create_view_edit": false,
+        "label": "What Best Describes You?",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Certified coder seeking additional certifications",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Medical coder or student seeking certification",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Certified professional looking to stay certified",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Nurse looking for a new career",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "Exploring medical coding as a new career",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 6,
+              "status": "active",
+              "text": "Medical office manager with many hats",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 7,
+              "status": "active",
+              "text": "Physician seeking medical coding expertise",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "what-best-describes-you",
+      "field_id": 274330225,
+      "label": "What Best Describes You?",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 3,
+            "status": "active",
+            "text": "Certified professional looking to stay certified",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 26,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Contact Type",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 18,
+              "status": "active",
+              "text": "Advocate",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 26,
+              "status": "active",
+              "text": "BHAT™ Interview",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Business",
+              "color": "B5E3FF"
+            },
+            {
+              "id": 17,
+              "status": "active",
+              "text": "Candidate",
+              "color": "E1D8ED"
+            },
+            {
+              "id": 19,
+              "status": "active",
+              "text": "CCO Team",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 7,
+              "status": "active",
+              "text": "Chapter Officer",
+              "color": "F7F0C5"
+            },
+            {
+              "id": 13,
+              "status": "active",
+              "text": "Coach",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 25,
+              "status": "active",
+              "text": "Competition",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 6,
+              "status": "active",
+              "text": "Consultant",
+              "color": "F7D1D0"
+            },
+            {
+              "id": 9,
+              "status": "active",
+              "text": "Customer",
+              "color": "E1D8ED"
+            },
+            {
+              "id": 8,
+              "status": "active",
+              "text": "Door Prize Winner",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "Employee",
+              "color": "FFD5C2"
+            },
+            {
+              "id": 10,
+              "status": "active",
+              "text": "Friends/Family",
+              "color": "D2E4EB"
+            },
+            {
+              "id": 15,
+              "status": "active",
+              "text": "Guest Blogger",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 14,
+              "status": "active",
+              "text": "Helpdesk Agent",
+              "color": "E1D8ED"
+            },
+            {
+              "id": 32,
+              "status": "active",
+              "text": "Intern Applicant",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 30,
+              "status": "active",
+              "text": "Intern",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 11,
+              "status": "active",
+              "text": "Lead",
+              "color": "D1F3EC"
+            },
+            {
+              "id": 28,
+              "status": "active",
+              "text": "Organization",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 31,
+              "status": "active",
+              "text": "Partner",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 20,
+              "status": "active",
+              "text": "Podio Consultant",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 27,
+              "status": "active",
+              "text": "Potential SME",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 23,
+              "status": "active",
+              "text": "Scholarship Receipient",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "SME",
+              "color": "F7F0C5"
+            },
+            {
+              "id": 24,
+              "status": "active",
+              "text": "Speaker",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Student",
+              "color": "F7D1D0"
+            },
+            {
+              "id": 21,
+              "status": "active",
+              "text": "SWAG Vendor",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 29,
+              "status": "active",
+              "text": "Topic Requester",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 22,
+              "status": "active",
+              "text": "Upwork Staff",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 12,
+              "status": "active",
+              "text": "Vendor",
+              "color": "E1D8ED"
+            },
+            {
+              "id": 16,
+              "status": "active",
+              "text": "Delete",
+              "color": "F7F0C5"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Other",
+              "color": "DDDDDD"
+            }
+          ],
+          "multiple": true,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "contact-type",
+      "field_id": 112437086,
+      "label": "Contact Type",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 9,
+            "status": "active",
+            "text": "Customer",
+            "color": "E1D8ED"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 40,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# CCO CLUB SUBSCRIPTION STATUS \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-10",
+      "field_id": 134218374,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# CCO CLUB SUBSCRIPTION STATUS \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 41,
+        "description": "This field is used to grant course / blitz extensions for non &quot;lifetime&quot; purchases.  Grandfathered monthly club members and annual club members are granted extensions.  If they have a &quot;lifetime&quot; purchase (Full Pay 26) then their club status doesn&#x27;t matter.",
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "CCO Club Subscription Status",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 10,
+              "status": "active",
+              "text": "Never",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Active",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 8,
+              "status": "active",
+              "text": "Monthly (Grandfathered)",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 7,
+              "status": "active",
+              "text": "Monthly (26)",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Active Annual",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 9,
+              "status": "active",
+              "text": "Monthly",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 3,
+              "status": "deleted",
+              "text": "Lapsed Monthly (Grandfathered)",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 6,
+              "status": "deleted",
+              "text": "Lapsed Annual",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 5,
+              "status": "deleted",
+              "text": "Intern",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "deleted",
+              "text": "Lost",
+              "color": "F7D1D0"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "subscription-status",
+      "field_id": 134218375,
+      "label": "CCO Club Subscription Status",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 1,
+            "status": "active",
+            "text": "Not Active",
+            "color": "FFD1D1"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 52,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# PROGRESS TRACKERS \\n\"+\n\"----------------------------\\n\"+\n@[[H] Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-12",
+      "field_id": 185302332,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# PROGRESS TRACKERS \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 53,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "PT Table",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var type       = @[All of Progress Tracker Type](in_128205285_125306242);     // PT app by Student \nvar status     = @[All of Overall Status](in_149529784_125306242);            // PT app by Student\nvar enrol      = @[All of Date Enrolled](in_126215935_125306242);             // PT app by Student\nvar comp       = @[All of Date Completed](in_128223330_125306242);            // PT app by Student\nvar pt_url     = @[All of Item URL [H]](in_185356885_125306242)               // PT app by Student\nvar table      = '';\n\ntable += \"Type|Status|Enrolled|Completed\\n\"\ntable += \":---|:---|:---|:---\\n\"\n\nfor(i=0; i<type.length; i++) {\n  var comp_row = comp[i] ? moment(comp[i]).format(\"MM/DD/YYYY\") : \"TBC\";\n  table += type[i].link(pt_url[i]) + \"|\" + status[i] + \"|\" + moment(enrol[i]).format(\"MM/DD/YYYY\") + \"|\" + comp_row + \"\\n\";\n\n}\n\n\ntable\n\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "pt-table",
+      "field_id": 185302333,
+      "label": "PT Table",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Type|Status|Enrolled|Completed\n:---|:---|:---|:---\n"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 55,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# STUDENT SUPPORT HUBS \\n\"+\n\"----------------------------\\n\"+\n@[[H] Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-9",
+      "field_id": 133632081,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# STUDENT SUPPORT HUBS \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 57,
+        "description": "Used for Forum and Gradebook access.",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Contact's Default System Username MASTER [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "contacts-default-system-username-master-h",
+      "field_id": 199426794,
+      "label": "Contact's Default System Username MASTER [H]",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "ReneeB_96011"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 58,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Contact's Default System Username",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[Contact's Default System Username MASTER [H]](field_199426794) || \"NOT SET\" ",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "contacts-default-system-username",
+      "field_id": 199426950,
+      "label": "Contact's Default System Username",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "ReneeB_96011"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 59,
+        "description": "Used for Forum and Gradebook access.",
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Contact's Default System Password MASTER [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "pp-wf-password-master-h",
+      "field_id": 199172888,
+      "label": "Contact's Default System Password MASTER [H]",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "RB5593!"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 60,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Contact's Default System Password",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[Contact's Default System Password MASTER [H]](field_199172888) || \"NOT SET\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "pp-wf-password",
+      "field_id": 199172889,
+      "label": "Contact's Default System Password",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "RB5593!"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 63,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Create / Set Xenforo User ID & Password",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "F7D1D0"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "F7F0C5"
+            },
+            {
+              "id": 6,
+              "status": "active",
+              "text": "Update",
+              "color": "B5E3FF"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Error",
+              "color": "E1D8ED"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "STOP",
+              "color": "FFD5C2"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "get-create-xenforo-user-id",
+      "field_id": 199121591,
+      "label": "Create / Set Xenforo User ID & Password",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 3,
+            "status": "active",
+            "text": "Done",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 65,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Xenforo User ID",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "xenforo-user-id",
+      "field_id": 199121592,
+      "label": "Xenforo User ID",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "40446"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 66,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Create / Set Circle User ID & Password",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Update",
+              "color": "B5E3FF"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Done",
+              "color": "CFFCC7"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "Error",
+              "color": "E3D6FF"
+            },
+            {
+              "id": 6,
+              "status": "active",
+              "text": "STOP",
+              "color": "FFD5B8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "create-set-circle-user-id-password",
+      "field_id": 272609490,
+      "label": "Create / Set Circle User ID & Password",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 4,
+            "status": "active",
+            "text": "Done",
+            "color": "CFFCC7"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 67,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Create PS Group DM in Circle ",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "FFD1D1"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "FAF2C4"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Update",
+              "color": "B5E3FF"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Done",
+              "color": "CFFCC7"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "Error",
+              "color": "FFD5B8"
+            },
+            {
+              "id": 6,
+              "status": "active",
+              "text": "STOP",
+              "color": "DCECFF"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "create-ps-group-dm-in-circle",
+      "field_id": 275925353,
+      "label": "Create PS Group DM in Circle ",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 1,
+            "status": "active",
+            "text": "Not Done",
+            "color": "FFD1D1"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 68,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Circle User ID",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "circle-user-id",
+      "field_id": 272609487,
+      "label": "Circle User ID",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "78764927"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 69,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Xenforo User Link",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[Xenforo User ID](field_199121592) != null\n  ? \"[Click here](https://www.cco.community/admin.php?users/\" + @[Xenforo User ID](field_199121592) + \"/edit)\"\n  : \"No Xenforo User ID detected\"\n\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "xenforo-user-link",
+      "field_id": 203442371,
+      "label": "Xenforo User Link",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "[Click here](https://www.cco.community/admin.php?users/40446/edit)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 70,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Send Default Systems Welcome Email",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Not Done",
+              "color": "F7D1D0"
+            },
+            {
+              "id": 2,
+              "status": "active",
+              "text": "Do It Now",
+              "color": "F7F0C5"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "Error",
+              "color": "E1D8ED"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "STOP",
+              "color": "FFD5C2"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "send-default-systems-welcome-email",
+      "field_id": 200186024,
+      "label": "Send Default Systems Welcome Email",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 3,
+            "status": "active",
+            "text": "Done",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 71,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Default Systems Welcome Email Last Sent Date",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "calendar": false,
+          "end": "disabled",
+          "time": "enabled",
+          "color": "DCEBD8"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "default-systems-welcome-email-sent-date",
+      "field_id": 200187416,
+      "label": "Default Systems Welcome Email Last Sent Date",
+      "status": "active",
+      "type": "date",
+      "values": [
+        {
+          "start": "2026-03-23 20:52:15",
+          "start_date": "2026-03-23",
+          "start_time": "20:52:15",
+          "start_utc": "2026-03-23 20:52:15",
+          "start_date_utc": "2026-03-23",
+          "start_time_utc": "20:52:15"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 78,
+        "description": null,
+        "hidden": true,
+        "hidden_create_view_edit": false,
+        "label": "SSH Invitation | History Table",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var str = \"\";\nvar show = @[SSH Invitations | Show Most Recent](field_202611118) || 10;\nvar rows = @[All of Table String [H]](in_133633252_133632962);\nvar start = 0;\n\n\nif(show != \"All\") {\n  start = rows.length - show;\n};\n\n\n/* ORIGINAL TABLE: Retired 31 May 2020 by Pete Cuff \n * str += \"Link|Method|Space|Status|Date\\n\";\n * str += \"---|---|---|---|---\\n\";\n */\n\nstr += \"Date | Mem | Method | Status | Link \\n\";\nstr += \"---  | --- | ---    | ---    | ---  \\n\";\n\nfor(i=start; i<rows.length; i++){\n  if(rows[i] != null) {\n    str += rows[i]+\"\\n\";\n  };\n};\n\nstr;\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "new-ssh-invitation-history-table",
+      "field_id": 133655061,
+      "label": "SSH Invitation | History Table",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Date | Mem | Method | Status | Link \n---  | --- | ---    | ---    | ---  \n03/23/2026|cco-club-monthly-26|Circle,Xenforo|Active|[Link](https://podio.com/ccous/course-management/apps/student-invitations-processing/items/147761)\n"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 79,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# STUDENT TESTS \\n\"+\n\"----------------------------\\n\"+\n@[[H] Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-17",
+      "field_id": 171920001,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# STUDENT TESTS \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 80,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Average Test Result Percentage",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": 2,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var TotalScore = @[Sum of result__percentage](in_sum_125911831_125914549)\nvar ScoreCount = @[All of result__percentage](in_125911831_125914549).length\n\nMath.round((TotalScore/ScoreCount)*100)/100\n",
+          "return_type": "number"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "average-test-result-percentage",
+      "field_id": 150824550,
+      "label": "Average Test Result Percentage",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "87.2000"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 81,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "All Test Results Dashboard",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var Table = \"\"\nvar TakenDate = \"\"\nvar TotalScore = 0\nvar AverageScore = 0\n\nTable += \"Date | Test Name | Score | Download\\n\"\nTable += \"---|---|---|---\\n\"\n\nfor (i=0;i<@[All of [H] Podio Test Results ID Feed](in_150754589_125914549).length;i++){\n  TakenDate = moment(@[All of Date Taken](in_125935780_125914549)[i]).format(\"MM/DD/YYYY\")\n  TotalScore += @[All of result__percentage](in_125911831_125914549)[i]\n  Table += TakenDate+\" | \"+@[All of test__test_name](in_125911836_125914549)[i]+\" | \"+@[All of result__percentage](in_125911831_125914549)[i]+\"% | \"+(@[All of View Results | Students](in_150750509_125914549)[i].split(\" \")[0])+\"\\n\"\n}\n\nAverageScore = Math.round((TotalScore/@[All of [H] Podio Test Results ID Feed](in_150754589_125914549).length)*100)/100\n\nTable += \" | # AVERAGE: |\"+AverageScore+\"%|\"\n\n\nTable\n\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "test-result-dashboard",
+      "field_id": 150754145,
+      "label": "All Test Results Dashboard",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Date | Test Name | Score | Download\n---|---|---|---\n03/24/2026 | 2026 ICD-10 Update with Find-A-Code Quiz | 70% | [Xenforo](https://www.cco.community/exams/results/22476)\n03/24/2026 | 2026 CPT Update with Find-A-Code | 100% | [Xenforo](https://www.cco.community/exams/results/22478)\n03/24/2026 | February 2025 CCO Club Q&A Webinar | 100% | [Xenforo](https://www.cco.community/exams/results/22479)\n03/24/2026 | March 2025 CCO Club Q&A Webinar | 90% | [Xenforo](https://www.cco.community/exams/results/22485)\n03/24/2026 | Battling Bugs and Parasites: Infectious Diseases (1A00-1H0Z) | 70% | [Xenforo](https://www.cco.community/exams/results/22486)\n03/25/2026 | May 2025 CCO Club Q&A Webinar | 100% | [Xenforo](https://www.cco.community/exams/results/22487)\n03/25/2026 | June 2025 CCO Club Q&A Webinar | 100% | [Xenforo](https://www.cco.community/exams/results/22488)\n03/25/2026 | July 2025 CCO Club Q&A Webinar | 100% | [Xenforo](https://www.cco.community/exams/results/22490)\n03/25/2026 | CCO Club Q&A #1097 | 90% | [Xenforo](https://www.cco.community/exams/results/22491)\n03/25/2026 | September 2025 CCO Club Q&A Webinar | 50% | [Xenforo](https://www.cco.community/exams/results/22495)\n03/25/2026 | September 2025 CCO Club Q&A Webinar | 100% | [Xenforo](https://www.cco.community/exams/results/22496)\n03/25/2026 | Cell Rebellion: Neoplasms and Tumors (2A00-2F9Z) | 90% | [Xenforo](https://www.cco.community/exams/results/22498)\n03/25/2026 | Postcoordination in ICD-11: Using Stem Codes and Extension Codes | 90% | [Xenforo](https://www.cco.community/exams/results/22499)\n03/25/2026 | 2026 ICD-10-CM Update | 60% | [Xenforo](https://www.cco.community/exams/results/22500)\n03/25/2026 | 2026 ICD-10-CM Update | 100% | [Xenforo](https://www.cco.community/exams/results/22501)\n03/25/2026 | April 2025 CCO Club Q&A Webinar | 100% | [Xenforo](https://www.cco.community/exams/results/22502)\n03/25/2026 | 2026 CPT Update with Find-A-Code | 60% | [Xenforo](https://www.cco.community/exams/results/22504)\n03/25/2026 | 2026 CPT Update with Find-A-Code | 100% | [Xenforo](https://www.cco.community/exams/results/22505)\n03/25/2026 | CCO Club Q&A #1732 | 74% | [Xenforo](https://www.cco.community/exams/results/22506)\n03/25/2026 | CCO Club Q&A #1733 | 100% | [Xenforo](https://www.cco.community/exams/results/22508)\n | # AVERAGE: |87.2%|"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 82,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# PODIO INFORMATION \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-7",
+      "field_id": 133631785,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# PODIO INFORMATION \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 83,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Health Checks",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "// ---------- 1. Pull fields from related Health Check items ----------\nvar Scores       = @[All of Health Score with nulls](inn_274796984_274796983);\nvar Risks        = @[All of Drop-off Risk % with nulls](inn_274796985_274796983);\nvar Upgrades     = @[All of Upgrade Likelihood % with nulls](inn_274796986_274796983);\nvar Archetypes   = @[All of Archetype with nulls](inn_274796987_274796983);\nvar RunDates     = @[All of Health Check Date with nulls](inn_274797013_274796983);\nvar Summaries    = @[All of Explanatory Summary with nulls](inn_274796990_274796983);\nvar Links        = @[All of ltti [H] with nulls](inn_274797014_274796983);\n\n// ---------- Helpers ----------\nfunction toStr(v){ return (v === null || v === undefined) ? \"\" : String(v); }\nfunction isValidDate(d){ return d instanceof Date && !isNaN(d.getTime()); }\n\nfunction riskIcon(r){\n  var n = parseInt(r, 10);\n  if (isNaN(n)) return \"⚪\";     // unknown\n  if (n <= 30)  return \"_\";    // low\n  if (n <= 60)  return \"_\";    // medium\n  return \"_\";                  // high\n}\n\n// ----- SCORE EMOJI -----\nfunction scoreIcon(s){\n  var n = parseInt(s, 10);\n  if (isNaN(n)) return \"\";\n  if (n <= 40)  return \"_ \";\n  if (n <= 60)  return \"_ \";\n  if (n <= 80)  return \"_ \";\n  return \"_ \";\n}\n\n// ----- UPGRADE EMOJI -----\nfunction upgradeIcon(s){\n  var n = parseInt(s, 10);\n  if (isNaN(n)) return \"\";\n  if (n <= 30)  return \"_ \";\n  if (n <= 60)  return \"↗️ \";\n  if (n <= 80)  return \"_ \";\n  return \"_ \";\n}\n\n// ----- ARCHETYPE EMOJI -----\nfunction archetypeIcon(a){\n  if (!a) return \"\";\n  a = a.toLowerCase();\n\n  if (a.indexOf(\"loyal\") !== -1) return \"_ \";\n  if (a.indexOf(\"explorer\") !== -1) return \"_ \";\n  if (a.indexOf(\"power\") !== -1) return \"⚡ \";\n  if (a.indexOf(\"risk\") !== -1) return \"⚠️ \";\n  if (a.indexOf(\"dormant\") !== -1) return \"_ \";\n  if (a.indexOf(\"billing\") !== -1 || a.indexOf(\"issue\") !== -1) return \"_ \";\n  if (a.indexOf(\"expansion\") !== -1) return \"_ \";\n  if (a.indexOf(\"feedback\") !== -1) return \"_️ \";\n\n  return \"\";\n}\n\n\n// ---------- 2. Combine ----------\nvar combined = [];\nvar maxLen = Math.max(\n  Scores.length, Risks.length, Upgrades.length,\n  Archetypes.length, RunDates.length, Summaries.length, Links.length\n);\n\nfor (var i = 0; i < maxLen; i++) {\n  var rawDate = RunDates[i] || null;\n  var safeDate = rawDate ? new Date(rawDate) : null;\n\n  combined.push({\n    score: toStr(Scores[i]).trim(),\n    risk: toStr(Risks[i]).trim(),\n    upgrade: toStr(Upgrades[i]).trim(),\n    archetype: toStr(Archetypes[i]).trim(),\n    summary: toStr(Summaries[i]).trim(),\n    link: toStr(Links[i]).trim(),\n    date: isValidDate(safeDate) ? safeDate : null\n  });\n}\n\n// ---------- 3. Sort by Run Date DESC ----------\ncombined.sort(function(a, b){\n  if (!a.date && !b.date) return 0;\n  if (!a.date) return 1;\n  if (!b.date) return -1;\n  return b.date - a.date;\n});\n\n// ---------- 4. Build Markdown Table ----------\nvar md  = \"| Date | Score | Δ Score | Risk | Upgrade % | Archetype | Notes | Check |\\n\";\nmd     += \"| ---- | ----- | ------- | ---- | ---------- | --------- | ----- | ----- |\\n\";\n\nfor (var i = 0; i < combined.length; i++) {\n  var item = combined[i];\n\n  if (!item.score && !item.risk && !item.upgrade && !item.archetype && !item.summary && !item.date && !item.link) {\n    continue;\n  }\n\n  var dateCell     = item.date ? moment(item.date).format(\"MM/DD/YY\") : \"—\";\n  var scoreCell    = item.score ? scoreIcon(item.score) + item.score : \"—\";\n\n  // ----- Δ Score vs NEXT row (one below) -----\n  var deltaCell = \"—\";\n  var currScore = parseInt(item.score, 10);\n\n  if (!isNaN(currScore) && (i + 1) < combined.length) {\n    var nextScore = parseInt(combined[i + 1].score, 10);\n    if (!isNaN(nextScore)) {\n      var diff = currScore - nextScore;   // current (more recent) vs previous (older)\n      if (diff > 0)      { deltaCell = \"+\" + diff; }\n      else if (diff < 0) { deltaCell = String(diff); }\n      else               { deltaCell = \"0\"; }\n    }\n  }\n\n  // ----- Risk with icon (unchanged from before) -----\n  var riskCell = \"—\";\n  if (item.risk) {\n    riskCell = riskIcon(item.risk) + \" \" + item.risk;\n  }\n\n  var upgradeCell = item.upgrade ? upgradeIcon(item.upgrade) + item.upgrade : \"—\";\n\n  var archetypeCell = item.archetype ? archetypeIcon(item.archetype) + item.archetype : \"—\";\n\n\n  var summaryText = item.summary\n    ? (item.summary.length > 30 ? item.summary.substr(0, 30) + \"...\" : item.summary)\n    : \"—\";\n\n  var linkCell = \"—\";\n  if (item.link) {\n    linkCell = \"[_ View](\" + item.link + \")\";\n  }\n\n  md += \"| \" + dateCell +\n        \" | \" + scoreCell +\n        \" | \" + deltaCell +\n        \" | \" + riskCell +\n        \" | \" + upgradeCell +\n        \" | \" + archetypeCell +\n        \" | \" + summaryText +\n        \" | \" + linkCell +\n        \" |\\n\";\n}\n\n// ---------- 5. Output ----------\nmd;",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "health-checks",
+      "field_id": 274800976,
+      "label": "Health Checks",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "| Date | Score | Δ Score | Risk | Upgrade % | Archetype | Notes | Check |\n| ---- | ----- | ------- | ---- | ---------- | --------- | ----- | ----- |\n| 04/01/26 | _ 0 | 0 | _ 0 | _ 0 | — | — | [_ View](https://podio.com/ccous/hub/apps/contact-health-checks/items/3305) |\n| 03/24/26 | _ 0 | — | _ 0 | _ 0 | — | — | [_ View](https://podio.com/ccous/hub/apps/contact-health-checks/items/3174) |\n"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 84,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Podio User Profile",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var PodioURL = \"https://podio.com/users/\"+@[Podio User ID](field_131663986)\nvar Output = \"\"\n\nOutput = \"Click here to view Podio User Profile page\".link(PodioURL)\n\n\nif(@[Podio User ID](field_131663986)==null) {\n  Output = \"Please activate the 'Search For Podio User ID' function below\"\n}\n\nOutput\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "podio-user-profile",
+      "field_id": 144726154,
+      "label": "Podio User Profile",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Please activate the 'Search For Podio User ID' function below"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 90,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# CONTACT DUPLICATE INFORMATION \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-4",
+      "field_id": 133631782,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# CONTACT DUPLICATE INFORMATION \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 91,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Duplicate Status",
+        "mapping": null,
+        "required": true,
+        "settings": {
+          "options": [
+            {
+              "id": 6,
+              "status": "active",
+              "text": "Not Checked",
+              "color": "D2E4EB"
+            },
+            {
+              "id": 5,
+              "status": "active",
+              "text": "Check Now",
+              "color": "F7F0C5"
+            },
+            {
+              "id": 3,
+              "status": "active",
+              "text": "ACTIVE",
+              "color": "DCEBD8"
+            },
+            {
+              "id": 7,
+              "status": "active",
+              "text": "No Email Address To Check",
+              "color": "D1F3EC"
+            },
+            {
+              "id": 4,
+              "status": "active",
+              "text": "SUSPECTED DUPLICATE",
+              "color": "FFD5C2"
+            },
+            {
+              "id": 1,
+              "status": "active",
+              "text": "CONFIRMED DUPLICATE",
+              "color": "F7D1D0"
+            },
+            {
+              "id": 2,
+              "status": "deleted",
+              "text": "Merge",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "dropdown"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "statusaction",
+      "field_id": 125701761,
+      "label": "Duplicate Status",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 3,
+            "status": "active",
+            "text": "ACTIVE",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 93,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# SALES TRANSACTIONS \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-6",
+      "field_id": 133631784,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# SALES TRANSACTIONS \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 95,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Sales Transactions History Table",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var show = @[Nanacast Transactions | Show Most Recent](field_204029025) || 10;\nvar rowsJson = @[All of Order Row [H]](in_274590249_129807977); // from Order app\n\n// Parse safely\nvar rows = [];\nfor (var i=0;i<rowsJson.length;i++){\n  try {\n    var r = JSON.parse(rowsJson[i]);\n    if (r && r.dateISO) rows.push(r);\n  } catch(e){}\n}\n\n// Sort DESC (most-recent first)\nrows.sort(function(a,b){\n  return new Date(b.dateISO||0) - new Date(a.dateISO||0);\n});\n\n// Limit\nif (show != \"All\") {\n  var n = parseInt(show,10);\n  if (isNaN(n) || n <= 0) n = 10;\n  rows = rows.slice(0,n);\n}\n\n// Helpers\nfunction esc(s){ return (s||\"\").replace(/\\|/g,\"\\\\|\"); }\nfunction trunc(s,n){ s=s||\"\"; return s.length>55 ? s.substring(0,55)+\"…\" : s; }\nfunction money(n){ n=(isNaN(n)?0:Number(n)); return \"$\"+n.toFixed(2); }\nfunction dFmt(iso){ return iso ? moment(iso).format(\"MM-DD-YYYY\") : \"\"; }\n\n// Platform → emoji\nfunction platIcon(p){\n  if (p==\"Nanacast\")   return \"_\";\n  if (p==\"Circle\")     return \"⭕\";\n  if (p==\"Thrivecart\") return \"_\";\n  return \"_\";\n}\n\n// Build table\nif (rows.length === 0) {\n  \"No transactions found.\";\n} else {\n  var out = \"Date | Description | Price | Platform | Event \\n\";\n  out += \"---|---|---|---|--- \\n\";\n\n  for (var i=0;i<rows.length;i++){\n    var r = rows[i] || {};\n    var d = dFmt(r.dateISO);\n    var dLink = r.link ? \"[\"+d+\"](\"+r.link+\")\" : d;\n    out += dLink+\" | \"+esc(trunc(r.description,55))+\" | \"+money(r.price)+\" | \"+\n           platIcon(r.platform)+\" \"+esc(r.platform||\"\")+\" | \"+esc(r.eventType||\"\")+\"\\n\";\n  }\n\n  out;\n}",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "sales-transactions-history-table",
+      "field_id": 274590251,
+      "label": "Sales Transactions History Table",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Date | Description | Price | Platform | Event \n---|---|---|---|--- \n[03-23-2026](https://podio.com/1/1/item/3275345655) | cco-club-monthly-26 | $24.99 | ⭕ Circle | Paywall Charged - Webhook\n"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 96,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Nanacast Transactions History Table",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "var Output = \"\";\nvar show = @[Nanacast Transactions | Show Most Recent](field_204029025) || 10;\nvar rows = @[All of Nanacast Table Row [H]](in_159372330_129807977)\n\nif(show != \"All\") {\n  start = rows.length - show;\n};\n\nOutput += \"Date | Description | Price | Type \\n\";\nOutput += \"---|---|---|--- \\n\";\n\nfor(i=start; i<rows.length; i++){\n   Output += rows[i]+\"\\n\";\n}\n\nOutput\n\n\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "nanacast-transactions-history",
+      "field_id": 159372608,
+      "label": "Nanacast Transactions History Table",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Date | Description | Price | Type \n---|---|---|--- \nundefined\nundefined\nundefined\nundefined\nundefined\nundefined\nundefined\nundefined\nundefined\n[03-23-2026](https://podio.com/1/1/item/3275345655) | cco-club-monthly-26 | $24.99 | null\n"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 105,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# EMPLOYEE INFORMATION \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-3",
+      "field_id": 129404323,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# EMPLOYEE INFORMATION \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 108,
+        "description": null,
+        "hidden": true,
+        "hidden_create_view_edit": false,
+        "label": "CCO Staff Podio Profile For Search [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[CCO Staff Podio Profile](field_127525329)+\"\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "h-cco-staff-podio-profile-for-search",
+      "field_id": 145998468,
+      "label": "CCO Staff Podio Profile For Search [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "null"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 117,
+        "description": null,
+        "hidden": true,
+        "hidden_create_view_edit": false,
+        "label": "Clean Name Search",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "// This clears off any commas etc in the name\n\nvar Output = @[Name](field_112436965)\nvar String = @[Contact Type](field_112437086)+\"\"\nvar n = String.indexOf(\"Employee\")\nif(n>=0) {\nOutput = \"Employee \"+@[Name](field_112436965)\n}\nOutput = Output.split(\",\", 1)\nOutput[0]\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "helpdesk-search",
+      "field_id": 127782962,
+      "label": "Clean Name Search",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Renee Busacca"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 118,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "==>",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"----------------------------\\n\"+\n\"# SYSTEM INFORMATION \\n\"+\n\"----------------------------\\n\"+\n@[Navigation Bar](field_145324704)",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "field-8",
+      "field_id": 133631786,
+      "label": "==>",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "----------------------------\n# SYSTEM INFORMATION \n----------------------------\n[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 132,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "URL to this contact item [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"https://podio.com/ccous/hub/apps/contacts/items/\" + @[Unique ID](item_app_item_id).replace(\"contact\", \"\")",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "url-to-this-contact-item",
+      "field_id": 147089347,
+      "label": "URL to this contact item [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "https://podio.com/ccous/hub/apps/contacts/items/96011"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 136,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "==> [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "// @[Unique ID](item_app_item_id)\n\n\"Hidden fields\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "h",
+      "field_id": 205885567,
+      "label": "==> [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "Hidden fields"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 137,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "circleUserCode [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": 2,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[Circle User ID](field_272609487) ? 1 : 0",
+          "return_type": "number"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "circleusercode-h",
+      "field_id": 274160433,
+      "label": "circleUserCode [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "1.0000"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 140,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Last Xenforo JSON Payload [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "last-xenforo-json-payload-h",
+      "field_id": 207898730,
+      "label": "Last Xenforo JSON Payload [H]",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "{\"success\":true,\"user\":{\"about\":\"\",\"activity_visible\":true,\"alert_optout\":[],\"allow_post_profile\":\"none\",\"allow_receive_news_feed\":\"none\",\"allow_send_personal_conversation\":\"none\",\"allow_view_identities\":\"none\",\"allow_view_profile\":\"none\",\"avatar_urls\":{\"o\":null,\"h\":null,\"l\":null,\"m\":null,\"s\":null},\"can_ban\":false,\"can_converse\":true,\"can_edit\":true,\"can_follow\":true,\"can_ignore\":true,\"can_post_profile\":true,\"can_view_profile\":true,\"can_view_profile_posts\":true,\"can_warn\":true,\"content_show_signature\":false,\"creation_watch_state\":\"watch_email\",\"custom_fields\":{\"full_name\":\"Renee Busacca\",\"podio_contact_link\":\"https:\\/\\/podio.com\\/ccous\\/hub\\/apps\\/contacts\\/items\\/96011\"},\"custom_title\":\"\",\"email\":\"reneebusacca@gmail.com\",\"email_on_conversation\":true,\"gravatar\":\"\",\"interaction_watch_state\":\"watch_email\",\"is_admin\":false,\"is_banned\":false,\"is_discouraged\":false,\"is_followed\":false,\"is_ignored\":false,\"is_moderator\":false,\"is_staff\":false,\"is_super_admin\":false,\"last_activity\":1774299127,\"location\":\"\",\"message_count\":0,\"profile_banner_urls\":{\"l\":null,\"m\":null},\"push_on_conversation\":true,\"push_optout\":[],\"question_solution_count\":0,\"reaction_score\":0,\"receive_admin_email\":true,\"register_date\":1774299127,\"secondary_group_ids\":[],\"show_dob_date\":false,\"show_dob_year\":false,\"signature\":\"\",\"timezone\":\"America\\/New_York\",\"trophy_points\":0,\"use_tfa\":false,\"user_group_id\":2,\"user_id\":40446,\"user_state\":\"valid\",\"user_title\":\"New member\",\"username\":\"ReneeB_96011\",\"view_url\":\"https:\\/\\/www.cco.community\\/members\\/reneeb_96011.40446\\/\",\"visible\":true,\"vote_score\":0,\"warning_points\":0,\"website\":\"\"}}"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 143,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Podio Item ID Text [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "podio-item-id-text-h",
+      "field_id": 208299021,
+      "label": "Podio Item ID Text [H]",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "3275345593"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 145,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "internsTotalHours [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "@[All of Intern Total Hours ](in_267239833_266986720).toString() || \"0\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "internstotalhours-h",
+      "field_id": 267239858,
+      "label": "internsTotalHours [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 146,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Email Address For Search [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "size": "small",
+          "format": "plain"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "h-email-address-for-search",
+      "field_id": 164909409,
+      "label": "Email Address For Search [H]",
+      "status": "active",
+      "type": "text",
+      "values": [
+        {
+          "value": "reneebusaccaatgmaildotcom"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 147,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Navigation Bar [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "//@[Contact](field_127886375)\n\"[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)\"",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "navigation-bar",
+      "field_id": 145324704,
+      "label": "Navigation Bar [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "[Main Details](#main-contact-details) | [CCO Club Subs](#field-10) | [PTs](#progress-trackers) | [SSH](#student-support-hubs) | [Tests](#student-tests) | [Podio](#podio-information) | [Dupes](#contact-duplicate-information) | [Sales Transactions](#sales-transactions) | [Employee Info](#employee-information)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 148,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Email Signature [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "//<h4>Name</h4>\n//<p>ROLE, CCO</p>\n//<p>e: EMAIL | w: www.cco.us</p>\n//<p>Get Certified | Stay Certified</p>\n//<p>FB LI YT TW</p>\n//[link text](http://example.com/)\n//![Alt text](/path/to/img.jpg \"Optional title\")\n\n\nvar signature='';\n\n\nif(@[Credentials](field_125311532) != ''&& @[Credentials](field_125311532)!=null && @[Credentials](field_125311532)!='null'){\n   signature += '<h4>' + @[Name](field_112436965) + ', ' + @[Credentials](field_125311532) + '</h4>'\n} else {\n   signature += '<h4>' + @[Name](field_112436965) +'</h4>'\n}\n\nif(@[Job Title](field_112436966) != '' && @[Job Title](field_112436966) != null && @[Job Title](field_112436966) != 'null'){\n   signature += '<p>' + @[Job Title](field_112436966) + ', Certification Coaching Organization, LLC</p>'\n} else {\n   signature += '<p>Certification Coaching Organization, LLC</p>'\n}\nvar a = @[Email Address](field_112436968); \nif(a){\n   signature += '<p>e: ' + a.map(function (obj) { return obj.value})[0] + ' | w: [www.cco.us](https://www.cco.us/)</p>';\n} else {\nsignature += '<p>w: [www.cco.us](https://www.cco.us/)</p>'\n}\n\nsignature +='<p>[![Facebook](http://s3.amazonaws.com/ws-gapp-images/facebook.png)](https://www.facebook.com/cco.us)[![LinkedIn](http://s3.amazonaws.com/ws-gapp-images/linkedin.png)](https://www.linkedin.com/company/codingcertification-org) [![YouTube](http://s3.amazonaws.com/ws-gapp-images/youtube.png)](https://www.youtube.com/medicalcodingcert) [![Twitter](http://s3.amazonaws.com/ws-gapp-images/twitter.png)](https://twitter.com/certcoachingorg)[![blogRSS](http://s3.amazonaws.com/ws-gapp-images/blogRSS.png)](https://www.cco.us/forum/?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature)[![GooglePlus](http://s3.amazonaws.com/ws-gapp-images/googlepluspage.png)](https://plus.google.com/+CodingcertificationOrg)[![Pinterest](http://s3.amazonaws.com/ws-gapp-images/pinterest.png)](https://www.pinterest.com/certcoachingorg/)[![Instagram](http://s3.amazonaws.com/ws-gapp-images/instagram.png)](https://www.instagram.com/certificationcoaching/)</p>';\n\nsignature += '<p>[Get Certified](http://cco.us/?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature) | [Stay Certified](http://cco.us/?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature)</p>';\n\nsignature +='<p> ![Webinar](https://s3.amazonaws.com/images.wisestamp.com/apps/webinar/3.png ) Join Our Monthly Webinar: [Fun Free Monthly Q&A, Webinar](https://www.cco.us/free-medical-coding-webinar/?utm_campaign=free%20webinar&utm_medium=helpdesk&utm_source=cco%20webinar)</p>'\n\nsignature +='<p> ![Newsletter](https://s3.amazonaws.com/images.wisestamp.com/apps/newsletter/2.png) Newsletter [Join Our Insider Club](https://www.cco.us/insider/?utm_campaign=CCO%20General&utm_source=support)</p>'\n\nsignature +='<p> ![Testimonials](https://s3.amazonaws.com/images.wisestamp.com/apps/feedback/1.png) Testimonial [Share it here](http://cco.us/testimonials?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature)</p>'\n\nsignature",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "h-email-signature",
+      "field_id": 172968912,
+      "label": "Email Signature [H]",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "#### Renee Busacca, CPB, CPC-A\n\nCertification Coaching Organization, LLC\n\ne: reneebusacca@gmail.com | w: [www.cco.us](https://www.cco.us/)\n\n[![Facebook](http://s3.amazonaws.com/ws-gapp-images/facebook.png)](https://www.facebook.com/cco.us)[![LinkedIn](http://s3.amazonaws.com/ws-gapp-images/linkedin.png)](https://www.linkedin.com/company/codingcertification-org) [![YouTube](http://s3.amazonaws.com/ws-gapp-images/youtube.png)](https://www.youtube.com/medicalcodingcert) [![Twitter](http://s3.amazonaws.com/ws-gapp-images/twitter.png)](https://twitter.com/certcoachingorg)[![blogRSS](http://s3.amazonaws.com/ws-gapp-images/blogRSS.png)](https://www.cco.us/forum/?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature)[![GooglePlus](http://s3.amazonaws.com/ws-gapp-images/googlepluspage.png)](https://plus.google.com/+CodingcertificationOrg)[![Pinterest](http://s3.amazonaws.com/ws-gapp-images/pinterest.png)](https://www.pinterest.com/certcoachingorg/)[![Instagram](http://s3.amazonaws.com/ws-gapp-images/instagram.png)](https://www.instagram.com/certificationcoaching/)\n\n[Get Certified](http://cco.us/?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature) | [Stay Certified](http://cco.us/?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature)\n\n![Webinar](https://s3.amazonaws.com/images.wisestamp.com/apps/webinar/3.png ) Join Our Monthly Webinar: [Fun Free Monthly Q&A, Webinar](https://www.cco.us/free-medical-coding-webinar/?utm_campaign=free%20webinar&utm_medium=helpdesk&utm_source=cco%20webinar)\n\n![Newsletter](https://s3.amazonaws.com/images.wisestamp.com/apps/newsletter/2.png) Newsletter [Join Our Insider Club](https://www.cco.us/insider/?utm_campaign=CCO%20General&utm_source=support)\n\n![Testimonials](https://s3.amazonaws.com/images.wisestamp.com/apps/feedback/1.png) Testimonial [Share it here](http://cco.us/testimonials?utm_source=WiseStamp&utm_medium=email&utm_term=&utm_content=&utm_campaign=signature)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 149,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Email Tracking",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "\"![](http://www.globimail.com/images/gm-activated-sm.png)\\n\\n---------------------------------------\\n\\n[Compose New Message >](http://www.globimail.com/l2/NEW2.AMlp.o74N.\"+@[Unique ID](item_app_item_id)+\")\"\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "email-tracking",
+      "field_id": 208270698,
+      "label": "Email Tracking",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "![](http://www.globimail.com/images/gm-activated-sm.png)\n\n---------------------------------------\n\n[Compose New Message >](http://www.globimail.com/l2/NEW2.AMlp.o74N.contact96011)"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 151,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "WO209 - Podio Fields Updated from Circle [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "wo209-podio-fields-updated-from-circle-h",
+      "field_id": 274160444,
+      "label": "WO209 - Podio Fields Updated from Circle [H]",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 1,
+            "status": "active",
+            "text": "Done",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 152,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "WO209 - Circle Member Updated with Podio Url [H]",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "options": [
+            {
+              "id": 1,
+              "status": "active",
+              "text": "Done",
+              "color": "DCEBD8"
+            }
+          ],
+          "multiple": false,
+          "display": "inline"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "wo209-circle-member-updated-with-podio-url-h",
+      "field_id": 274160445,
+      "label": "WO209 - Circle Member Updated with Podio Url [H]",
+      "status": "active",
+      "type": "category",
+      "values": [
+        {
+          "value": {
+            "id": 1,
+            "status": "active",
+            "text": "Done",
+            "color": "DCEBD8"
+          }
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 155,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Progress Tracker History JSON",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "// --- Collect arrays from related Progress Tracker items ---\nvar titles          = @[All of Title](in_125311850_125306242);\nvar types           = @[All of Progress Tracker Type](in_128205285_125306242);\nvar overallStatus   = @[All of Overall Status](in_149529784_125306242);\nvar dateEnrolled    = @[All of Date Enrolled](in_126215935_125306242);\nvar lastTouch       = @[All of Last Touch](in_127701942_125306242);\nvar ticklerDate     = @[All of Last Touch Tickler](in_128248653_125306242);\nvar ticklerOverride = @[All of Last Touch Tickler Delay Override](in_168892307_125306242);\nvar touchStatus     = @[All of Last Touch Status](in_153443921_125306242);\n\nvar psDmStatus      = @[All of PS Group DM Status](in_273000530_125306242);\nvar psDmLink        = @[All of PS Group DM on Circle](in_273136936_125306242);\n\nvar coach           = @[All of Coach calc [H]](in_274898143_125306242);\nvar coachUser       = @[All of [H] Coach Podio User](in_131330288_125306242);\n\nvar autoResults     = @[All of Automate Test Results Email](in_172904004_125306242);\n\nvar ptUrl           = @[All of Item URL [H]](in_185356885_125306242);\nvar ptItemId        = @[All of Podio Item ID Text [H]](in_155580968_125306242);\nvar ptEmailAddress  = @[All of PT Email Address [H]](in_185280538_125306242);\n\n// --- Build tracker array ---\nvar trackers = [];\nfor (var i = 0; i < titles.length; i++) {\n  trackers.push({\n    pt_id: ptItemId[i] || null,\n    title: titles[i] || \"\",\n    type: types[i] || \"\",\n    overall_status: overallStatus[i] || \"\",\n    date_enrolled: dateEnrolled[i] || null,\n    last_touch: lastTouch[i] || null,\n    last_touch_tickler: ticklerDate[i] || null,\n    last_touch_tickler_override: ticklerOverride[i] || \"\",\n    last_touch_status: touchStatus[i] || \"\",\n\n    ps_group_dm_status: psDmStatus[i] || \"\",\n    ps_group_dm_link: psDmLink[i] || \"\",\n\n    coach: coach[i] || \"\",\n    coach_podio_user: coachUser[i] || \"\",\n\n    automate_test_results_email: autoResults[i] || \"\",\n    pt_item_url: ptUrl[i] || \"\",\n    pt_email_address: ptEmailAddress[i] || \"\"\n  });\n}\n\n// --- Sort by Date Enrolled (newest first) ---\ntrackers.sort(function (a, b) {\n  var da = a.date_enrolled ? new Date(a.date_enrolled).getTime() : 0;\n  var db = b.date_enrolled ? new Date(b.date_enrolled).getTime() : 0;\n  return db - da;\n});\n\n// --- Summary fields for the health-check payload ---\nvar activeCount = 0;\nvar latest = trackers.length ? trackers[0] : null;\n\nfor (var j = 0; j < trackers.length; j++) {\n  var status = (trackers[j].overall_status || \"\").toLowerCase();\n  if (status.indexOf(\"active\") > -1 || status.indexOf(\"enrolled\") > -1) {\n    activeCount++;\n  }\n}\n\nvar out = {\n  progress_tracker_count: trackers.length,\n  active_progress_tracker_count: activeCount,\n  last_progress_type:  latest ? latest.type : null,\n  last_progress_status: latest ? latest.overall_status : null,\n  last_progress_touch_date: latest ? latest.last_touch : null,\n  last_progress_coach: latest ? latest.coach : null,\n  trackers: trackers\n};\n\nJSON.stringify(out);\n",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "progress-tracker-history-json",
+      "field_id": 274898169,
+      "label": "Progress Tracker History JSON",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "{\"progress_tracker_count\":0,\"active_progress_tracker_count\":0,\"last_progress_type\":null,\"last_progress_status\":null,\"last_progress_touch_date\":null,\"last_progress_coach\":null,\"trackers\":[]}"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 156,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": true,
+        "label": "Help Desk Tickets History JSON",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": null,
+          "calendar": null,
+          "color": null,
+          "expression": null,
+          "script": "// --- Collect arrays from related Help Desk Tickets ---\nvar ids        = @[All of HD Ticket ID [H]](in_143427125_125146452);\nvar subjects   = @[All of Subject](in_125145746_125146452);\nvar issuesRaw  = @[All of Issue](in_122333512_125146452);\nvar types      = @[All of Type](in_121385656_119252258);\nvar statuses   = @[All of Status](in_122333513_125146452);\nvar priorities = @[All of Priority](in_122333508_125146452);\nvar sources    = @[All of Source](in_125305447_125146452);\nvar agents     = @[All of CCO Team Member calc [H]](in_274898025_125146452);\nvar received   = @[All of Date Received](in_122333509_125146452);\nvar lastTouch  = @[All of Last Touch Point](in_134317212_125146452);\n\n// --- Helper: strip HTML + truncate long text for the AI payload ---\nfunction cleanIssue(html) {\n  if (!html) return \"\";\n  // remove HTML tags\n  var txt = (\"\" + html).replace(/<[^>]+>/g, \"\");\n  // collapse whitespace\n  txt = txt.replace(/\\s+/g, \" \").trim();\n  // limit length so the JSON doesn't explode\n  if (txt.length > 500) {\n    txt = txt.substr(0, 500) + \"…\";\n  }\n  return txt;\n}\n\n// --- Build ticket array ---\nvar tickets = [];\nfor (var i = 0; i < subjects.length; i++) {\n  tickets.push({\n    ticket_id: ids[i] || null,\n    subject: subjects[i] || \"\",\n    type: types[i] || \"\",\n    status: statuses[i] || \"\",\n    priority: priorities[i] || \"\",\n    source: sources[i] || \"\",\n    agent: agents[i] || \"\",\n    date_received: received[i] || null,\n    last_touch: lastTouch[i] || null,\n    issue_summary: cleanIssue(issuesRaw[i])\n  });\n}\n\n// --- Sort by Date Received (newest first) ---\ntickets.sort(function (a, b) {\n  var da = a.date_received ? new Date(a.date_received).getTime() : 0;\n  var db = b.date_received ? new Date(b.date_received).getTime() : 0;\n  return db - da;\n});\n\n// Optional: limit to last N tickets if needed\n// tickets = tickets.slice(0, 20);\n\n// --- Top-level metadata for health check ---\nvar lastTicket = tickets.length ? tickets[0] : null;\n\nvar out = {\n  support_ticket_count: tickets.length,\n  last_support_date: lastTicket ? lastTicket.date_received : null,\n  last_support_status: lastTicket ? lastTicket.status : null,\n  last_support_agent: lastTicket ? lastTicket.agent : null,\n  tickets: tickets\n};\n\nJSON.stringify(out);\n ",
+          "return_type": "text"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "help-desk-tickets",
+      "field_id": 274898029,
+      "label": "Help Desk Tickets History JSON",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "value": "{\"support_ticket_count\":2,\"last_support_date\":\"2026-03-31T19:41:06.000Z\",\"last_support_status\":\"Closed\",\"last_support_agent\":\"William Kuevogah\",\"tickets\":[{\"ticket_id\":\"HD55180\",\"subject\":\"cancel membership/subscription\",\"type\":\"\",\"status\":\"Closed\",\"priority\":\"Medium\",\"source\":\"Web Form\",\"agent\":\"William Kuevogah\",\"date_received\":\"2026-03-31T19:41:06.000Z\",\"last_touch\":\"2026-03-31T20:36:45.000Z\",\"issue_summary\":\"none of the links to cancel or manage payments will open up\"},{\"ticket_id\":\"HD55096\",\"subject\":\"login in\",\"type\":\"\",\"status\":\"Closed\",\"priority\":\"High\",\"source\":\"Web Form\",\"agent\":\"William Kuevogah\",\"date_received\":\"2026-03-24T01:17:49.000Z\",\"last_touch\":\"2026-03-24T11:45:05.000Z\",\"issue_summary\":\"i want to log in to take CEU exam . Says my password is wrong. and theres no link to reset\"}]}"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 157,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Recent Health Check",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": "enabled",
+          "calendar": false,
+          "color": "DCEBD8",
+          "expression": null,
+          "script": "@[Max of Health Check Date](in_max_274797013_274796983)",
+          "return_type": "date"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "recent-health-check",
+      "field_id": 274800096,
+      "label": "Recent Health Check",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "start": "2026-04-01 08:01:59",
+          "start_date": "2026-04-01",
+          "start_time": "08:01:59",
+          "start_utc": "2026-04-01 07:01:59",
+          "start_date_utc": "2026-04-01",
+          "start_time_utc": "07:01:59"
+        }
+      ]
+    },
+    {
+      "config": {
+        "default_value": null,
+        "delta": 158,
+        "description": null,
+        "hidden": false,
+        "hidden_create_view_edit": false,
+        "label": "Created On",
+        "mapping": null,
+        "required": false,
+        "settings": {
+          "unit": null,
+          "decimals": null,
+          "time": "enabled",
+          "calendar": false,
+          "color": "DCEBD8",
+          "expression": null,
+          "script": "@[Created On](item_created_on)",
+          "return_type": "date"
+        },
+        "unique": false,
+        "visible": true
+      },
+      "external_id": "created-on",
+      "field_id": 272799391,
+      "label": "Created On",
+      "status": "active",
+      "type": "calculation",
+      "values": [
+        {
+          "start": "2026-03-23 20:51:18",
+          "start_date": "2026-03-23",
+          "start_time": "20:51:18",
+          "start_utc": "2026-03-23 20:51:18",
+          "start_date_utc": "2026-03-23",
+          "start_time_utc": "20:51:18"
+        }
+      ]
+    }
+  ],
+  "files": [],
+  "invite": null,
+  "is_liked": false,
+  "item_id": 3275345593,
+  "last_event_on": "2026-03-31 20:36:49",
+  "like_count": 0,
+  "link": "https://podio.com/ccous/hub/apps/contacts/items/96011",
+  "linked_account_data": null,
+  "linked_account_id": null,
+  "participants": {},
+  "presence": {
+    "user_id": 6047669,
+    "signature": "0520e96d9ac90ff03d567cb75730fa5b9aa9d739",
+    "ref_type": "item",
+    "ref_id": 3275345593
+  },
+  "priority": 3275345593,
+  "push": {
+    "channel": "/item/3275345593",
+    "timestamp": 1777537122,
+    "signature": "0eb7604bbd48cf9a5fe647d2454a2b6ff901bc7d",
+    "expires_in": 21600
+  },
+  "ratings": {
+    "like": {
+      "average": null,
+      "counts": {
+        "1": {
+          "total": 0,
+          "users": []
+        }
+      }
+    }
+  },
+  "recurrence": null,
+  "ref": null,
+  "refs": [
+    {
+      "app": {
+        "app_id": 15817104,
+        "config": {
+          "icon": "215.png",
+          "icon_id": 215,
+          "item_name": "HD Ticket",
+          "name": "Help Desk Tickets",
+          "type": "standard"
+        },
+        "current_revision": 354,
+        "default_view_id": null,
+        "icon": "215.png",
+        "icon_id": 215,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "HD Ticket",
+        "link": "https://podio.com/ccous/hub/apps/help-desk-tickets",
+        "link_add": "https://podio.com/ccous/hub/apps/help-desk-tickets/items/new",
+        "name": "Help Desk Tickets",
+        "sharefile_vault_url": null,
+        "space_id": 4201014,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/hub/apps/help-desk-tickets/items/new",
+        "url": "https://podio.com/ccous/hub/apps/help-desk-tickets",
+        "url_label": "help-desk-tickets",
+        "workflow_accounting_info": null
+      },
+      "count": 2,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": true,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "submitter-podio-contact-item",
+        "field_id": 125146452,
+        "label": "Contact",
+        "type": "app"
+      }
+    },
+    {
+      "app": {
+        "app_id": 16234798,
+        "config": {
+          "icon": "113.png",
+          "icon_id": 113,
+          "item_name": "Test Result",
+          "name": "Test Results",
+          "type": "standard"
+        },
+        "current_revision": 142,
+        "default_view_id": null,
+        "icon": "113.png",
+        "icon_id": 113,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "Test Result",
+        "link": "https://podio.com/ccous/course-management/apps/test-results",
+        "link_add": "https://podio.com/ccous/course-management/apps/test-results/items/new",
+        "name": "Test Results",
+        "sharefile_vault_url": null,
+        "space_id": 4275251,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/course-management/apps/test-results/items/new",
+        "url": "https://podio.com/ccous/course-management/apps/test-results",
+        "url_label": "test-results",
+        "workflow_accounting_info": null
+      },
+      "count": 20,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": true,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "contact",
+        "field_id": 125914549,
+        "label": "Contact",
+        "type": "app"
+      }
+    },
+    {
+      "app": {
+        "app_id": 16274502,
+        "config": {
+          "icon": "359.png",
+          "icon_id": 359,
+          "item_name": "Order",
+          "name": "All Orders",
+          "type": "standard"
+        },
+        "current_revision": 182,
+        "default_view_id": null,
+        "icon": "359.png",
+        "icon_id": 359,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "Order",
+        "link": "https://podio.com/ccous/orders/apps/all-orders",
+        "link_add": "https://podio.com/ccous/orders/apps/all-orders/items/new",
+        "name": "All Orders",
+        "sharefile_vault_url": null,
+        "space_id": 4459726,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/orders/apps/all-orders/items/new",
+        "url": "https://podio.com/ccous/orders/apps/all-orders",
+        "url_label": "all-orders",
+        "workflow_accounting_info": null
+      },
+      "count": 1,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": true,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "contact",
+        "field_id": 129807977,
+        "label": "Contact",
+        "type": "app"
+      }
+    },
+    {
+      "app": {
+        "app_id": 17122975,
+        "config": {
+          "icon": "110.png",
+          "icon_id": 110,
+          "item_name": "Student Invitation To Process",
+          "name": "Student Invitations Processing",
+          "type": "standard"
+        },
+        "current_revision": 150,
+        "default_view_id": null,
+        "icon": "110.png",
+        "icon_id": 110,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "Student Invitation To Process",
+        "link": "https://podio.com/ccous/course-management/apps/student-invitations-processing",
+        "link_add": "https://podio.com/ccous/course-management/apps/student-invitations-processing/items/new",
+        "name": "Student Invitations Processing",
+        "sharefile_vault_url": null,
+        "space_id": 4275251,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/course-management/apps/student-invitations-processing/items/new",
+        "url": "https://podio.com/ccous/course-management/apps/student-invitations-processing",
+        "url_label": "student-invitations-processing",
+        "workflow_accounting_info": null
+      },
+      "count": 1,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": false,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "contact",
+        "field_id": 133632962,
+        "label": "Contact",
+        "type": "app"
+      }
+    },
+    {
+      "app": {
+        "app_id": 30430633,
+        "config": {
+          "icon": "120.png",
+          "icon_id": 120,
+          "item_name": "Free Forum & CEU Sign-Up",
+          "name": "Free Forum & CEU Sign-Up",
+          "type": "contact"
+        },
+        "current_revision": 49,
+        "default_view_id": null,
+        "icon": "120.png",
+        "icon_id": 120,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "Free Forum & CEU Sign-Up",
+        "link": "https://podio.com/ccous/hub/apps/free-forum-ceu-sign-up",
+        "link_add": "https://podio.com/ccous/hub/apps/free-forum-ceu-sign-up/items/new",
+        "name": "Free Forum & CEU Sign-Up",
+        "sharefile_vault_url": null,
+        "space_id": 4201014,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/hub/apps/free-forum-ceu-sign-up/items/new",
+        "url": "https://podio.com/ccous/hub/apps/free-forum-ceu-sign-up",
+        "url_label": "free-forum-ceu-sign-up",
+        "workflow_accounting_info": null
+      },
+      "count": 1,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": true,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "contact-2",
+        "field_id": 273458287,
+        "label": "Contact",
+        "type": "app"
+      }
+    },
+    {
+      "app": {
+        "app_id": 30441980,
+        "config": {
+          "icon": "244.png",
+          "icon_id": 244,
+          "item_name": "Circle Webhooks",
+          "name": "Circle Webhooks",
+          "type": "standard"
+        },
+        "current_revision": 23,
+        "default_view_id": null,
+        "icon": "244.png",
+        "icon_id": 244,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "Circle Webhooks",
+        "link": "https://podio.com/ccous/orders/apps/circle-webhooks",
+        "link_add": "https://podio.com/ccous/orders/apps/circle-webhooks/items/new",
+        "name": "Circle Webhooks",
+        "sharefile_vault_url": null,
+        "space_id": 4459726,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/orders/apps/circle-webhooks/items/new",
+        "url": "https://podio.com/ccous/orders/apps/circle-webhooks",
+        "url_label": "circle-webhooks",
+        "workflow_accounting_info": null
+      },
+      "count": 4,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": true,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "contact",
+        "field_id": 273675366,
+        "label": "Contact",
+        "type": "app"
+      }
+    },
+    {
+      "app": {
+        "app_id": 30551683,
+        "config": {
+          "icon": "206.png",
+          "icon_id": 206,
+          "item_name": "Contact Health Check",
+          "name": "Contact Health Checks",
+          "type": "standard"
+        },
+        "current_revision": 14,
+        "default_view_id": null,
+        "icon": "206.png",
+        "icon_id": 206,
+        "is_default": false,
+        "item_accounting_info": null,
+        "item_name": "Contact Health Check",
+        "link": "https://podio.com/ccous/hub/apps/contact-health-checks",
+        "link_add": "https://podio.com/ccous/hub/apps/contact-health-checks/items/new",
+        "name": "Contact Health Checks",
+        "sharefile_vault_url": null,
+        "space_id": 4201014,
+        "status": "active",
+        "task_accounting_info": null,
+        "url_add": "https://podio.com/ccous/hub/apps/contact-health-checks/items/new",
+        "url": "https://podio.com/ccous/hub/apps/contact-health-checks",
+        "url_label": "contact-health-checks",
+        "workflow_accounting_info": null
+      },
+      "count": 2,
+      "field": {
+        "config": {
+          "label": "Contact",
+          "mapping": null,
+          "settings": {
+            "multiple": true,
+            "referenceable_types": [
+              14660191
+            ],
+            "referenced_apps": [
+              {
+                "app_id": 14660191,
+                "view_id": null
+              }
+            ]
+          }
+        },
+        "external_id": "contact",
+        "field_id": 274796983,
+        "label": "Contact",
+        "type": "app"
+      }
+    }
+  ],
+  "reminder": null,
+  "revision": 19,
+  "current_revision": {
+    "created_by": {
+      "avatar": 2281587189,
+      "avatar_id": 2281587189,
+      "avatar_type": "file",
+      "image": {
+        "external_file_id": null,
+        "file_id": 2281587189,
+        "hosted_by": "podio",
+        "hosted_by_humanized_name": "Podio",
+        "link": "https://files.podio.com/2281587189",
+        "link_target": "_blank",
+        "thumbnail_link": "https://files.podio.com/2281587189",
+        "uuid_link": "https://files.podio.com/868b19d8-cdaf-493d-9a82-4ea015838e30"
+      },
+      "last_seen_on": "2026-04-30 00:06:01",
+      "name": "William Kuevogah",
+      "id": 77020104,
+      "type": "user",
+      "url": "https://podio.com/users/77020104",
+      "user_id": 77020104
+    },
+    "created_on": "2026-03-31 20:36:49",
+    "created_via": {
+      "auth_client_id": 1,
+      "display": false,
+      "id": 1,
+      "name": "Podio",
+      "url": null
+    },
+    "item_revision_id": 15416567863,
+    "revision": 19,
+    "type": "update",
+    "user": {
+      "avatar": 2281587189,
+      "avatar_id": 2281587189,
+      "avatar_type": "file",
+      "image": {
+        "external_file_id": null,
+        "file_id": 2281587189,
+        "hosted_by": "podio",
+        "hosted_by_humanized_name": "Podio",
+        "link": "https://files.podio.com/2281587189",
+        "link_target": "_blank",
+        "thumbnail_link": "https://files.podio.com/2281587189",
+        "uuid_link": "https://files.podio.com/868b19d8-cdaf-493d-9a82-4ea015838e30"
+      },
+      "last_seen_on": "2026-04-30 00:06:01",
+      "name": "William Kuevogah",
+      "id": 77020104,
+      "type": "user",
+      "url": "https://podio.com/users/77020104",
+      "user_id": 77020104
+    }
+  },
+  "initial_revision": {
+    "created_by": {
+      "avatar": 235168937,
+      "avatar_id": 235168937,
+      "avatar_type": "file",
+      "image": {
+        "external_file_id": null,
+        "file_id": 235168937,
+        "hosted_by": "podio",
+        "hosted_by_humanized_name": "Podio",
+        "link": "https://files.podio.com/235168937",
+        "link_target": "_blank",
+        "thumbnail_link": "https://files.podio.com/235168937",
+        "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+      },
+      "last_seen_on": "2026-04-30 08:12:04",
+      "name": "CCO AI",
+      "id": 3507081,
+      "type": "user",
+      "url": "https://podio.com/users/3507081",
+      "user_id": 3507081
+    },
+    "created_on": "2026-03-23 20:51:18",
+    "created_via": {
+      "auth_client_id": 9108,
+      "display": true,
+      "id": 9108,
+      "name": "Workflow automation",
+      "url": null
+    },
+    "item_revision_id": 15387937227,
+    "revision": 0,
+    "type": "creation",
+    "user": {
+      "avatar": 235168937,
+      "avatar_id": 235168937,
+      "avatar_type": "file",
+      "image": {
+        "external_file_id": null,
+        "file_id": 235168937,
+        "hosted_by": "podio",
+        "hosted_by_humanized_name": "Podio",
+        "link": "https://files.podio.com/235168937",
+        "link_target": "_blank",
+        "thumbnail_link": "https://files.podio.com/235168937",
+        "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+      },
+      "last_seen_on": "2026-04-30 08:12:04",
+      "name": "CCO AI",
+      "id": 3507081,
+      "type": "user",
+      "url": "https://podio.com/users/3507081",
+      "user_id": 3507081
+    }
+  },
+  "revisions": [
+    {
+      "created_by": {
+        "avatar": 2281587189,
+        "avatar_id": 2281587189,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 2281587189,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/2281587189",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/2281587189",
+          "uuid_link": "https://files.podio.com/868b19d8-cdaf-493d-9a82-4ea015838e30"
+        },
+        "last_seen_on": "2026-04-30 00:06:01",
+        "name": "William Kuevogah",
+        "id": 77020104,
+        "type": "user",
+        "url": "https://podio.com/users/77020104",
+        "user_id": 77020104
+      },
+      "created_on": "2026-03-31 20:36:49",
+      "created_via": {
+        "auth_client_id": 1,
+        "display": false,
+        "id": 1,
+        "name": "Podio",
+        "url": null
+      },
+      "item_revision_id": 15416567863,
+      "revision": 19,
+      "type": "update",
+      "user": {
+        "avatar": 2281587189,
+        "avatar_id": 2281587189,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 2281587189,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/2281587189",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/2281587189",
+          "uuid_link": "https://files.podio.com/868b19d8-cdaf-493d-9a82-4ea015838e30"
+        },
+        "last_seen_on": "2026-04-30 00:06:01",
+        "name": "William Kuevogah",
+        "id": 77020104,
+        "type": "user",
+        "url": "https://podio.com/users/77020104",
+        "user_id": 77020104
+      }
+    },
+    {
+      "created_by": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "created_on": "2026-03-23 20:56:50",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "item_revision_id": 15387956291,
+      "revision": 18,
+      "type": "update",
+      "user": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      }
+    },
+    {
+      "created_by": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "created_on": "2026-03-23 20:52:53",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "item_revision_id": 15387942933,
+      "revision": 17,
+      "type": "update",
+      "user": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      }
+    },
+    {
+      "created_by": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      },
+      "created_on": "2026-03-23 20:52:51",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "item_revision_id": 15387942766,
+      "revision": 16,
+      "type": "update",
+      "user": {
+        "avatar": -1,
+        "avatar_id": 30,
+        "avatar_type": "icon",
+        "image": null,
+        "last_seen_on": null,
+        "name": "Contacts",
+        "id": 14660191,
+        "type": "app",
+        "url": "https://podio.com/ccous/hub/apps/contacts",
+        "user_id": -1
+      }
+    },
+    {
+      "created_by": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      },
+      "created_on": "2026-03-23 20:52:35",
+      "created_via": {
+        "auth_client_id": 9108,
+        "display": true,
+        "id": 9108,
+        "name": "Workflow automation",
+        "url": null
+      },
+      "item_revision_id": 15387941741,
+      "revision": 15,
+      "type": "update",
+      "user": {
+        "avatar": 235168937,
+        "avatar_id": 235168937,
+        "avatar_type": "file",
+        "image": {
+          "external_file_id": null,
+          "file_id": 235168937,
+          "hosted_by": "podio",
+          "hosted_by_humanized_name": "Podio",
+          "link": "https://files.podio.com/235168937",
+          "link_target": "_blank",
+          "thumbnail_link": "https://files.podio.com/235168937",
+          "uuid_link": "https://files.podio.com/5649c780-95f2-4563-8ed4-5ce50dac04f3"
+        },
+        "last_seen_on": "2026-04-30 08:12:04",
+        "name": "CCO AI",
+        "id": 3507081,
+        "type": "user",
+        "url": "https://podio.com/users/3507081",
+        "user_id": 3507081
+      }
+    }
+  ],
+  "rights": [
+    "add_file",
+    "update",
+    "grant",
+    "add_task",
+    "view",
+    "grant_view",
+    "delete",
+    "subscribe",
+    "add_conversation",
+    "comment",
+    "rate"
+  ],
+  "sharefile_vault_folder_id": null,
+  "sharefile_vault_url": null,
+  "subscribed": false,
+  "subscribed_count": 2,
+  "tags": [],
+  "title": "Renee Busacca",
+  "user_ratings": {
+    "like": null
+  }
+}

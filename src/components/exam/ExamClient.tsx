@@ -270,24 +270,25 @@ export function ExamClient({
   return (
     <div className="flex flex-col h-[calc(100vh-65px)]">
       {/* Top bar */}
-      <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-white border-b border-cco-border shrink-0">
-        <div className="flex items-center gap-3">
-          <h2 className="font-heading font-semibold text-sm text-cco-ink truncate max-w-[200px] sm:max-w-none">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 bg-white border-b border-cco-border shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <h2 className="font-heading font-semibold text-sm text-cco-ink truncate">
             {testName}
           </h2>
-          <span className="text-xs text-cco-muted">
+          <span className="hidden sm:inline text-xs text-cco-muted shrink-0">
             {state.currentIndex + 1} / {state.questions.length}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <div
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-mono font-semibold ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-mono font-semibold ${
               isLowTime
                 ? "bg-red-50 text-red-700 animate-pulse"
                 : "bg-cco-bg-soft text-cco-ink"
             }`}
           >
-            <Clock size={14} />
+            <Clock size={12} className="sm:hidden" />
+            <Clock size={14} className="hidden sm:block" />
             {formatTime(state.timeRemaining)}
           </div>
           <button
@@ -296,28 +297,36 @@ export function ExamClient({
                 type: state.status === "paused" ? "RESUME" : "PAUSE",
               })
             }
-            className="p-2 rounded-full text-cco-muted hover:bg-cco-bg-soft transition"
+            aria-label={state.status === "paused" ? "Resume exam" : "Pause exam"}
+            className="p-1.5 sm:p-2 rounded-full text-cco-muted hover:bg-cco-bg-soft transition"
           >
             {state.status === "paused" ? (
-              <Play size={16} />
+              <Play size={14} className="sm:hidden" />
             ) : (
-              <Pause size={16} />
+              <Pause size={14} className="sm:hidden" />
+            )}
+            {state.status === "paused" ? (
+              <Play size={16} className="hidden sm:block" />
+            ) : (
+              <Pause size={16} className="hidden sm:block" />
             )}
           </button>
           {/* Mobile-only scratch pad toggle */}
           <button
             onClick={() => setShowMobileScratchPad(!showMobileScratchPad)}
-            className="md:hidden p-2 rounded-full text-cco-muted hover:bg-cco-bg-soft transition"
+            aria-label="Scratch pad"
+            className="md:hidden p-1.5 rounded-full text-cco-muted hover:bg-cco-bg-soft transition"
           >
-            <StickyNote size={16} />
+            <StickyNote size={14} />
           </button>
           <button
             onClick={() => setShowSubmitConfirm(true)}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cco-green text-white text-xs font-semibold transition hover:bg-cco-green-600 disabled:opacity-50"
+            aria-label="Submit exam"
+            className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-cco-green text-white text-xs font-semibold transition hover:bg-cco-green-600 disabled:opacity-50"
           >
             <Send size={12} />
-            Submit
+            <span className="hidden sm:inline">Submit</span>
           </button>
         </div>
       </div>

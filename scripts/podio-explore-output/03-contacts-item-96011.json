@@ -1,0 +1,6 @@
+{
+  "__error": true,
+  "status": 404,
+  "body": "{\"error\":\"not_found\",\"error_detail\":null,\"error_description\":\"Object not found\",\"error_parameters\":{},\"error_propagate\":false,\"request\":{\"url\":\"/item/96011\",\"method\":\"GET\",\"query_string\":\"\"}}",
+  "path": "/item/96011"
+}

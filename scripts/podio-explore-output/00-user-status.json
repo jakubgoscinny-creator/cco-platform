@@ -1,0 +1,136 @@
+{
+  "betas": [
+    "granular_notifications_participant",
+    "avoid_redundant_join",
+    "reference_search_with_badges",
+    "trial",
+    "location_filter",
+    "granular_notifications_organizer",
+    "responsive_oauth",
+    "notification_dropdown_exp",
+    "new_ui",
+    "auth_scope_read",
+    "app_share_grant",
+    "force_calendar_with_future_events",
+    "finite_past_calendar",
+    "new_location_field",
+    "contact_app_type",
+    "hide_completedtasks_enabled",
+    "share_public_market",
+    "category_not_empty_filter",
+    "appearin_suddenly_appears_in",
+    "new_notification",
+    "v8_upgrade",
+    "activity_groups_grp_all_events_with_same_limit",
+    "calendar_coloring",
+    "uncheck_calender_by_default",
+    "app_share_with_users",
+    "v8_engine_updated",
+    "enable_item_limit_for_apps",
+    "granular_permissions",
+    "relationship_badge",
+    "newtag_field"
+  ],
+  "calendar_code": null,
+  "flags": [
+    "partner_user"
+  ],
+  "inbox": null,
+  "inbox_new": 14,
+  "mailbox": null,
+  "message_unread_count": 0,
+  "presence": {
+    "user_id": 6047669,
+    "signature": "06467ce065538306527bd2a28a5a2978b68279bf",
+    "ref_type": "user",
+    "ref_id": 6047669
+  },
+  "profile": {
+    "external_id": null,
+    "image": {
+      "external_file_id": null,
+      "file_id": 2422685620,
+      "hosted_by": "podio",
+      "hosted_by_humanized_name": "Podio",
+      "link": "https://files.podio.com/2422685620",
+      "link_target": "_blank",
+      "thumbnail_link": "https://files.podio.com/2422685620",
+      "uuid_link": "https://files.podio.com/e09ca662-c0f9-43aa-b320-8ef27952037f"
+    },
+    "last_seen_on": "2026-04-30 08:17:30",
+    "link": "https://podio.com/users/6047669",
+    "org_id": null,
+    "profile_id": 199475933,
+    "push": {
+      "channel": "/profile/199475933",
+      "timestamp": 1777537074,
+      "signature": "d653799eef022ed7ba69ff4e70069fbbee7c4a40",
+      "expires_in": 21600
+    },
+    "type": "user",
+    "space_id": null,
+    "user_id": 6047669,
+    "avatar": 2422685620,
+    "country": "PL",
+    "mail": [
+      "jakub.goscinny@futuresolutionsonline.co.uk"
+    ],
+    "name": "Jakub Goscinny",
+    "title": [
+      "Solutions Developer"
+    ]
+  },
+  "properties": {},
+  "push": {
+    "channel": "/user/6047669",
+    "timestamp": 1777537074,
+    "signature": "69e3ac9eef3b3e54fa00a999810ddc843151fd74",
+    "expires_in": 21600
+  },
+  "referral": {
+    "status": "inactive",
+    "code": "2c1UUv1pT0XBuqdBUySJag"
+  },
+  "user": {
+    "activated_on": "2020-10-09 15:54:43",
+    "created_on": "2020-10-09 15:48:00",
+    "domain": "futuresolutionsonline.co.uk",
+    "flags": [
+      "partner_user"
+    ],
+    "from_sharefile": false,
+    "is_partner": true,
+    "locale": "en_GB",
+    "mail": "jakub.goscinny@futuresolutionsonline.co.uk",
+    "mails": [
+      {
+        "disabled": false,
+        "verified": true,
+        "mail": "jakub@fsoltd.com",
+        "primary": false
+      },
+      {
+        "disabled": false,
+        "verified": true,
+        "mail": "jakub@futuresolutionsonline.co.uk",
+        "primary": false
+      },
+      {
+        "disabled": false,
+        "verified": true,
+        "mail": "jakub.goscinny@futuresolutionsonline.co.uk",
+        "primary": true
+      },
+      {
+        "disabled": false,
+        "verified": true,
+        "mail": "u1228295539@gmail.com",
+        "primary": false
+      }
+    ],
+    "sf_mail": null,
+    "status": "active",
+    "timezone": "Europe/London",
+    "user_id": 6047669
+  }
+}

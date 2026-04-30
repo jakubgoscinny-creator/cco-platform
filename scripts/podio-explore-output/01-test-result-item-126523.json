@@ -1,0 +1,6 @@
+{
+  "__error": true,
+  "status": 403,
+  "body": "{\"error\":\"forbidden\",\"error_detail\":null,\"error_description\":\"The user with id 6047669 does not have the right view on item with id 126523\",\"error_parameters\":{},\"error_propagate\":false,\"request\":{\"url\":\"/item/126523\",\"method\":\"GET\",\"query_string\":\"\"}}",
+  "path": "/item/126523"
+}
