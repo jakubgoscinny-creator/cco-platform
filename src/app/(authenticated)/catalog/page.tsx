@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { getActiveTests, getDomainNames } from "@/lib/sync";
 import { TestGrid } from "@/components/catalog/TestGrid";
 import { CatalogFilters } from "@/components/catalog/CatalogFilters";
+import { CatalogHero } from "@/components/catalog/CatalogHero";
 import { DataLineage } from "@/components/shared/DataLineage";
-import { PageHeader, timeOfDayGreeting, firstName } from "@/components/shared/PageHeader";
+import { timeOfDayGreeting, firstName } from "@/components/shared/PageHeader";
 import { getSessionContact } from "@/lib/auth";
 import type { TestCardProps } from "@/components/catalog/TestCard";
 
@@ -29,7 +30,7 @@ export default async function CatalogPage({
   const domainNameMap = await getDomainNames(allDomainIds);
 
   // Filter
-  let filtered = allTests.filter((t) => {
+  const filtered = allTests.filter((t) => {
     if (!t.testName) return false;
     if (typeFilter && t.testType !== typeFilter) return false;
     if (
@@ -71,9 +72,8 @@ export default async function CatalogPage({
 
   return (
     <div>
-      <PageHeader
-        gradient
-        eyebrow="Your Study Portal"
+      <CatalogHero
+        eyebrow="CCO Academy · Exam Catalog"
         title={greet ? `${timeOfDayGreeting()}, ${greet}` : "Your exam catalog"}
         subtitle="Pick up where you left off, or start a new CEU quiz. Every exam you complete brings you closer to certified."
         right={<DataLineage syncedAt={latestSync} />}

@@ -15,11 +15,11 @@ const sora = Sora({
 
 export const metadata: Metadata = {
   title: {
-    default: "CCO Portal · Learn it. Get certified. Stay certified.",
-    template: "%s · CCO Portal",
+    default: "CCO Academy · Learn it. Get certified. Stay certified.",
+    template: "%s · CCO Academy",
   },
   description:
-    "Your medical coding study portal from CCO Academy. Practice exams, CEU quizzes, and certificates — learn it, get certified, stay certified.",
+    "CCO Academy — medical coding study portal. Practice exams, CEU quizzes, and certificates. Learn it. Get certified. Stay certified.",
 };
 
 export default function RootLayout({

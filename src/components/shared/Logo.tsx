@@ -1,58 +1,86 @@
 import Image from "next/image";
 import Link from "next/link";
 
+const HORIZONTAL = { src: "/brand/cco-academy-horizontal-green.png", w: 4092, h: 460 };
+const STACKED = { src: "/brand/cco-academy-stacked-green.png", w: 500, h: 500 };
+const ICON_ROUND = { src: "/brand/cco-icon-round.png", w: 411, h: 411 };
+const HEIGHTS: Record<"sm" | "md" | "lg", number> = { sm: 32, md: 48, lg: 112 };
+
 /**
- * CCO brand mark. Two variants:
- *  - <Logo size="sm" /> -- compact: just the logo tile (used in TopBar)
- *  - <Logo size="md" showTagline /> -- logo + wordmark + tagline (used on sign-in)
+ * CCO Academy brand mark.
+ *
+ * Variants:
+ *   - "horizontal" (default): full lockup with the "Academy" wordmark next to the CC tile.
+ *     At size="sm" (header use), the round icon shows on small viewports and the full
+ *     lockup shows on md+ — keeps the TopBar from overflowing on 375px screens.
+ *   - "stacked": square lockup with "Academy" beneath the tile. Good for sign-in display.
  */
 export function Logo({
   size = "sm",
+  variant = "horizontal",
   showTagline = false,
   href = "/catalog",
   className = "",
 }: {
   size?: "sm" | "md" | "lg";
+  variant?: "horizontal" | "stacked";
   showTagline?: boolean;
   href?: string | null;
   className?: string;
 }) {
-  const tileSize = size === "lg" ? 64 : size === "md" ? 48 : 36;
-  const wordSize =
-    size === "lg" ? "text-2xl" : size === "md" ? "text-lg" : "text-base";
+  const height = HEIGHTS[size];
+  const align = variant === "stacked" ? "items-center" : "items-start";
+
+  const mark =
+    variant === "stacked" ? (
+      <Image
+        src={STACKED.src}
+        alt="CCO Academy"
+        width={STACKED.w}
+        height={STACKED.h}
+        priority
+        className="block"
+        style={{ height: `${height}px`, width: `${height}px` }}
+      />
+    ) : (
+      <>
+        {/* Mobile: round icon only */}
+        <Image
+          src={ICON_ROUND.src}
+          alt="CCO Academy"
+          width={ICON_ROUND.w}
+          height={ICON_ROUND.h}
+          priority
+          className="block md:hidden rounded-lg"
+          style={{ height: `${height}px`, width: `${height}px` }}
+        />
+        {/* md+: full horizontal lockup */}
+        <Image
+          src={HORIZONTAL.src}
+          alt="CCO Academy"
+          width={HORIZONTAL.w}
+          height={HORIZONTAL.h}
+          priority
+          className="hidden md:block w-auto"
+          style={{ height: `${height}px` }}
+        />
+      </>
+    );
 
   const inner = (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <div
-        className="relative rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(129,84,129,0.25)] ring-1 ring-black/5"
-        style={{ width: tileSize, height: tileSize }}
-      >
-        <Image
-          src="/brand/cco-logo.png"
-          alt="CCO"
-          width={tileSize}
-          height={tileSize}
-          className="object-cover"
-          priority
-        />
-      </div>
-      <div className="leading-tight">
-        <div className={`font-heading font-bold text-cco-ink ${wordSize}`}>
-          CCO
-          <span className="text-cco-muted font-normal ml-1.5">Portal</span>
-        </div>
-        {showTagline && (
-          <div className="text-[10px] uppercase tracking-[0.2em] text-cco-purple mt-1 font-semibold">
-            Learn it · Get certified · Stay certified
-          </div>
-        )}
-      </div>
+    <div className={`inline-flex flex-col ${align} gap-3 ${className}`}>
+      {mark}
+      {showTagline && (
+        <span className="text-[10px] uppercase tracking-[0.24em] text-cco-purple font-semibold">
+          Learn it · Get certified · Stay certified
+        </span>
+      )}
     </div>
   );
 
   if (href == null) return inner;
   return (
-    <Link href={href} className="no-underline">
+    <Link href={href} className="no-underline" aria-label="CCO Academy">
       {inner}
     </Link>
   );

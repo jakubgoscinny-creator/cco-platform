@@ -12,31 +12,54 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-full flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Ambient brand glows — soft, non-clickable */}
-      <div
-        className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: "#815481" }}
-      />
-      <div
-        className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full opacity-15 blur-3xl pointer-events-none"
-        style={{ background: "#89bd40" }}
-      />
+      {/* Structural background: concentric rings that echo the round CC letterforms
+       *  in the Academy mark. A single deliberate anchor, NOT an ambient gradient blob. */}
+      <svg
+        className="absolute -bottom-40 -right-40 w-[640px] h-[640px] opacity-[0.08] pointer-events-none"
+        viewBox="0 0 100 100"
+        aria-hidden
+      >
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#815481" strokeWidth="0.6" />
+        <circle cx="50" cy="50" r="34" fill="none" stroke="#815481" strokeWidth="0.6" />
+        <circle cx="50" cy="50" r="24" fill="none" stroke="#89bd40" strokeWidth="0.6" />
+        <circle cx="50" cy="50" r="14" fill="none" stroke="#89bd40" strokeWidth="0.6" />
+      </svg>
+      <svg
+        className="absolute -top-40 -left-40 w-[480px] h-[480px] opacity-[0.06] pointer-events-none"
+        viewBox="0 0 100 100"
+        aria-hidden
+      >
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#89bd40" strokeWidth="0.5" />
+        <circle cx="50" cy="50" r="36" fill="none" stroke="#815481" strokeWidth="0.5" />
+      </svg>
 
-      <div className="w-full max-w-sm relative">
-        <div className="text-center mb-8">
+      <div className="w-full max-w-md relative">
+        {/* Brand featured at top */}
+        <div className="text-center mb-10">
           <div className="flex justify-center mb-5">
-            <Logo size="lg" showTagline href={null} />
+            <Logo size="lg" variant="stacked" href={null} />
           </div>
-          <p className="text-cco-muted mt-4 text-sm">
-            Welcome back. Sign in to pick up where you left off.
+          <p className="text-[11px] uppercase tracking-[0.28em] text-cco-purple font-semibold">
+            Medical Coding · CEU · Certification
           </p>
         </div>
 
+        {/* Form */}
         <form
           action={formAction}
-          className="bg-white border border-cco-border rounded-2xl shadow-[0_8px_24px_rgba(15,23,42,0.06)] p-6 space-y-4"
+          className="bg-white border border-cco-border rounded-2xl shadow-[0_8px_24px_rgba(15,23,42,0.06)] p-7 space-y-5"
         >
           <input type="hidden" name="return_to" value={returnTo} />
+
+          <div>
+            <h2 className="font-heading text-xl font-bold text-cco-ink leading-tight">
+              Welcome back
+            </h2>
+            <p className="text-sm text-cco-muted mt-1">
+              Pick up where you left off.
+            </p>
+          </div>
+
           {state?.error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
               {state.error}
@@ -46,7 +69,7 @@ export default function SignInPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-semibold text-cco-ink mb-1.5"
+              className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-cco-muted mb-1.5"
             >
               Email
             </label>
@@ -63,7 +86,7 @@ export default function SignInPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-semibold text-cco-ink mb-1.5"
+              className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-cco-muted mb-1.5"
             >
               Password
             </label>
@@ -80,19 +103,20 @@ export default function SignInPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full bg-cco-purple text-white font-semibold rounded-full py-2.5 transition hover:bg-cco-purple-600 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-cco-purple text-white font-semibold rounded-full py-3 transition hover:bg-cco-purple-600 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {pending ? "Signing you in…" : "Sign in"}
           </button>
         </form>
 
-        {/* Laureen quote — small, warm, signed */}
-        <div className="mt-8 text-center px-4">
-          <p className="text-sm text-cco-ink/80 italic leading-relaxed">
+        {/* Founder quote with gold rule above — inverts the usual cco-accent underline. */}
+        <div className="mt-10 text-center px-4">
+          <div className="mx-auto h-[3px] w-12 rounded-full bg-cco-gold" />
+          <p className="text-sm text-cco-ink/80 italic leading-relaxed mt-5">
             &ldquo;You showed up. That&rsquo;s already half the battle. Let&rsquo;s
             get you certified.&rdquo;
           </p>
-          <p className="mt-2 text-xs text-cco-muted">
+          <p className="mt-3 text-xs text-cco-muted">
             — Laureen Jandroep, CPC, COC, CPC-I · Founder, CCO
           </p>
         </div>
