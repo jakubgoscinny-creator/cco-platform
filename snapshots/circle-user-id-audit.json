@@ -1,0 +1,191 @@
+{
+  "total_filtered": 291,
+  "scanned": 291,
+  "with_circle_user_id": 254,
+  "without_circle_user_id": 37,
+  "by_status": {
+    "Active Annual": 143,
+    "Monthly (26)": 33,
+    "Monthly (Grandfathered)": 104,
+    "Monthly": 11
+  },
+  "missing_sample": [
+    {
+      "contact_id": 2910256631,
+      "name": "Saxton Phillips",
+      "email": "phillipssaxton@gmail.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2892568832,
+      "name": "Shirly Intern Moy",
+      "email": "smoy77+cco@gmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2809074610,
+      "name": "Ava Soares",
+      "email": "avajs@mail.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2665280296,
+      "name": "Tiffani Palmer",
+      "email": "Littleme.083@gmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2641708547,
+      "name": "Alicia Lee",
+      "email": "aliciamarie8727@gmail.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2631663723,
+      "name": "Kay Waterman",
+      "email": "Kayrwater1968@Outlook.Com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2624053418,
+      "name": "Kappy Rushing",
+      "email": "kappyt@hotmail.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2576289457,
+      "name": "KYLIE ALLEN",
+      "email": "lewiskylie@yahoo.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2467162027,
+      "name": "Abbi Vandhana",
+      "email": "abbivandhana@gmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2322608108,
+      "name": "Eric Bates",
+      "email": "eric.m.bates@gmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 2250913229,
+      "name": "Demetra Daley",
+      "email": "demetratodd23@yahoo.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1988902955,
+      "name": "Kelly Gittings",
+      "email": "kdgittings@gmail.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1918527440,
+      "name": "Briteni Egan",
+      "email": "briti_03@hotmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1890821588,
+      "name": "Ann Reilly",
+      "email": "ann.reilly@agshealth.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1822776082,
+      "name": "Meaghan Albanese",
+      "email": "Mfurtado87@yahoo.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1710061420,
+      "name": "Traci Worner",
+      "email": "mtworner1@gmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1551285427,
+      "name": "Patricia Stephens",
+      "email": "Pastephens316@gmail.com",
+      "status": "Monthly (Grandfathered)",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1430837288,
+      "name": "Lynn Escalante-Koburi",
+      "email": "linziewag@hotmail.com",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1122348178,
+      "name": "Linda Gouchenour",
+      "email": "linda.gouchenour@ascension.org",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    },
+    {
+      "contact_id": 1109696430,
+      "name": "Susan Wescott",
+      "email": "swescott2@pennstatehealth.psu.edu",
+      "status": "Active Annual",
+      "circle_user_id": ""
+    }
+  ],
+  "with_id_sample": [
+    {
+      "contact_id": 3291130398,
+      "name": "Elizabeth Gawronski",
+      "email": "elizabethefm@yahoo.com",
+      "status": "Active Annual",
+      "circle_user_id": "80296229"
+    },
+    {
+      "contact_id": 3206323740,
+      "name": "Valerie Sue",
+      "email": "vzajac646@gmail.com",
+      "status": "Active Annual",
+      "circle_user_id": "73072868"
+    },
+    {
+      "contact_id": 3186264384,
+      "name": "Carol Proa",
+      "email": "cproa78@outlook.com",
+      "status": "Active Annual",
+      "circle_user_id": "60596448"
+    },
+    {
+      "contact_id": 3173703937,
+      "name": "Victoria Sanchez",
+      "email": "victoria.sanchez@aah.org",
+      "status": "Monthly (26)",
+      "circle_user_id": "52073171"
+    },
+    {
+      "contact_id": 3163080914,
+      "name": "Christina Stern",
+      "email": "chrissie.stern@gmail.com",
+      "status": "Monthly (26)",
+      "circle_user_id": "45201648"
+    }
+  ]
+}
