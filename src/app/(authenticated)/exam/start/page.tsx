@@ -8,6 +8,8 @@ import { Clock, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { StartExamButton } from "@/components/exam/StartExamButton";
 import { CeuExpirationBanner } from "@/components/exam/CeuExpirationBanner";
+import { getSessionContact } from "@/lib/auth";
+import { canAccessTest } from "@/lib/circle-access";
 
 export default async function ExamStartPage({
   searchParams,
@@ -43,6 +45,16 @@ export default async function ExamStartPage({
     .limit(1);
 
   if (!test) redirect("/catalog");
+
+  // CCO-T006: block Member-tier tests for non-subscribers. Redirect to the
+  // upgrade page rather than rendering the start UI; cleaner than a mid-page
+  // "Members only" block since the catalog already showed the lock badge.
+  // This is layer 2 of 3 (catalog UX is layer 1; attempt-create server
+  // action enforcement is layer 3 — the integrity boundary).
+  const contact = await getSessionContact();
+  if (canAccessTest(test, { subscriptionStatus: contact?.subscriptionStatus ?? null }) === "members_only") {
+    redirect(`/upgrade?test_id=${testId}`);
+  }
 
   // CEU expiration: surface the earliest (most restrictive) expiration date
   // across all CEU items linked to this test.

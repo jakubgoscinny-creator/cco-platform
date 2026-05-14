@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, FileText, BarChart3 } from "lucide-react";
+import { Clock, FileText, BarChart3, Lock } from "lucide-react";
 import { Pill } from "@/components/shared/Pill";
 import { Card } from "@/components/shared/Card";
 
@@ -12,6 +12,8 @@ export interface TestCardProps {
   timeLimitMinutes: number | null;
   passingScore: number | null;
   domainNames: string[];
+  /** CCO-T006: true when the current user can't take this test (Member tier + non-subscriber). */
+  locked?: boolean;
 }
 
 export function TestCard({
@@ -22,6 +24,7 @@ export function TestCard({
   questionCount,
   timeLimitMinutes,
   domainNames,
+  locked = false,
 }: TestCardProps) {
   return (
     <Card className="flex flex-col gap-3 hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)] transition-shadow">
@@ -29,11 +32,14 @@ export function TestCard({
         <h3 className="font-heading font-semibold text-cco-ink leading-snug">
           {name}
         </h3>
-        {testType && (
-          <Pill variant={testType === "Static" ? "default" : "purple"}>
-            {testType === "Random" ? "Custom" : testType}
-          </Pill>
-        )}
+        <div className="flex items-center gap-1.5">
+          {locked && <Pill variant="purple">Members only</Pill>}
+          {testType && (
+            <Pill variant={testType === "Static" ? "default" : "purple"}>
+              {testType === "Random" ? "Custom" : testType}
+            </Pill>
+          )}
+        </div>
       </div>
 
       {description && (
@@ -63,13 +69,23 @@ export function TestCard({
         )}
       </div>
 
-      <Link
-        href={`/exam/start?test_id=${id}`}
-        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-cco-purple text-white text-sm font-semibold no-underline transition hover:bg-cco-purple-600 hover:shadow-lg hover:-translate-y-px"
-      >
-        <BarChart3 size={15} />
-        Start Exam
-      </Link>
+      {locked ? (
+        <Link
+          href={`/upgrade?test_id=${id}`}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-cco-ink text-white text-sm font-semibold no-underline transition hover:bg-cco-ink/90 hover:shadow-lg hover:-translate-y-px"
+        >
+          <Lock size={15} />
+          Members only - Upgrade
+        </Link>
+      ) : (
+        <Link
+          href={`/exam/start?test_id=${id}`}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-cco-purple text-white text-sm font-semibold no-underline transition hover:bg-cco-purple-600 hover:shadow-lg hover:-translate-y-px"
+        >
+          <BarChart3 size={15} />
+          Start Exam
+        </Link>
+      )}
     </Card>
   );
 }

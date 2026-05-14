@@ -100,6 +100,13 @@ function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
     getCategoryValue(item, TEST_FIELDS.TEST_TYPE) ||
     null;
 
+  // CCO-T006: read access_tier from Podio category field. Fall back to
+  // "Member" if Mary hasn't created the field yet or hasn't tagged the test —
+  // fail-closed default so nothing leaks to non-subscribers without explicit
+  // intent.
+  const accessTierRaw = getCategoryValue(item, TEST_FIELDS.ACCESS_TIER);
+  const accessTier = accessTierRaw === "Free" ? "Free" : "Member";
+
   return {
     podioItemId: item.item_id,
     testName: name,
@@ -110,6 +117,7 @@ function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
     timeLimitMinutes: getNumberValue(item, TEST_FIELDS.TIME_LIMIT),
     passingScore: getNumberValue(item, TEST_FIELDS.PASSING_SCORE),
     status: getCategoryValue(item, TEST_FIELDS.TEST_STATUS) || null,
+    accessTier,
     ceuItemIds: getAppReferenceIds(item, TEST_FIELDS.CEU_ITEMS),
     payload: item.fields as unknown as Record<string, unknown>,
   };

@@ -358,7 +358,12 @@ export const TEST_FIELDS = {
   TEST_STATUS: 125981847,
   TYPE: 137578152,             // CEU Quiz | Domain Pool | Course Module | Blitz/Practice Exam | etc.
   TEST_RESULT_PROCESSING: 150300363,
-  CEU_ITEMS: 137578199,           // app ref → CEU Items in Hub
+  CEU_ITEMS: 137578199,        // app ref → CEU Items in Hub
+  // CCO-T006: per-test access tier. Mary creates a category field on the
+  // Tests app (16243239) with external_id "access-tier" and options
+  // "Free" / "Member". Until that field exists / a test is tagged,
+  // mapPodioTest falls back to "Member" (fail-closed).
+  ACCESS_TIER: "access-tier",
 } as const;
 
 // Statuses that indicate a test is available for students

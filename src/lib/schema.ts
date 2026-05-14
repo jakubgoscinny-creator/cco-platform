@@ -26,6 +26,9 @@ export const tests = pgTable("tests", {
   timeLimitMinutes: integer("time_limit_minutes"),
   passingScore: integer("passing_score"),
   status: text("status"),
+  // 'Free' | 'Member'. Mary tags in Podio Tests app (16243239), access_tier
+  // category field. Untagged tests default to 'Member' (fail-closed).
+  accessTier: text("access_tier").notNull().default("Member"),
   ceuItemIds: bigint("ceu_item_ids", { mode: "number" }).array(),
   payload: jsonb("payload"), // full Podio field snapshot
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
@@ -77,6 +80,11 @@ export const contacts = pgTable(
     passwordHash: text("password_hash").notNull(),
     fullName: text("full_name"),
     circleMember: boolean("circle_member").default(false).notNull(),
+    // Podio CONTACT_FIELDS.SUBSCRIPTION_STATUS (134218375). Active values per
+    // Mary (2026-05-14): "Monthly (Grandfathered)", "Monthly (26)",
+    // "Active Annual", "Monthly". Anything else (including null) is treated
+    // as non-subscriber. See `circle-access.ts`.
+    subscriptionStatus: text("subscription_status"),
     payload: jsonb("payload"),
     syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
   },

@@ -31,6 +31,7 @@ import { contacts } from "./schema";
 import {
   filterItems,
   getTextValue,
+  getCategoryValue,
   PODIO_APPS,
   CONTACT_FIELDS,
 } from "./podio";
@@ -207,6 +208,12 @@ export async function upsertCircleUser(params: {
       ? rawEmail
       : (rawEmail as { value?: string } | undefined)?.value ?? email;
 
+  // Per CCO-T006: read SUBSCRIPTION_STATUS so the portal can gate Member-tier
+  // tests. Refresh on every SSO callback so a member who upgrades/downgrades
+  // in Circle picks it up on next sign-in.
+  const subStatusRaw = getCategoryValue(item, CONTACT_FIELDS.SUBSCRIPTION_STATUS);
+  const subscriptionStatus = subStatusRaw || null;
+
   // Mirror into Neon
   await db
     .insert(contacts)
@@ -216,6 +223,7 @@ export async function upsertCircleUser(params: {
       passwordHash,
       fullName: resolvedName || null,
       circleMember: params.circleMember,
+      subscriptionStatus,
       payload: item.fields as unknown as Record<string, unknown>,
       syncedAt: new Date(),
     })
@@ -225,6 +233,7 @@ export async function upsertCircleUser(params: {
         email: podioEmail.toLowerCase().trim(),
         fullName: resolvedName || null,
         circleMember: params.circleMember,
+        subscriptionStatus,
         syncedAt: new Date(),
       },
     });

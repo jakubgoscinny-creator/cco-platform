@@ -7,6 +7,7 @@ import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { syncQuestionsForTest } from "@/lib/sync";
 import { createItem, PODIO_APPS } from "@/lib/podio";
+import { canAccessTest } from "@/lib/circle-access";
 
 // Podio Test Attempts app (30626082) field IDs
 const ATTEMPT_FIELDS = {
@@ -45,6 +46,25 @@ export async function startExamAction(
     .limit(1);
 
   if (!test) return { error: "Test not found" };
+
+  // CCO-T006: server-side enforcement (layer 3 of 3). Catalog UX and the
+  // /exam/start redirect can be bypassed by hitting this server action
+  // directly (e.g. a non-subscriber who knows a test_id). This guard is the
+  // integrity boundary — without it, the UI gates are advisory only.
+  const [contactRow] = await db
+    .select({ subscriptionStatus: contacts.subscriptionStatus })
+    .from(contacts)
+    .where(eq(contacts.podioItemId, session.contactId))
+    .limit(1);
+  const decision = canAccessTest(test, {
+    subscriptionStatus: contactRow?.subscriptionStatus ?? null,
+  });
+  if (decision === "members_only") {
+    return {
+      error:
+        "This exam is available to CCO Club members only. Visit /upgrade to learn more.",
+    };
+  }
 
   // Sync questions from Podio
   const questionList = await syncQuestionsForTest(testPodioId);

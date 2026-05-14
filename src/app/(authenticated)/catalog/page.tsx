@@ -6,6 +6,7 @@ import { CatalogHero } from "@/components/catalog/CatalogHero";
 import { DataLineage } from "@/components/shared/DataLineage";
 import { timeOfDayGreeting, firstName } from "@/components/shared/PageHeader";
 import { getSessionContact } from "@/lib/auth";
+import { canAccessTest } from "@/lib/circle-access";
 import type { TestCardProps } from "@/components/catalog/TestCard";
 
 export default async function CatalogPage({
@@ -45,7 +46,14 @@ export default async function CatalogPage({
   // Sort by name
   filtered.sort((a, b) => a.testName.localeCompare(b.testName));
 
-  // Map to card props
+  // CCO-T006: gate Member-tier tests for non-subscribers. Locked cards still
+  // render in the catalog (so non-subscribers see what's available), but the
+  // CTA swaps to "Members only - Upgrade" and links to /upgrade.
+  // Treat missing user / missing subscriptionStatus as non-subscriber.
+  const userForGating = {
+    subscriptionStatus: user?.subscriptionStatus ?? null,
+  };
+
   const cards: TestCardProps[] = filtered.map((t) => ({
     id: t.podioItemId,
     name: t.testName,
@@ -57,6 +65,7 @@ export default async function CatalogPage({
     domainNames: (t.domainIds ?? [])
       .map((id) => domainNameMap.get(id))
       .filter((n): n is string => !!n),
+    locked: canAccessTest(t, userForGating) === "members_only",
   }));
 
   const latestSync = allTests.reduce<Date | null>((latest, t) => {

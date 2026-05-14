@@ -7,6 +7,7 @@ import { createHash } from "crypto";
 import {
   filterItems,
   getTextValue,
+  getCategoryValue,
   PODIO_APPS,
   CONTACT_FIELDS,
 } from "./podio";
@@ -50,6 +51,19 @@ export async function authenticate(
       .update(contacts)
       .set({ passwordHash: bcryptHash })
       .where(eq(contacts.podioItemId, contact.podioItemId));
+  }
+
+  // Per CCO-T006: refresh from Podio after successful auth so subscription_status
+  // (and name/email) reflect Podio's current truth. Cache-hit path would otherwise
+  // serve a stale tier (e.g. a member who upgraded since their last sign-in
+  // wouldn't see Member-tier tests until next cache miss).
+  // Fire-and-no-await would race against gating; await here. Cost: one extra
+  // Podio call per successful sign-in. Sign-ins are rare.
+  try {
+    await fetchContactFromPodio(email);
+  } catch (err) {
+    // Refresh failure is non-fatal — auth already succeeded against cached creds.
+    console.error("Post-auth refresh from Podio failed (non-fatal):", err);
   }
 
   return {
@@ -106,12 +120,19 @@ async function fetchContactFromPodio(
 
     if (!emailVal || !passwordVal) return null;
 
+    // Per CCO-T006: read SUBSCRIPTION_STATUS so the portal can gate Member-tier
+    // tests. Empty string means non-subscriber; getCategoryValue returns ""
+    // when the field is unset, so we normalise to null for the column.
+    const subStatusRaw = getCategoryValue(item, CONTACT_FIELDS.SUBSCRIPTION_STATUS);
+    const subscriptionStatus = subStatusRaw || null;
+
     const record = {
       podioItemId: item.item_id,
       email: emailVal.toLowerCase().trim(),
       passwordHash: passwordVal,
       fullName: nameVal,
       circleMember: false,
+      subscriptionStatus,
       payload: item.fields as unknown as Record<string, unknown>,
       syncedAt: new Date(),
     };
@@ -187,6 +208,7 @@ export async function getSessionContact(): Promise<{
   contactId: number;
   email: string;
   fullName: string | null;
+  subscriptionStatus: string | null;
 } | null> {
   const session = await getSession();
   if (!session) return null;
@@ -201,6 +223,7 @@ export async function getSessionContact(): Promise<{
     contactId: contact.podioItemId,
     email: contact.email,
     fullName: contact.fullName,
+    subscriptionStatus: contact.subscriptionStatus,
   };
 }
 
