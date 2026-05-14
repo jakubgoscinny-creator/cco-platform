@@ -243,6 +243,94 @@ export function getAppReferenceIds(
 }
 
 // ---------------------------------------------------------------------------
+// Identity resolution: Profile → Contact
+//
+// Platform Profiles (PLATFORM_PROFILES) is the credential store. Every
+// Profile has a `person` ref to a Contact (CONTACTS). Contacts is the
+// canonical identity hub — Test Results, Circle, Xenforo IDs, subscription
+// status all join via Contact, never Profile.
+// ---------------------------------------------------------------------------
+
+export async function getContactItemIdFromProfile(
+  profileItemId: number
+): Promise<number | null> {
+  const profile = await getItem(profileItemId);
+  const refs = getAppReferenceIds(profile, PROFILE_FIELDS.PERSON);
+  return refs[0] ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Legacy test-results fetch
+// ---------------------------------------------------------------------------
+
+export interface LegacyTestResult {
+  podioItemId: number;
+  appItemId: number;
+  dateTaken: Date | null;
+  testItemId: number | null;
+  testName: string;
+  scorePercent: number | null;
+  passed: boolean | null;
+  source: string;
+  type: string;
+  legacyCertUrl: string;
+  legacyViewUrl: string;
+  durationSeconds: number | null;
+}
+
+function parsePassed(val: string): boolean | null {
+  if (!val) return null;
+  const v = val.toLowerCase().trim();
+  if (v === "true" || v === "yes" || v === "1") return true;
+  if (v === "false" || v === "no" || v === "0") return false;
+  return null;
+}
+
+export async function getLegacyTestResultsByContact(
+  contactItemId: number,
+  options: { limit?: number } = {}
+): Promise<LegacyTestResult[]> {
+  const result = await filterItems(
+    PODIO_APPS.TEST_RESULTS,
+    { [TEST_RESULT_FIELDS.CONTACT]: [contactItemId] },
+    {
+      limit: options.limit ?? 500,
+      sortBy: String(TEST_RESULT_FIELDS.DATE_TAKEN),
+      sortDesc: true,
+    }
+  );
+
+  return (result.items || []).map((item) => {
+    const examLookup = getFieldValue(item, TEST_RESULT_FIELDS.EXAM_LOOKUP) as
+      | { value?: { item_id?: number; title?: string } }[]
+      | undefined;
+    const testRef = examLookup?.[0]?.value;
+
+    return {
+      podioItemId: item.item_id,
+      appItemId: item.app_item_id,
+      dateTaken: getDateValue(item, TEST_RESULT_FIELDS.DATE_TAKEN),
+      testItemId: testRef?.item_id ?? null,
+      testName:
+        testRef?.title ?? getTextValue(item, TEST_RESULT_FIELDS.TEST_NAME),
+      scorePercent: getNumberValue(item, TEST_RESULT_FIELDS.RESULT_PERCENTAGE),
+      passed: parsePassed(getTextValue(item, TEST_RESULT_FIELDS.RESULT_PASSED)),
+      source: getCategoryValue(item, TEST_RESULT_FIELDS.TEST_SOURCE),
+      type: getCategoryValue(item, TEST_RESULT_FIELDS.PROGRESS_TRACKER_TYPE),
+      legacyCertUrl: getTextValue(
+        item,
+        TEST_RESULT_FIELDS.RESULT_CERTIFICATE_URL
+      ),
+      legacyViewUrl: getTextValue(
+        item,
+        TEST_RESULT_FIELDS.VIEW_RESULTS_STUDENTS
+      ),
+      durationSeconds: getNumberValue(item, TEST_RESULT_FIELDS.RESULT_DURATION),
+    };
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Known Podio App IDs
 // ---------------------------------------------------------------------------
 
@@ -255,6 +343,7 @@ export const PODIO_APPS = {
   PROFESSIONAL_CREDENTIALS: 19824388,
   CONTACTS: 14660191,
   CEU_ITEMS: 14639788,
+  TEST_RESULTS: 16234798, // legacy results store, 126K+ items, joins to Contacts
 } as const;
 
 export const TEST_FIELDS = {
@@ -293,7 +382,12 @@ export function getDateValue(
 ): Date | null {
   const vals = getFieldValue(item, fieldId);
   if (!Array.isArray(vals) || !vals.length) return null;
-  const start = (vals[0]?.value as { start?: string })?.start;
+  // Podio date fields put `start` / `start_date` / `start_utc` directly on
+  // the value object — there is no extra `.value` wrapper like text fields.
+  const v = vals[0] as
+    | { start?: string; start_utc?: string; start_date?: string }
+    | undefined;
+  const start = v?.start_utc ?? v?.start ?? v?.start_date;
   return start ? new Date(start) : null;
 }
 
@@ -329,6 +423,42 @@ export const PROFILE_FIELDS = {
   EMAIL: "email-2",
   PASSWORD: "password-2",
   PASSWORD_STORAGE: "password",
+  PERSON: 275832534, // app ref → Contacts (canonical identity)
+} as const;
+
+export const CONTACT_FIELDS = {
+  NAME: 112436965,
+  EMAIL: 112436968,
+  SUBSCRIPTION_STATUS: 134218375,
+  CIRCLE_USER_ID: 272609487,
+  XENFORO_USER_ID: 199121592,
+  DEFAULT_USERNAME: 199426950,        // calc: e.g. "ReneeB_96011"
+  DEFAULT_USERNAME_MASTER: 199426794, // text master that drives the calc above
+  PASSWORD_MASTER: 199172888,         // pp-wf-password-master-h, text plaintext (e.g. "RB5593!")
+} as const;
+
+// Test Results app (legacy results store, 126K+ items as of 2026-04-30)
+export const TEST_RESULT_FIELDS = {
+  DATE_TAKEN: 125935780,
+  RESULT_PERCENTAGE: 125911831,
+  RESULT_PASSED: 125911820,
+  TEST_NAME: 125911836,                 // text fallback
+  TEST_SOURCE: 146183536,               // category — see TEST_SOURCE_OPTIONS
+  PROGRESS_TRACKER_TYPE: 128205567,     // category — CEU | Blitz | etc.
+  RESULT_CERTIFICATE_URL: 125913685,
+  RESULT_DURATION: 125911832,
+  EXAMINEE: 125913339,                  // calc
+  CONTACT: 125914549,                   // app ref → Contacts
+  EXAM_LOOKUP: 142217973,               // app ref → Tests
+  VIEW_RESULTS_STUDENTS: 150750509,     // calc — Xenforo deep link
+} as const;
+
+export const TEST_SOURCE_OPTIONS = {
+  CLASSMARKER: 1,
+  PROPROFS: 2,
+  CM_DEV: 3,
+  XENFORO: 4,
+  CCO_PORTAL: 5, // added by Mary 2026-04-30
 } as const;
 
 // ---------------------------------------------------------------------------

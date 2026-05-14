@@ -8,7 +8,7 @@ import {
   filterItems,
   getTextValue,
   PODIO_APPS,
-  PROFILE_FIELDS,
+  CONTACT_FIELDS,
 } from "./podio";
 
 const SESSION_COOKIE = "cco_session";
@@ -29,21 +29,22 @@ export async function authenticate(
 
   // If not in mirror, fetch from Podio
   if (!contact) {
-    const podioContact = await fetchProfileFromPodio(email);
+    const podioContact = await fetchContactFromPodio(email);
     if (!podioContact) {
       return { success: false, error: "Invalid email or password" };
     }
     contact = podioContact;
   }
 
-  // Verify password: try bcrypt first, then MD5 legacy
+  // Verify password: try bcrypt first, then MD5 legacy, then plaintext
   const isValid = await verifyPassword(password, contact.passwordHash);
   if (!isValid) {
     return { success: false, error: "Invalid email or password" };
   }
 
-  // If password was MD5, upgrade to bcrypt
-  if (contact.passwordHash.length === 32 && /^[a-f0-9]+$/i.test(contact.passwordHash)) {
+  // Upgrade any non-bcrypt hash (MD5 or plaintext "JG8032!"-style master
+  // passwords from Podio) to bcrypt on first successful login.
+  if (!contact.passwordHash.startsWith("$2")) {
     const bcryptHash = await hash(password, 12);
     await db
       .update(contacts)
@@ -74,25 +75,37 @@ async function verifyPassword(password: string, storedHash: string): Promise<boo
   return password === storedHash;
 }
 
-async function fetchProfileFromPodio(
+async function fetchContactFromPodio(
   email: string
 ): Promise<typeof contacts.$inferSelect | null> {
   try {
-    const result = await filterItems(PODIO_APPS.PLATFORM_PROFILES, {
-      [PROFILE_FIELDS.EMAIL]: email.toLowerCase().trim(),
-    }, { limit: 1 });
+    // Contacts email-type fields filter on a string array, not a bare string.
+    const result = await filterItems(
+      PODIO_APPS.CONTACTS,
+      { [CONTACT_FIELDS.EMAIL]: [email.toLowerCase().trim()] },
+      { limit: 1 }
+    );
 
     if (!result.items?.length) return null;
 
     const item = result.items[0];
-    const emailVal = getTextValue(item, PROFILE_FIELDS.EMAIL);
-    const passwordVal = getTextValue(item, PROFILE_FIELDS.PASSWORD);
-    const nameVal = item.title || "";
+    const nameVal = getTextValue(item, CONTACT_FIELDS.NAME) || item.title || "";
+    const passwordVal = getTextValue(item, CONTACT_FIELDS.PASSWORD_MASTER);
+
+    // Email field on Contacts is type "email" — values are { type, value }
+    // pairs (e.g. { type: "other", value: "user@example.com" }), so
+    // getTextValue won't unwrap them. Read directly.
+    const emailField = item.fields?.find(
+      (f) => f.field_id === CONTACT_FIELDS.EMAIL
+    );
+    const rawEmail = emailField?.values?.[0]?.value;
+    const emailVal =
+      typeof rawEmail === "string"
+        ? rawEmail
+        : (rawEmail as { value?: string } | undefined)?.value;
 
     if (!emailVal || !passwordVal) return null;
 
-    // Upsert into local mirror. circleMember defaults to false — this path
-    // only runs for password-based login, not Circle SSO.
     const record = {
       podioItemId: item.item_id,
       email: emailVal.toLowerCase().trim(),
@@ -116,7 +129,7 @@ async function fetchProfileFromPodio(
       syncedAt: record.syncedAt,
     };
   } catch (err) {
-    console.error("Failed to fetch profile from Podio:", err);
+    console.error("Failed to fetch contact from Podio:", err);
     return null;
   }
 }
@@ -138,7 +151,11 @@ export async function createSession(contactId: number): Promise<string> {
   cookieStore.set(SESSION_COOKIE, session.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    // "lax" (not "strict") so the cookie is sent on top-level GET
+    // navigations from other sites — required for SSO redirects from
+    // cco-sso-signer.vercel.app → portal. "strict" would withhold the
+    // cookie on any navigation initiated cross-site, breaking SSO.
+    sameSite: "lax",
     expires: expiresAt,
     path: "/",
   });

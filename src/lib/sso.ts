@@ -29,11 +29,10 @@ import { eq } from "drizzle-orm";
 import { db } from "./db";
 import { contacts } from "./schema";
 import {
-  createItem,
   filterItems,
   getTextValue,
   PODIO_APPS,
-  PROFILE_FIELDS,
+  CONTACT_FIELDS,
 } from "./podio";
 
 // ---------------------------------------------------------------------------
@@ -157,9 +156,14 @@ export interface UpsertResult {
 }
 
 /**
- * Find or create a Podio Platform Profile by email, mirror into Neon
- * contacts, and set circle_member from the Circle JWT claims. Idempotent
- * — calling twice with the same email returns the same contactId.
+ * Find a Podio Contact by email, mirror into Neon contacts, and set
+ * circle_member from the Circle JWT claims. If the contact doesn't
+ * exist in Podio, throws — the Circle webhook is responsible for
+ * creating Contacts when members join; we don't create them here.
+ *
+ * Uses the Contacts app (14660191), matching auth.ts. The email field
+ * is Podio type "email" — filter requires array syntax, and reading
+ * the value needs {type, value} unwrap.
  */
 export async function upsertCircleUser(params: {
   email: string;
@@ -169,56 +173,57 @@ export async function upsertCircleUser(params: {
   const email = params.email.toLowerCase().trim();
   const fullName = params.fullName.trim();
 
-  // Look for an existing Podio profile by email
+  // Look up existing Podio Contact by email.
+  // Email-type fields filter on a string array, not a bare string.
   const result = await filterItems(
-    PODIO_APPS.PLATFORM_PROFILES,
-    { [PROFILE_FIELDS.EMAIL]: email },
+    PODIO_APPS.CONTACTS,
+    { [CONTACT_FIELDS.EMAIL]: [email] },
     { limit: 1 }
   );
 
-  let podioItemId: number;
-  let passwordHash: string;
-
-  if (result.items?.length) {
-    const item = result.items[0];
-    podioItemId = item.item_id;
-    passwordHash =
-      getTextValue(item, PROFILE_FIELDS.PASSWORD) || ssoSentinelPasswordHash();
-  } else {
-    // Create a minimal Podio profile. Write password to PASSWORD_STORAGE
-    // (the text field), not PASSWORD (a calculation). Only EMAIL + the
-    // password hash are supplied here — other fields on the app are
-    // either optional or required-but-category-typed and need explicit
-    // option IDs we don't have. New-user creation may still fail on
-    // those required fields; see docs/CIRCLE_SSO_SETUP.md.
-    const sentinel = ssoSentinelPasswordHash();
-    const created = await createItem(PODIO_APPS.PLATFORM_PROFILES, {
-      [PROFILE_FIELDS.EMAIL]: email,
-      [PROFILE_FIELDS.PASSWORD_STORAGE]: sentinel,
-    });
-    podioItemId = created.item_id;
-    passwordHash = sentinel;
+  if (!result.items?.length) {
+    throw new Error(`No Podio Contact found for email: ${email}`);
   }
+
+  const item = result.items[0];
+  const podioItemId = item.item_id;
+
+  // Read name from Podio (fall back to Circle-provided name)
+  const podioName = getTextValue(item, CONTACT_FIELDS.NAME) || item.title || "";
+  const resolvedName = podioName || fullName;
+
+  // Read password — PASSWORD_MASTER is a plaintext text field
+  const passwordHash =
+    getTextValue(item, CONTACT_FIELDS.PASSWORD_MASTER) || ssoSentinelPasswordHash();
+
+  // Read email from the Podio item. Contacts email field is type "email"
+  // with values shaped as {type: "other", value: "user@example.com"}.
+  const emailField = item.fields?.find(
+    (f) => f.field_id === CONTACT_FIELDS.EMAIL
+  );
+  const rawEmail = emailField?.values?.[0]?.value;
+  const podioEmail =
+    typeof rawEmail === "string"
+      ? rawEmail
+      : (rawEmail as { value?: string } | undefined)?.value ?? email;
 
   // Mirror into Neon
   await db
     .insert(contacts)
     .values({
       podioItemId,
-      email,
+      email: podioEmail.toLowerCase().trim(),
       passwordHash,
-      fullName: fullName || null,
+      fullName: resolvedName || null,
       circleMember: params.circleMember,
-      payload: {},
+      payload: item.fields as unknown as Record<string, unknown>,
       syncedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: contacts.podioItemId,
       set: {
-        email,
-        fullName: fullName || null,
-        // Respect the claim on every login — if Circle downgrades a
-        // user's membership, we follow.
+        email: podioEmail.toLowerCase().trim(),
+        fullName: resolvedName || null,
         circleMember: params.circleMember,
         syncedAt: new Date(),
       },
@@ -230,7 +235,7 @@ export async function upsertCircleUser(params: {
 
   return {
     contactId: podioItemId,
-    email,
+    email: podioEmail.toLowerCase().trim(),
     fullName: existing?.fullName ?? null,
     circleMember: existing?.circleMember ?? params.circleMember,
   };

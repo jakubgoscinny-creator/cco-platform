@@ -5,8 +5,11 @@ import { getSessionContact } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { GradebookTable, type GradebookRow } from "@/components/gradebook/GradebookTable";
 import { DomainSummary } from "@/components/gradebook/DomainSummary";
+import { Scorecard } from "@/components/gradebook/Scorecard";
+import { PastResults, type PastResultRow } from "@/components/gradebook/PastResults";
 import { DataLineage } from "@/components/shared/DataLineage";
 import { PageHeader, firstName } from "@/components/shared/PageHeader";
+import { getLegacyResultsForContact } from "@/lib/legacy-results";
 
 export default async function GradebookPage() {
   const user = await getSessionContact();
@@ -78,18 +81,73 @@ export default async function GradebookPage() {
       return pctA - pctB; // weakest first
     });
 
-  const greet = user.fullName ? firstName(user.fullName) : null;
-  const completed = rows.filter((r) => r.status === "submitted").length;
-  const passedCount = rows.filter(
-    (r) => r.status === "submitted" && (r.scorePercent ?? 0) >= 70
-  ).length;
+  // Lazy fetch legacy test results from Podio (cached 24h in Neon).
+  // Errors here shouldn't break the page — show portal data without legacy.
+  let legacyRows: PastResultRow[] = [];
+  try {
+    const legacy = await getLegacyResultsForContact(user.contactId);
+    legacyRows = legacy.map((r) => ({
+      podioItemId: r.podioItemId,
+      appItemId: r.appItemId,
+      date: r.dateTaken
+        ? new Date(r.dateTaken).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "—",
+      testName: r.testName ?? "",
+      scorePercent: r.scorePercent != null ? Number(r.scorePercent) : null,
+      passed: r.passed,
+      source: r.source ?? "",
+      type: r.type ?? "",
+      legacyCertUrl: r.legacyCertUrl ?? "",
+      testItemId: r.testItemId,
+      hasCeuCertificate: r.aapcTemplateFileId != null,
+    }));
+  } catch (err) {
+    console.error("Failed to load legacy test results:", err);
+  }
 
+  // Combined stats across new-portal attempts + legacy results
+  const completed = rows.filter((r) => r.status === "submitted");
+  const completedScores = completed
+    .map((r) => r.scorePercent)
+    .filter((s): s is number => s != null);
+  const legacyScores = legacyRows
+    .map((r) => r.scorePercent)
+    .filter((s): s is number => s != null);
+  const allScores = [...completedScores, ...legacyScores];
+
+  const totalTaken = completed.length + legacyRows.length;
+  const passedCount =
+    completedScores.filter((s) => s >= 70).length +
+    legacyScores.filter((s) => s >= 70).length;
+  const passRate = totalTaken > 0 ? (passedCount / totalTaken) * 100 : null;
+  const averageScore =
+    allScores.length > 0
+      ? allScores.reduce((a, b) => a + b, 0) / allScores.length
+      : null;
+
+  const lastActivityCandidates: Date[] = [
+    ...completed
+      .map((r) => (r.date ? new Date(r.date) : null))
+      .filter((d): d is Date => d != null && !isNaN(d.getTime())),
+    ...legacyRows
+      .map((r) => new Date(r.date))
+      .filter((d) => !isNaN(d.getTime())),
+  ];
+  const lastActivity = lastActivityCandidates.length
+    ? new Date(Math.max(...lastActivityCandidates.map((d) => d.getTime())))
+    : null;
+
+  const greet = user.fullName ? firstName(user.fullName) : null;
   const subtitle =
-    completed === 0
+    totalTaken === 0
       ? "Every attempt teaches you something. Start your first exam whenever you're ready."
       : passedCount > 0
         ? `You've passed ${passedCount} exam${passedCount > 1 ? "s" : ""} so far. Keep going.`
-        : `${completed} attempt${completed > 1 ? "s" : ""} in the books. Every one is progress.`;
+        : `${totalTaken} attempt${totalTaken > 1 ? "s" : ""} in the books. Every one is progress.`;
 
   return (
     <div>
@@ -101,9 +159,41 @@ export default async function GradebookPage() {
         right={<DataLineage syncedAt={new Date()} />}
       />
 
+      <Scorecard
+        stats={{
+          totalTaken,
+          passRate,
+          averageScore,
+          lastActivity,
+        }}
+      />
+
       <DomainSummary scores={domainScores} />
 
-      <GradebookTable rows={rows} />
+      {rows.length > 0 && (
+        <section className="mt-6">
+          <div className="flex items-baseline justify-between gap-4 mb-3">
+            <div>
+              <h2 className="font-heading text-lg font-bold text-cco-ink">
+                Recent attempts
+              </h2>
+              <p className="text-sm text-cco-muted mt-0.5">
+                Tests taken in the new portal — full answer review available.
+              </p>
+            </div>
+            <span className="text-xs text-cco-muted">
+              {rows.length} {rows.length === 1 ? "attempt" : "attempts"}
+            </span>
+          </div>
+          <GradebookTable rows={rows} />
+        </section>
+      )}
+
+      <PastResults rows={legacyRows} />
+
+      {rows.length === 0 && legacyRows.length === 0 && (
+        <GradebookTable rows={[]} />
+      )}
     </div>
   );
 }

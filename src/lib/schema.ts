@@ -9,6 +9,7 @@ import {
   numeric,
   serial,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
@@ -164,6 +165,40 @@ export const certificates = pgTable(
   ]
 );
 
+// Lazy-fetched mirror of Podio Test Results (app 16234798) for the
+// authenticated student. Score-only legacy data: original answers do
+// not exist in Podio for Xenforo/ProProfs imports, so we don't try.
+export const legacyTestResults = pgTable(
+  "legacy_test_results",
+  {
+    podioItemId: bigint("podio_item_id", { mode: "number" }).primaryKey(),
+    contactItemId: bigint("contact_item_id", { mode: "number" }).notNull(),
+    appItemId: integer("app_item_id"),
+    dateTaken: timestamp("date_taken", { withTimezone: true }),
+    testItemId: bigint("test_item_id", { mode: "number" }),
+    testName: text("test_name"),
+    scorePercent: numeric("score_percent", { precision: 5, scale: 2 }),
+    passed: boolean("passed"),
+    source: text("source"),
+    type: text("type"),
+    durationSeconds: integer("duration_seconds"),
+    legacyCertUrl: text("legacy_cert_url"),
+    legacyViewUrl: text("legacy_view_url"),
+    // For CEU passes, we resolve the AAPC PDF template (uploaded by Mary
+    // to the Test's linked CEU Item) at sync time so the gradebook can
+    // offer a Download Cert button without an extra Podio round-trip.
+    aapcTemplateFileId: bigint("aapc_template_file_id", { mode: "number" }),
+    ceuIndexNumber: text("ceu_index_number"),
+    syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("legacy_results_contact_date_idx").on(
+      table.contactItemId,
+      table.dateTaken
+    ),
+  ]
+);
+
 export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   attemptId: integer("attempt_id").notNull(),
@@ -187,3 +222,4 @@ export type Attempt = typeof attempts.$inferSelect;
 export type Answer = typeof answers.$inferSelect;
 export type Certificate = typeof certificates.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
+export type LegacyTestResult = typeof legacyTestResults.$inferSelect;
