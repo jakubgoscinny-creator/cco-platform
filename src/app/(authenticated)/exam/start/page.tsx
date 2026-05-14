@@ -1,12 +1,13 @@
 import { db } from "@/lib/db";
-import { tests } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { tests, ceuItems } from "@/lib/schema";
+import { eq, inArray } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/shared/Card";
 import { Pill } from "@/components/shared/Pill";
 import { Clock, FileText, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { StartExamButton } from "@/components/exam/StartExamButton";
+import { CeuExpirationBanner } from "@/components/exam/CeuExpirationBanner";
 
 export default async function ExamStartPage({
   searchParams,
@@ -43,6 +44,24 @@ export default async function ExamStartPage({
 
   if (!test) redirect("/catalog");
 
+  // CEU expiration: surface the earliest (most restrictive) expiration date
+  // across all CEU items linked to this test.
+  let earliestCeuExpiration: Date | null = null;
+  if (test.ceuItemIds && test.ceuItemIds.length > 0) {
+    const ceuRows = await db
+      .select({ dateExpires: ceuItems.dateExpires })
+      .from(ceuItems)
+      .where(inArray(ceuItems.podioItemId, test.ceuItemIds));
+    const expirations = ceuRows
+      .map((r) => r.dateExpires)
+      .filter((d): d is Date => d != null);
+    if (expirations.length > 0) {
+      earliestCeuExpiration = new Date(
+        Math.min(...expirations.map((d) => new Date(d).getTime()))
+      );
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <Link
@@ -65,6 +84,10 @@ export default async function ExamStartPage({
 
         {test.description && (
           <p className="text-sm text-cco-muted">{stripHtml(test.description)}</p>
+        )}
+
+        {earliestCeuExpiration && (
+          <CeuExpirationBanner earliestExpiration={earliestCeuExpiration} />
         )}
 
         <div className="flex flex-wrap gap-4 text-sm text-cco-muted border-t border-b border-cco-border py-4">
