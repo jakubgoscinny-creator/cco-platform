@@ -221,6 +221,25 @@ export function getCategoryValues(
   return vals.map((v) => v?.value?.text ?? "").filter(Boolean);
 }
 
+/**
+ * Read a category field's selected option ID (not the text). Used where
+ * the caller needs to compare against a stable option_id constant rather
+ * than a string that could be relabelled in Podio.
+ */
+export function getCategoryOptionId(
+  item: PodioItem,
+  fieldId: number | string
+): number | null {
+  const vals = getFieldValue(item, fieldId);
+  if (!Array.isArray(vals) || !vals.length) return null;
+  const raw = vals[0]?.value;
+  if (raw && typeof raw === "object" && "id" in (raw as object)) {
+    const id = Number((raw as { id: unknown }).id);
+    return Number.isFinite(id) ? id : null;
+  }
+  return null;
+}
+
 export function getNumberValue(
   item: PodioItem,
   fieldId: number | string
@@ -440,6 +459,31 @@ export const CONTACT_FIELDS = {
   DEFAULT_USERNAME: 199426950,        // calc: e.g. "ReneeB_96011"
   DEFAULT_USERNAME_MASTER: 199426794, // text master that drives the calc above
   PASSWORD_MASTER: 199172888,         // pp-wf-password-master-h, text plaintext (e.g. "RB5593!")
+  // Mary's duplicate-management field. The portal reads this in
+  // findContactByEmail so password-reset doesn't fire against a flagged
+  // duplicate record. External id is the legacy "statusaction" (it was
+  // once labelled "Status/Action").
+  DUPLICATE_STATUS: 125701761,
+} as const;
+
+/**
+ * Option IDs for CONTACT_FIELDS.DUPLICATE_STATUS, captured 2026-05-21 by
+ * inspecting the Contacts app. ACTIVE is the canonical "this is the real
+ * record" tag. SUSPECTED_DUPLICATE and CONFIRMED_DUPLICATE are flagged
+ * by Mary's deduplication workflow and MUST NOT be used as a reset
+ * target. NOT_CHECKED / CHECK_NOW / NO_EMAIL_ADDRESS_TO_CHECK are
+ * non-canonical-but-not-flagged: still eligible as a fallback when no
+ * ACTIVE match exists.
+ *
+ * Option ID 2 was "Merge" — Mary's already retired it (status: deleted).
+ */
+export const CONTACT_DUPLICATE_STATUS = {
+  CONFIRMED_DUPLICATE: 1,
+  ACTIVE: 3,
+  SUSPECTED_DUPLICATE: 4,
+  CHECK_NOW: 5,
+  NOT_CHECKED: 6,
+  NO_EMAIL_ADDRESS_TO_CHECK: 7,
 } as const;
 
 // Test Results app (legacy results store, 126K+ items as of 2026-04-30)

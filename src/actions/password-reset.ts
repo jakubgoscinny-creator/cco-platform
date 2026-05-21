@@ -16,8 +16,10 @@ import {
 import { createPasswordResetItem } from "@/lib/password-reset-podio";
 import {
   filterItems,
+  getCategoryOptionId,
   PODIO_APPS,
   CONTACT_FIELDS,
+  CONTACT_DUPLICATE_STATUS,
 } from "@/lib/podio";
 
 // /forgot-password rate limit: 5 requests per IP per hour. Enough that
@@ -210,36 +212,87 @@ export async function resetPasswordAction(
 // ---------------------------------------------------------------------------
 
 /**
- * Look up the live Contact by email. We hit Podio (not the Neon mirror)
- * so accounts that have never signed in still receive a reset link.
- * `fetchContactFromPodio` in auth.ts upserts the mirror on hit; we mirror
- * just enough of that here without exposing internal helpers.
+ * Look up the live Contact by email, honouring Mary's Duplicate Status
+ * field (CONTACT_FIELDS.DUPLICATE_STATUS, 125701761) so a reset never
+ * fires against a flagged duplicate record.
+ *
+ * Why this skips the Neon mirror:
+ *   The mirror is keyed by a UNIQUE email index, so it holds at most one
+ *   row per email — even when Podio has duplicates. That row doesn't
+ *   currently carry Duplicate Status, so a mirror-hit response can't tell
+ *   us whether we'd be resetting an ACTIVE record or a SUSPECTED
+ *   DUPLICATE. Forgot-password is a rare event (rate-limited at 5/hr per
+ *   IP), so paying one extra Podio call for accurate duplicate handling
+ *   is the right trade.
+ *
+ * Selection rules (locked 2026-05-21 by Jakub):
+ *   - Disqualify any Contact whose Duplicate Status is SUSPECTED_DUPLICATE
+ *     (4) or CONFIRMED_DUPLICATE (1). Mary's flagged these as non-canonical.
+ *   - Among the rest, prefer ACTIVE (3) — that's Mary's "this is the real
+ *     record" tag.
+ *   - If no ACTIVE match remains, fall back to the first eligible match
+ *     (NOT_CHECKED / CHECK_NOW / NO_EMAIL_ADDRESS_TO_CHECK / unset).
+ *     These mean "not yet audited" rather than "known bad", so it's safe
+ *     to allow a reset through. William can audit afterwards.
+ *   - If multiple ACTIVE matches exist (data hygiene incident), log a
+ *     warning and use the first one. Future T009 / CCO Member ID work is
+ *     the proper fix.
  */
 async function findContactByEmail(
   email: string
 ): Promise<{ podioItemId: number } | null> {
-  // Mirror first — cheap path for repeat resets.
-  const mirror = await db.query.contacts.findFirst({
-    where: eq(contacts.email, email),
-    columns: { podioItemId: true },
-  });
-  if (mirror) return mirror;
-
-  // Podio fallback — email field on Contacts is type "email"; filter takes
-  // a string array (see auth.ts fetchContactFromPodio for the same pattern).
+  let items;
   try {
     const result = await filterItems(
       PODIO_APPS.CONTACTS,
       { [CONTACT_FIELDS.EMAIL]: [email] },
-      { limit: 1 }
+      // Realistic upper bound. If a single email is on >25 Contacts, the
+      // duplicate situation is bad enough that William should be looking
+      // at it directly, not the reset path.
+      { limit: 25 }
     );
-    const item = result.items?.[0];
-    if (!item) return null;
-    return { podioItemId: item.item_id };
+    items = result.items ?? [];
   } catch (err) {
     console.error("findContactByEmail: Podio filter failed:", err);
     return null;
   }
+
+  if (items.length === 0) return null;
+
+  const DISQUALIFIED = new Set<number>([
+    CONTACT_DUPLICATE_STATUS.SUSPECTED_DUPLICATE,
+    CONTACT_DUPLICATE_STATUS.CONFIRMED_DUPLICATE,
+  ]);
+
+  type Eligible = { podioItemId: number; statusId: number | null };
+  const eligible: Eligible[] = [];
+  for (const item of items) {
+    const statusId = getCategoryOptionId(item, CONTACT_FIELDS.DUPLICATE_STATUS);
+    if (statusId !== null && DISQUALIFIED.has(statusId)) continue;
+    eligible.push({ podioItemId: item.item_id, statusId });
+  }
+
+  if (eligible.length === 0) {
+    console.warn(
+      `findContactByEmail: ${items.length} matches for ${email} but ` +
+        `all flagged as SUSPECTED/CONFIRMED DUPLICATE; treating as no match`
+    );
+    return null;
+  }
+
+  // Prefer ACTIVE. Fall back to first eligible non-disqualified.
+  const actives = eligible.filter(
+    (e) => e.statusId === CONTACT_DUPLICATE_STATUS.ACTIVE
+  );
+  if (actives.length > 1) {
+    console.warn(
+      `findContactByEmail: ${actives.length} ACTIVE Contacts share email ` +
+        `${email} (data hygiene issue); using item ${actives[0].podioItemId}. ` +
+        `IDs: ${actives.map((a) => a.podioItemId).join(", ")}`
+    );
+  }
+  const chosen = actives[0] ?? eligible[0];
+  return { podioItemId: chosen.podioItemId };
 }
 
 /**
