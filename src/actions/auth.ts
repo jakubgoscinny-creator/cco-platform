@@ -8,12 +8,12 @@ import { authenticate, createSession, destroySession } from "@/lib/auth";
  * it to start with a single "/" and NOT "//" — `//evil.com` is a
  * protocol-relative URL that the browser would navigate to
  * https://evil.com. Everything else (absolute URLs, missing path,
- * empty string) falls back to /catalog.
+ * empty string) falls back to "/" (the CCO-T032 destination chooser).
  */
 function safeReturnTo(raw: string | null | undefined): string {
-  if (!raw) return "/catalog";
-  if (!raw.startsWith("/")) return "/catalog";
-  if (raw.startsWith("//")) return "/catalog";
+  if (!raw) return "/";
+  if (!raw.startsWith("/")) return "/";
+  if (raw.startsWith("//")) return "/";
   return raw;
 }
 

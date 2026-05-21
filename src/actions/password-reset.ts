@@ -54,7 +54,13 @@ export async function forgotPasswordAction(
   if (typeof rawEmail !== "string" || !rawEmail.trim()) {
     return { error: "Please enter the email you used to sign up." };
   }
-  const email = rawEmail.toLowerCase().trim();
+  // CCO-T028: Podio's email-field filter is case-sensitive on the stored
+  // value. Keep `email` (lowercase) for the recipient-email written to
+  // the Podio Password Resets item, but look up the Contact by the
+  // as-typed case first (handles mixed-case Contacts like
+  // "Jodi.Vongunten@gmail.com") with a lowercase fallback.
+  const emailAsTyped = rawEmail.trim();
+  const email = emailAsTyped.toLowerCase();
 
   // Per-IP rate limit. Runs BEFORE any Podio work, so a flood from one
   // address can't burn the hourly Podio cap.
@@ -72,7 +78,14 @@ export async function forgotPasswordAction(
   }
 
   try {
-    const contact = await findContactByEmail(email);
+    // CCO-T028 retry: prefer as-typed case (matches mixed-case Contacts),
+    // fall back to lowercase if no hit. The hit-rate cost is one extra
+    // Podio call only when the input case wasn't already lowercase, and
+    // forgot-password is rate-limited per IP, so the cap impact is bounded.
+    let contact = await findContactByEmail(emailAsTyped);
+    if (!contact && emailAsTyped !== email) {
+      contact = await findContactByEmail(email);
+    }
 
     if (contact) {
       const { token, jti, expiresAt } = await signResetToken(contact.podioItemId);

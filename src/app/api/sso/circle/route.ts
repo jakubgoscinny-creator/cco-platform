@@ -13,6 +13,10 @@
  *   - Invalid/expired JWT      → 302 to /sign-in?sso_error=invalid_token
  *   - Any upstream failure     → 302 to /sign-in?sso_error=server_error
  *
+ * On success: 302 to "/" (the CCO-T032 destination chooser). Earlier
+ * versions of this route landed users on /catalog directly; with the
+ * post-login chooser live, "/" is the canonical entry.
+ *
  * We don't surface the specific verification failure to the browser
  * (don't tell attackers why their forged token was rejected).
  */
@@ -64,7 +68,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     return redirect(request, "/sign-in?sso_error=server_error");
   }
 
-  return redirect(request, "/catalog");
+  return redirect(request, "/");
 }
 
 function redirect(request: NextRequest, path: string): Response {

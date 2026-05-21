@@ -92,11 +92,26 @@ async function fetchContactFromPodio(
 ): Promise<typeof contacts.$inferSelect | null> {
   try {
     // Contacts email-type fields filter on a string array, not a bare string.
-    const result = await filterItems(
+    // CCO-T028: Podio's email-field filter is CASE-SENSITIVE on the stored
+    // value. Try the email as typed first (handles Contacts stored with
+    // mixed case, e.g. "Jodi.Vongunten@gmail.com"); fall back to lowercase
+    // so we still match Contacts stored all-lowercase when the user typed
+    // mixed case. The Neon mirror still stores lowercase below — only the
+    // Podio-side lookup preserves case.
+    const trimmed = email.trim();
+    const lower = trimmed.toLowerCase();
+    let result = await filterItems(
       PODIO_APPS.CONTACTS,
-      { [CONTACT_FIELDS.EMAIL]: [email.toLowerCase().trim()] },
+      { [CONTACT_FIELDS.EMAIL]: [trimmed] },
       { limit: 1 }
     );
+    if ((result.items?.length ?? 0) === 0 && trimmed !== lower) {
+      result = await filterItems(
+        PODIO_APPS.CONTACTS,
+        { [CONTACT_FIELDS.EMAIL]: [lower] },
+        { limit: 1 }
+      );
+    }
 
     if (!result.items?.length) return null;
 

@@ -109,8 +109,14 @@ export async function verifyCircleAuthJwt(
   const avatarUrl = typeof claims.avatar_url === "string" ? claims.avatar_url : null;
   const circleMember = deriveMembership(claims);
 
+  // CCO-T028: preserve the JWT's email case through to the Podio
+  // lookup. Circle's webhook creates Contacts using Circle's stored
+  // case, so the JWT case and the Podio Contact case match. Lowercasing
+  // here breaks the filter for any subscriber with a mixed-case email
+  // (e.g. Jodi.Vongunten@gmail.com). The Neon mirror still stores
+  // lowercase — that conversion happens at the upsert site.
   return {
-    email: email.toLowerCase(),
+    email,
     fullName,
     avatarUrl,
     circleMember,
@@ -171,7 +177,10 @@ export async function upsertCircleUser(params: {
   fullName: string;
   circleMember: boolean;
 }): Promise<UpsertResult> {
-  const email = params.email.toLowerCase().trim();
+  // CCO-T028: preserve case for the Podio filter (Podio's email filter
+  // is case-sensitive on the stored value). The Neon mirror lowercases
+  // when it writes back; only the lookup respects what Circle sent us.
+  const email = params.email.trim();
   const fullName = params.fullName.trim();
 
   // Look up existing Podio Contact by email.
