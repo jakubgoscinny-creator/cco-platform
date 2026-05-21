@@ -141,13 +141,22 @@ async function fetchContactFromPodio(
       syncedAt: new Date(),
     };
 
-    // CCO-T031: do NOT clobber passwordResetJti via the conflict-update path
-    // — that column is owned by the reset action, not the Podio sync. The
-    // insert path still sets it (to null) for fresh rows; the conflict path
-    // explicitly omits it.
+    // CCO-T031: do NOT clobber these columns via the conflict-update path.
+    // Both are owned by code paths that write to Neon and intentionally do
+    // NOT write back to Podio:
+    //   - passwordResetJti: owned by the password-reset action.
+    //   - passwordHash: bcrypt-upgrade-on-login writes here (auth.ts:48-52),
+    //     and the password-reset action writes an argon2id hash here. Podio's
+    //     `Contacts.PASSWORD_MASTER` is stale legacy storage (plaintext / MD5
+    //     / bcrypt) and would silently roll back the user's current hash on
+    //     every post-auth refresh — making any password change non-persistent
+    //     across sign-ins. P1 bug discovered when Jakub's first reset stuck
+    //     once and then mysteriously "stopped working" on the next sign-in.
+    //     Tracked for the Podio write-through follow-up under CCO-T038.
+    // The INSERT path still sets both columns for fresh rows (first-ever
+    // sign-in seeds Neon from Podio); only the CONFLICT path skips them.
     const conflictUpdate = {
       email: record.email,
-      passwordHash: record.passwordHash,
       fullName: record.fullName,
       circleMember: record.circleMember,
       subscriptionStatus: record.subscriptionStatus,
