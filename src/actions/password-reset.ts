@@ -6,6 +6,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contacts } from "@/lib/schema";
 import { hashPassword } from "@/lib/password";
+import { validatePassword } from "@/lib/password-policy";
+import { checkAndIncrement } from "@/lib/rate-limit";
 import {
   signResetToken,
   verifyResetToken,
@@ -17,6 +19,13 @@ import {
   PODIO_APPS,
   CONTACT_FIELDS,
 } from "@/lib/podio";
+
+// /forgot-password rate limit: 5 requests per IP per hour. Enough that
+// a real user retrying after a typo or "didn't get email" complaint is
+// fine, low enough that a single-IP flood can't burn through Podio's
+// hourly cap (which is what tripped us 2026-05-21).
+const FORGOT_RATE_LIMIT_MAX = 5;
+const FORGOT_RATE_LIMIT_WINDOW_SECONDS = 60 * 60;
 
 // ---------------------------------------------------------------------------
 // /forgot-password
@@ -44,6 +53,21 @@ export async function forgotPasswordAction(
     return { error: "Please enter the email you used to sign up." };
   }
   const email = rawEmail.toLowerCase().trim();
+
+  // Per-IP rate limit. Runs BEFORE any Podio work, so a flood from one
+  // address can't burn the hourly Podio cap.
+  const ip = await getClientIp();
+  const verdict = await checkAndIncrement(
+    `forgot:ip:${ip}`,
+    FORGOT_RATE_LIMIT_MAX,
+    FORGOT_RATE_LIMIT_WINDOW_SECONDS
+  );
+  if (!verdict.allowed) {
+    const minutes = Math.ceil(verdict.retryAfterSeconds / 60);
+    return {
+      error: `Too many reset requests from this network. Please try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+    };
+  }
 
   try {
     const contact = await findContactByEmail(email);
@@ -91,6 +115,15 @@ export async function forgotPasswordAction(
     return { sent: true };
   } catch (err) {
     console.error("forgotPasswordAction failed:", err);
+    // Detect Podio rate-limit (HTTP 420) so the user gets an honest
+    // wait time instead of "try again in a minute" for an hour.
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("(420)") || msg.toLowerCase().includes("rate_limit")) {
+      return {
+        error:
+          "Our reset service is temporarily rate-limited. Please try again in about 30 minutes.",
+      };
+    }
     return {
       error:
         "Something went wrong sending the reset link. Please try again in a minute.",
@@ -127,8 +160,8 @@ export async function resetPasswordAction(
   if (typeof token !== "string" || !token) {
     return { error: "This reset link is invalid. Request a new one." };
   }
-  if (typeof password !== "string" || password.length < 8) {
-    return { error: "Password must be at least 8 characters." };
+  if (typeof password !== "string") {
+    return { error: "Please enter a new password." };
   }
   if (password !== confirm) {
     return { error: "The two passwords don't match." };
@@ -157,6 +190,11 @@ export async function resetPasswordAction(
         "This reset link has already been used or was invalidated. Request a new one.",
     };
   }
+
+  // Policy check AFTER the token + jti check so we don't probe the
+  // policy as an oracle without a valid link.
+  const policyError = await validatePassword(password, { email: contact.email });
+  if (policyError) return { error: policyError };
 
   const newHash = await hashPassword(password);
   await db
@@ -202,6 +240,20 @@ async function findContactByEmail(
     console.error("findContactByEmail: Podio filter failed:", err);
     return null;
   }
+}
+
+/**
+ * Best-effort client IP from request headers. On Vercel, `x-forwarded-for`
+ * is set by the edge and is trustworthy (we're not behind a customer-
+ * configurable reverse proxy). May be a comma-separated list; first entry
+ * is the original client. Falls back to "unknown" if absent so the
+ * rate-limiter bucket key is still stable.
+ */
+async function getClientIp(): Promise<string> {
+  const hdrs = await headers();
+  const xff = hdrs.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0]!.trim();
+  return hdrs.get("x-real-ip") ?? "unknown";
 }
 
 async function buildResetUrl(token: string): Promise<string> {

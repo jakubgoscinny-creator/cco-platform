@@ -102,6 +102,18 @@ export const contacts = pgTable(
 // Platform-owned tables
 // ---------------------------------------------------------------------------
 
+// CCO-T031 hardening: per-key sliding-window rate limiter buckets. Used
+// by /forgot-password to keep a single IP from flooding the Podio API
+// (which is how my dev-session burned the Podio rate-limit 2026-05-21).
+// See src/lib/rate-limit.ts for the checkAndIncrement implementation.
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull().default(0),
+  windowStart: timestamp("window_start", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const sessions = pgTable("sessions", {
   id: text("id")
     .primaryKey()
