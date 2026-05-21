@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contacts } from "@/lib/schema";
@@ -59,7 +60,7 @@ export async function forgotPasswordAction(
         .set({ passwordResetJti: jti })
         .where(eq(contacts.podioItemId, contact.podioItemId));
 
-      const resetUrl = buildResetUrl(token);
+      const resetUrl = await buildResetUrl(token);
 
       await createPasswordResetItem({
         recipientEmail: email,
@@ -196,15 +197,26 @@ async function findContactByEmail(
   }
 }
 
-function buildResetUrl(token: string): string {
-  // CRITICAL: this is a server-only `BASE_URL`, NOT `NEXT_PUBLIC_BASE_URL`.
-  // NEXT_PUBLIC_* values are inlined into the client bundle at build time —
-  // which, with `vercel --prod` deploying the local working tree, means a
-  // localhost value in the local .env can leak straight into the production
-  // build. This URL is only ever read in server actions, so the prefix-less
-  // env var is correct and safe.
-  const base = process.env.BASE_URL ?? "https://cco-platform.vercel.app";
-  return `${base.replace(/\/$/, "")}/reset-password?token=${encodeURIComponent(
-    token
-  )}`;
+async function buildResetUrl(token: string): Promise<string> {
+  // Derive the base URL from the incoming request headers rather than an
+  // env var. Earlier attempts using `NEXT_PUBLIC_BASE_URL` and then plain
+  // `BASE_URL` both leaked a local-dev value (`http://localhost:3000`)
+  // into the production deploy via the various .env precedence rules of
+  // `vercel --prod` + Next.js — see CONTINUITY.md "two Vercel .env
+  // footguns" postmortem.
+  //
+  // Headers route is robust: localhost on `npm run dev`, cco-platform.vercel.app
+  // on prod, future custom domain automatically — all without any env var.
+  const hdrs = await headers();
+  const host =
+    hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "cco-platform.vercel.app";
+  // x-forwarded-proto is set by Vercel's edge to "https" in prod; on local
+  // dev there's no x-forwarded-proto and `host` is "localhost:3000", so
+  // we want "http" there. Default to "http" when the host is loopback.
+  const inferredProto =
+    host.startsWith("localhost") || host.startsWith("127.0.0.1")
+      ? "http"
+      : "https";
+  const proto = hdrs.get("x-forwarded-proto") ?? inferredProto;
+  return `${proto}://${host}/reset-password?token=${encodeURIComponent(token)}`;
 }
