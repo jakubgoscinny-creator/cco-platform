@@ -50,6 +50,22 @@ export async function forgotPasswordAction(
 
     if (contact) {
       const { token, jti, expiresAt } = await signResetToken(contact.podioItemId);
+      const resetUrl = await buildResetUrl(token);
+
+      // Order matters: do the failable Podio call FIRST. If it throws
+      // (e.g. Podio rate-limit / network error), Neon is untouched and
+      // any previously-issued reset link the user is still holding stays
+      // valid. If we wrote the jti to Neon first and then Podio failed,
+      // we'd strand the user with a phantom jti that no email contains —
+      // every old link would fail the single-use cross-check, and the
+      // new forgot would error before creating the replacement Podio
+      // item. (This is exactly the failure mode Jakub hit 2026-05-21.)
+      await createPasswordResetItem({
+        recipientEmail: email,
+        contactItemId: contact.podioItemId,
+        resetUrl,
+        expiresAt,
+      });
 
       // Single-use marker — /reset-password requires the inbound jti
       // to match what's stored here, then clears it on consume. A
@@ -59,15 +75,6 @@ export async function forgotPasswordAction(
         .update(contacts)
         .set({ passwordResetJti: jti })
         .where(eq(contacts.podioItemId, contact.podioItemId));
-
-      const resetUrl = await buildResetUrl(token);
-
-      await createPasswordResetItem({
-        recipientEmail: email,
-        contactItemId: contact.podioItemId,
-        resetUrl,
-        expiresAt,
-      });
     } else {
       // Enumeration-safe branch: still create a Podio item so the
       // outside-visible response shape + timing matches a hit. The
