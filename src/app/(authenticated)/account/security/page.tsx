@@ -11,8 +11,8 @@ export default async function AccountSecurityPage() {
   if (!user) redirect("/sign-in?return_to=/account/security");
 
   return (
-    <div className="max-w-xl">
-      <div className="mb-8">
+    <div className="max-w-xl mx-auto">
+      <div className="mb-8 text-center">
         <p className="text-[11px] uppercase tracking-[0.28em] text-cco-purple font-semibold">
           Account · Security
         </p>
