@@ -85,6 +85,13 @@ export const contacts = pgTable(
     // "Active Annual", "Monthly". Anything else (including null) is treated
     // as non-subscriber. See `circle-access.ts`.
     subscriptionStatus: text("subscription_status"),
+    // CCO-T031: single-use enforcement for password-reset JWTs. When the
+    // /forgot-password action issues a token, we store its jti here. The
+    // /reset-password verifier requires the jti claim to match this column
+    // AND clears it on successful consumption. Replaying the same link is
+    // therefore rejected even within the 30-min TTL. Nullable: cleared on
+    // consumption; null = no outstanding reset request.
+    passwordResetJti: text("password_reset_jti"),
     payload: jsonb("payload"),
     syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
   },

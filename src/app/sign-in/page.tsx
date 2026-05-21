@@ -1,14 +1,18 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { loginAction } from "@/actions/auth";
 import { Logo } from "@/components/shared/Logo";
 
 export default function SignInPage() {
   const [state, formAction, pending] = useActionState(loginAction, null);
+  const params = useSearchParams();
   // SSO flows redirect here with ?return_to=/api/sso/authorize?...
-  const returnTo = useSearchParams().get("return_to") ?? "";
+  const returnTo = params.get("return_to") ?? "";
+  // /reset-password redirects here with ?reset=done after a successful reset.
+  const justReset = params.get("reset") === "done";
 
   return (
     <div className="min-h-full flex items-center justify-center px-4 py-12 relative overflow-hidden">
@@ -60,6 +64,12 @@ export default function SignInPage() {
             </p>
           </div>
 
+          {justReset && !state?.error && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 text-sm">
+              Password updated. Sign in with your new password to continue.
+            </div>
+          )}
+
           {state?.error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
               {state.error}
@@ -107,6 +117,15 @@ export default function SignInPage() {
           >
             {pending ? "Signing you in…" : "Sign in"}
           </button>
+
+          <p className="text-sm text-center text-cco-muted">
+            <Link
+              href="/forgot-password"
+              className="font-semibold text-cco-purple hover:underline"
+            >
+              Forgot your password?
+            </Link>
+          </p>
         </form>
 
         {/* Founder quote with gold rule above — inverts the usual cco-accent underline. */}

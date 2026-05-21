@@ -8,6 +8,13 @@
       "when": 1776329138355,
       "tag": "0000_add_circle_member",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779344711480,
+      "tag": "0001_add_password_reset_jti",
+      "breakpoints": true
     }
   ]
 }

@@ -2,8 +2,8 @@ import { cookies } from "next/headers";
 import { db } from "./db";
 import { contacts, sessions } from "./schema";
 import { eq, and, gt } from "drizzle-orm";
-import { compare, hash } from "bcryptjs";
-import { createHash } from "crypto";
+import { hash as bcryptHash } from "bcryptjs";
+import { verifyPassword } from "./password";
 import {
   filterItems,
   getTextValue,
@@ -43,13 +43,21 @@ export async function authenticate(
     return { success: false, error: "Invalid email or password" };
   }
 
-  // Upgrade any non-bcrypt hash (MD5 or plaintext "JG8032!"-style master
-  // passwords from Podio) to bcrypt on first successful login.
-  if (!contact.passwordHash.startsWith("$2")) {
-    const bcryptHash = await hash(password, 12);
+  // Upgrade any non-bcrypt / non-argon2 hash (MD5 or plaintext
+  // "JG8032!"-style master passwords from Podio) to bcrypt on first
+  // successful login. CCO-T031 introduces argon2id as the new write
+  // standard for password-reset and change-password paths, but this
+  // upgrade-on-login path stays on bcrypt for now to keep the T031
+  // diff scoped; migrating it to argon2id is tracked under CCO-T038
+  // alongside the Podio write-through gap.
+  if (
+    !contact.passwordHash.startsWith("$2") &&
+    !contact.passwordHash.startsWith("$argon2")
+  ) {
+    const upgradedHash = await bcryptHash(password, 12);
     await db
       .update(contacts)
-      .set({ passwordHash: bcryptHash })
+      .set({ passwordHash: upgradedHash })
       .where(eq(contacts.podioItemId, contact.podioItemId));
   }
 
@@ -73,21 +81,11 @@ export async function authenticate(
   };
 }
 
-async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-  // Check if it's a bcrypt hash ($2a$, $2b$, $2y$)
-  if (storedHash.startsWith("$2")) {
-    return compare(password, storedHash);
-  }
-
-  // Legacy MD5 hash (32 hex chars)
-  if (storedHash.length === 32 && /^[a-f0-9]+$/i.test(storedHash)) {
-    const md5 = createHash("md5").update(password).digest("hex");
-    return md5.toLowerCase() === storedHash.toLowerCase();
-  }
-
-  // Plain text comparison (very legacy, shouldn't exist)
-  return password === storedHash;
-}
+// `verifyPassword` was inlined here previously. It now lives in
+// src/lib/password.ts as part of CCO-T031 so the hash/verify surface
+// is centralised. The behaviour is identical (argon2 → bcrypt → MD5
+// → plaintext ladder); argon2 is a new branch for hashes written by
+// the T031 reset and change-password paths.
 
 async function fetchContactFromPodio(
   email: string
@@ -133,16 +131,35 @@ async function fetchContactFromPodio(
       fullName: nameVal,
       circleMember: false,
       subscriptionStatus,
+      // CCO-T031: passwordResetJti is set by /forgot-password and cleared
+      // by /reset-password — never written from the Podio sync path.
+      // Default null on first upsert; preserved by not touching it in the
+      // onConflictDoUpdate `set` clause below (which uses this same record
+      // but only writes the columns we just computed).
+      passwordResetJti: null as string | null,
       payload: item.fields as unknown as Record<string, unknown>,
       syncedAt: new Date(),
     };
 
+    // CCO-T031: do NOT clobber passwordResetJti via the conflict-update path
+    // — that column is owned by the reset action, not the Podio sync. The
+    // insert path still sets it (to null) for fresh rows; the conflict path
+    // explicitly omits it.
+    const conflictUpdate = {
+      email: record.email,
+      passwordHash: record.passwordHash,
+      fullName: record.fullName,
+      circleMember: record.circleMember,
+      subscriptionStatus: record.subscriptionStatus,
+      payload: record.payload,
+      syncedAt: record.syncedAt,
+    };
     await db
       .insert(contacts)
       .values(record)
       .onConflictDoUpdate({
         target: contacts.podioItemId,
-        set: record,
+        set: conflictUpdate,
       });
 
     return {
