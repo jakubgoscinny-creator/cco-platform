@@ -6,7 +6,15 @@ import { type NextRequest, NextResponse } from "next/server";
 //     after verifying the Circle JWT.
 //   - /api/sso/circle-link is an operator-facing JSON spec endpoint used
 //     by Laureen when configuring the cco.academy-side signer.
-const PUBLIC_PATHS = ["/sign-in", "/api/health", "/api/sso/"];
+// CCO-T031: /forgot-password and /reset-password are entered by users
+// who CAN'T sign in (that's the whole point); they must be public.
+const PUBLIC_PATHS = [
+  "/sign-in",
+  "/forgot-password",
+  "/reset-password",
+  "/api/health",
+  "/api/sso/",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
