@@ -1,14 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { LogOut, Menu, Shield, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { logoutAction } from "@/actions/auth";
 import { Logo } from "@/components/shared/Logo";
 
-export function TopBar({ userName }: { userName?: string | null }) {
-  const [open, setOpen] = useState(false);
+export function TopBar({
+  userName,
+  userEmail,
+}: {
+  userName?: string | null;
+  userEmail?: string | null;
+}) {
+  const [navOpen, setNavOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const initials = getInitials(userName ?? "");
+  const accountRef = useRef<HTMLDivElement>(null);
+
+  // Click-outside + Escape closes the account dropdown.
+  useEffect(() => {
+    if (!accountOpen) return;
+
+    function onMouseDown(e: MouseEvent) {
+      if (!accountRef.current?.contains(e.target as Node)) {
+        setAccountOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setAccountOpen(false);
+    }
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [accountOpen]);
 
   return (
     <header className="sticky top-0 z-30 bg-white/85 border-b border-cco-border backdrop-blur-md">
@@ -30,25 +58,71 @@ export function TopBar({ userName }: { userName?: string | null }) {
           </Link>
 
           {userName && (
-            <div className="flex items-center gap-2 ml-1 pl-3 border-l border-cco-border">
-              <div
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-cco-purple to-[#5f3c60] text-white flex items-center justify-center text-xs font-bold shadow-[0_2px_6px_rgba(129,84,129,0.25)]"
-                title={userName}
+            <div
+              ref={accountRef}
+              className="relative flex items-center gap-2 ml-1 pl-3 border-l border-cco-border"
+            >
+              <button
+                type="button"
+                onClick={() => setAccountOpen((v) => !v)}
+                className="flex items-center gap-2 rounded-full p-0.5 transition hover:opacity-90 focus:outline-2 focus:outline-cco-purple/25"
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                aria-label="Account menu"
               >
-                {initials}
-              </div>
-              <span className="text-sm font-semibold text-cco-ink hidden lg:inline">
-                {firstName(userName)}
-              </span>
-              <form action={logoutAction} className="flex items-center">
-                <button
-                  type="submit"
-                  className="p-2 rounded-full text-cco-muted hover:bg-cco-bg-soft hover:text-cco-purple transition"
-                  title="Sign out"
+                <span
+                  className="w-8 h-8 rounded-full bg-gradient-to-br from-cco-purple to-[#5f3c60] text-white flex items-center justify-center text-xs font-bold shadow-[0_2px_6px_rgba(129,84,129,0.25)]"
+                  title={userName}
                 >
-                  <LogOut size={18} />
-                </button>
-              </form>
+                  {initials}
+                </span>
+                <span className="text-sm font-semibold text-cco-ink hidden lg:inline">
+                  {firstName(userName)}
+                </span>
+              </button>
+
+              {accountOpen && (
+                <div
+                  role="menu"
+                  aria-label="Account menu"
+                  className="absolute right-0 top-[calc(100%+6px)] z-50 w-64 bg-white border border-cco-border rounded-2xl shadow-[0_12px_32px_rgba(15,23,42,0.12)] py-1.5 animate-in fade-in slide-in-from-top-1"
+                >
+                  <div className="px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-wider text-cco-muted font-semibold">
+                      Signed in as
+                    </p>
+                    <p className="font-semibold text-cco-ink mt-0.5 truncate text-sm">
+                      {userName}
+                    </p>
+                    {userEmail && userEmail !== userName && (
+                      <p className="text-xs text-cco-muted truncate mt-0.5">
+                        {userEmail}
+                      </p>
+                    )}
+                  </div>
+                  <div className="h-px bg-cco-border mx-2" />
+                  <Link
+                    href="/account/security"
+                    role="menuitem"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-cco-ink font-medium no-underline hover:bg-cco-bg-soft transition"
+                  >
+                    <Shield size={16} className="text-cco-muted" />
+                    Account security
+                  </Link>
+                  <div className="h-px bg-cco-border mx-2" />
+                  <form action={logoutAction}>
+                    <button
+                      type="submit"
+                      role="menuitem"
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 transition"
+                    >
+                      <LogOut size={16} />
+                      Sign out
+                    </button>
+                  </form>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -64,22 +138,22 @@ export function TopBar({ userName }: { userName?: string | null }) {
             </div>
           )}
           <button
-            onClick={() => setOpen(!open)}
+            onClick={() => setNavOpen(!navOpen)}
             className="p-2 rounded-full text-cco-ink hover:bg-cco-bg-soft transition"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
+            aria-label={navOpen ? "Close menu" : "Open menu"}
+            aria-expanded={navOpen}
           >
-            {open ? <X size={22} /> : <Menu size={22} />}
+            {navOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </nav>
 
       {/* Mobile drawer */}
-      {open && (
+      {navOpen && (
         <>
           <div
             className="md:hidden fixed inset-0 bg-cco-ink/30 backdrop-blur-sm z-40"
-            onClick={() => setOpen(false)}
+            onClick={() => setNavOpen(false)}
             aria-hidden
           />
           <div className="md:hidden absolute top-full left-0 right-0 z-50 bg-white border-b border-cco-border shadow-xl animate-in slide-in-from-top-2">
@@ -92,19 +166,33 @@ export function TopBar({ userName }: { userName?: string | null }) {
                   <p className="font-semibold text-cco-ink mt-0.5 truncate">
                     {userName}
                   </p>
+                  {userEmail && userEmail !== userName && (
+                    <p className="text-xs text-cco-muted truncate mt-0.5">
+                      {userEmail}
+                    </p>
+                  )}
                 </div>
               )}
               <div className="h-px bg-cco-border" />
-              <MobileLink href="/catalog" onClick={() => setOpen(false)}>
+              <MobileLink href="/catalog" onClick={() => setNavOpen(false)}>
                 Catalog
               </MobileLink>
-              <MobileLink href="/gradebook" onClick={() => setOpen(false)}>
+              <MobileLink href="/gradebook" onClick={() => setNavOpen(false)}>
                 Gradebook
               </MobileLink>
-              <MobileLink href="/exam/start" onClick={() => setOpen(false)}>
+              <MobileLink href="/exam/start" onClick={() => setNavOpen(false)}>
                 Start exam
               </MobileLink>
               <div className="h-px bg-cco-border" />
+              <MobileLink
+                href="/account/security"
+                onClick={() => setNavOpen(false)}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Shield size={16} className="text-cco-muted" />
+                  Account security
+                </span>
+              </MobileLink>
               <form action={logoutAction}>
                 <button
                   type="submit"

@@ -12,7 +12,7 @@ export default async function AuthenticatedLayout({
 
   return (
     <>
-      <TopBar userName={user.fullName ?? user.email} />
+      <TopBar userName={user.fullName ?? user.email} userEmail={user.email} />
       <main className="flex-1 w-full max-w-[calc(100vw-clamp(32px,4vw,48px))] mx-auto px-[clamp(16px,2vw,24px)] py-8">
         {children}
       </main>
