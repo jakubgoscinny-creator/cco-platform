@@ -197,8 +197,13 @@ async function findContactByEmail(
 }
 
 function buildResetUrl(token: string): string {
-  const base =
-    process.env.NEXT_PUBLIC_BASE_URL ?? "https://cco-platform.vercel.app";
+  // CRITICAL: this is a server-only `BASE_URL`, NOT `NEXT_PUBLIC_BASE_URL`.
+  // NEXT_PUBLIC_* values are inlined into the client bundle at build time —
+  // which, with `vercel --prod` deploying the local working tree, means a
+  // localhost value in the local .env can leak straight into the production
+  // build. This URL is only ever read in server actions, so the prefix-less
+  // env var is correct and safe.
+  const base = process.env.BASE_URL ?? "https://cco-platform.vercel.app";
   return `${base.replace(/\/$/, "")}/reset-password?token=${encodeURIComponent(
     token
   )}`;
