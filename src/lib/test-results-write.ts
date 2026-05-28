@@ -53,6 +53,10 @@ export interface TestResultWriteInput {
   contactFullName: string | null;
   testPodioId: number;
   testName: string;
+  /** The Test's Podio app_item_id (the "[ID####]" shown in Exam Lookup), used to
+   *  write test__test_id = "test{appItemId}" matching the Zenforo rows. Optional —
+   *  omitted (field left blank) if it couldn't be sourced. */
+  testAppItemId?: number | null;
   scorePercent: number;
   durationSeconds: number;
   completedAt: Date;
@@ -111,6 +115,10 @@ export function mapTestResultFields(
   // Podio rejects empty strings on text fields — only include names when present.
   if (first) fields[F.RESULT_FIRST] = first;
   if (last) fields[F.RESULT_LAST] = last;
+
+  // test__test_id = "test{appItemId}", matching the Zenforo rows (e.g. "test2929").
+  // Only when we could source the Test's app_item_id.
+  if (input.testAppItemId != null) fields[F.TEST_ID] = `test${input.testAppItemId}`;
 
   return fields;
 }

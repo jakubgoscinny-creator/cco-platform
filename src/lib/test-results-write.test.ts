@@ -12,6 +12,7 @@ const base: TestResultWriteInput = {
   contactFullName: "Renee Busacca",
   testPodioId: 3046527757,
   testName: "July 2025 CCO Club Q&A Webinar",
+  testAppItemId: 2930,
   scorePercent: 100,
   durationSeconds: 183,
   completedAt: new Date("2026-03-25T14:30:00.000Z"),
@@ -52,6 +53,14 @@ describe("mapTestResultFields", () => {
 
   it("writes result__ID = the attempt id (drives the View Results link)", () => {
     expect(mapTestResultFields(base)[F.RESULT_ID]).toBe("42");
+  });
+
+  it("writes test__test_id = test{appItemId} (matches Zenforo rows)", () => {
+    expect(mapTestResultFields(base)[F.TEST_ID]).toBe("test2930");
+  });
+
+  it("omits test__test_id when the app_item_id couldn't be sourced", () => {
+    expect(mapTestResultFields({ ...base, testAppItemId: null })[F.TEST_ID]).toBeUndefined();
   });
 
   it("writes Test Source = CCO Portal (option id 5) so flow 20's source!=null gate passes", () => {

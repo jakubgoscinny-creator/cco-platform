@@ -6,7 +6,7 @@ import { attempts, answers, tests, contacts } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { syncQuestionsForTest } from "@/lib/sync";
-import { createItem, PODIO_APPS } from "@/lib/podio";
+import { createItem, getItem, PODIO_APPS } from "@/lib/podio";
 import { canAccessTest } from "@/lib/circle-access";
 import { writeTestResultToPodio } from "@/lib/test-results-write";
 
@@ -399,11 +399,25 @@ async function writeResultToTestResultsApp(
     Math.round((submittedAt.getTime() - startedAt.getTime()) / 1000)
   );
 
+  // Best-effort: the Test's app_item_id (for test__test_id = "test{id}") isn't in
+  // the Neon mirror, so fetch it from Podio. A failure must NOT block the result
+  // write — test__test_id is just left blank in that case.
+  let testAppItemId: number | null = null;
+  try {
+    testAppItemId = (await getItem(attempt.testPodioId)).app_item_id ?? null;
+  } catch (err) {
+    console.error(
+      `CCO-T034: could not fetch app_item_id for test ${attempt.testPodioId} (test__test_id left blank):`,
+      err
+    );
+  }
+
   const itemId = await writeTestResultToPodio({
     contactEmail: contact.email,
     contactFullName: contact.fullName ?? null,
     testPodioId: attempt.testPodioId,
     testName: test.testName,
+    testAppItemId,
     scorePercent,
     durationSeconds,
     completedAt: submittedAt,
