@@ -74,7 +74,7 @@ export function TestCard({
           href="https://cco.us/club#price"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-cco-ink text-white text-sm font-semibold no-underline transition hover:bg-cco-ink/90 hover:shadow-lg hover:-translate-y-px"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-cco-gold text-cco-ink text-sm font-semibold no-underline transition hover:bg-cco-gold-dark hover:shadow-lg hover:-translate-y-px"
         >
           <Lock size={15} />
           Join CCO Club

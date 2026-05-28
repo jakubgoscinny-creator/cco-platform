@@ -83,7 +83,7 @@ export default async function UpgradePage({
           href={UPGRADE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600 hover:shadow-lg hover:-translate-y-px"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-cco-gold text-cco-ink font-semibold no-underline transition hover:bg-cco-gold-dark hover:shadow-lg hover:-translate-y-px"
         >
           Join CCO Club
           <ArrowRight size={16} />
