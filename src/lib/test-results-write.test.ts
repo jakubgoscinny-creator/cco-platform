@@ -65,9 +65,9 @@ describe("mapTestResultFields", () => {
     ).toBe(0);
   });
 
-  it("writes Date Taken as a UTC date-only start", () => {
+  it("writes Date Taken as a midnight-UTC datetime (Podio rejects bare YYYY-MM-DD)", () => {
     expect(mapTestResultFields(base)[F.DATE_TAKEN]).toEqual({
-      start: "2026-03-25",
+      start: "2026-03-25 00:00:00",
     });
   });
 

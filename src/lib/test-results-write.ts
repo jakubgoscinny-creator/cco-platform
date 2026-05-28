@@ -71,9 +71,14 @@ export function splitName(fullName: string | null): {
   return { first: name.slice(0, idx), last: name.slice(idx + 1) };
 }
 
-/** Podio date-only field wants "YYYY-MM-DD" (UTC, matching the existing podio.ts writes). */
+/**
+ * Podio's createItem rejects a bare "YYYY-MM-DD" even for a date-only
+ * (time-disabled) field — it demands "YYYY-MM-DD HH:MM:SS" and then stores just
+ * the date. Use midnight UTC, matching the Zenforo-originated rows (which store
+ * `start: "...-... 00:00:00"`).
+ */
 export function podioDateOnly(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return d.toISOString().slice(0, 10) + " 00:00:00";
 }
 
 /** Pure mapper — produces the Podio createItem `fields` payload. Unit-tested. */

@@ -249,21 +249,27 @@ export async function submitExamAction(
     })
     .where(eq(attempts.id, attemptId));
 
-  // Write back to Podio (fire-and-forget — don't block the redirect). Two
+  // Replicate to Podio BEFORE returning. These were previously fire-and-forget,
+  // but Vercel suspends the serverless function the moment the action returns,
+  // which killed the in-flight writes (T034 incident: attempt left unsynced even
+  // though Podio reads worked). Awaiting in parallel makes them reliable; we
+  // capture failures so a Podio outage still lets the student see results, and
+  // scripts/backfill-test-results.mjs recovers anything left unsynced. Two
   // independent writes (CCO-T034 keeps both):
   //   1. Test Attempts (30626082) — the portal's richer per-question record.
   //   2. Test Results (16234798)  — the Zenforo-shape row that drives the
   //      gradebook "Past results" + Mary's progress-tracker automation.
-  writAttemptToPodio(attempt, submittedAt, scorePercent, total, correct, session.contactId).catch(
-    (err) => console.error("Podio Test Attempts write-back failed:", err)
-  );
-  writeResultToTestResultsApp(attempt, submittedAt, scorePercent, session.contactId).catch(
-    (err) =>
-      console.error(
-        "CCO-T034 Test Results write failed (left unsynced for backfill):",
-        err
-      )
-  );
+  const [attemptsWrite, resultsWrite] = await Promise.allSettled([
+    writAttemptToPodio(attempt, submittedAt, scorePercent, total, correct, session.contactId),
+    writeResultToTestResultsApp(attempt, submittedAt, scorePercent, session.contactId),
+  ]);
+  if (attemptsWrite.status === "rejected")
+    console.error("Podio Test Attempts write-back failed:", attemptsWrite.reason);
+  if (resultsWrite.status === "rejected")
+    console.error(
+      "CCO-T034 Test Results write failed (left unsynced for backfill):",
+      resultsWrite.reason
+    );
 
   return { redirectTo: `/exam/results/${attemptId}` };
 }
