@@ -135,6 +135,10 @@ export const attempts = pgTable("attempts", {
   domainScores: jsonb("domain_scores"), // {domainId: {correct, total}}
   scratchPad: text("scratch_pad"),
   podioSynced: boolean("podio_synced").default(false),
+  // CCO-T034: item_id of the Podio Test Results (16234798) row this attempt was
+  // replicated to. Null = not yet written. Acts as the idempotency key so a
+  // retry / backfill never creates a duplicate Test Results row.
+  podioTestResultItemId: bigint("podio_test_result_item_id", { mode: "number" }),
   questionOrder: bigint("question_order", { mode: "number" }).array(),
   questionSnapshots: jsonb("question_snapshots"), // frozen question data at attempt time
   highlights: jsonb("highlights"), // {questionId: highlightedHTML}

@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth";
 import { syncQuestionsForTest } from "@/lib/sync";
 import { createItem, PODIO_APPS } from "@/lib/podio";
 import { canAccessTest } from "@/lib/circle-access";
+import { writeTestResultToPodio } from "@/lib/test-results-write";
 
 // Podio Test Attempts app (30626082) field IDs
 const ATTEMPT_FIELDS = {
@@ -248,9 +249,20 @@ export async function submitExamAction(
     })
     .where(eq(attempts.id, attemptId));
 
-  // Write back to Podio (fire-and-forget — don't block the redirect)
+  // Write back to Podio (fire-and-forget — don't block the redirect). Two
+  // independent writes (CCO-T034 keeps both):
+  //   1. Test Attempts (30626082) — the portal's richer per-question record.
+  //   2. Test Results (16234798)  — the Zenforo-shape row that drives the
+  //      gradebook "Past results" + Mary's progress-tracker automation.
   writAttemptToPodio(attempt, submittedAt, scorePercent, total, correct, session.contactId).catch(
-    (err) => console.error("Podio write-back failed:", err)
+    (err) => console.error("Podio Test Attempts write-back failed:", err)
+  );
+  writeResultToTestResultsApp(attempt, submittedAt, scorePercent, session.contactId).catch(
+    (err) =>
+      console.error(
+        "CCO-T034 Test Results write failed (left unsynced for backfill):",
+        err
+      )
   );
 
   return { redirectTo: `/exam/results/${attemptId}` };
@@ -325,4 +337,80 @@ async function writAttemptToPodio(
     .where(eq(attempts.id, attempt.id));
 
   console.log("Podio write-back OK: item", result.item_id, "for attempt", attempt.id);
+}
+
+// ---------------------------------------------------------------------------
+// CCO-T034: replicate the result into the Podio Test Results app (16234798) in
+// the Zenforo shape, so the gradebook "Past results" + Mary's progress-tracker
+// automation pick it up. The Test Results app's create-triggered ACTION chain
+// resolves Contact (by email) + Test/PT (by name) itself — see
+// `test-results-write.ts`. Podio-first: the Neon sync column is set only AFTER
+// Podio confirms, so a Podio failure leaves it null + logged (recoverable by
+// the backfill sweep) rather than silently dropping the result.
+// ---------------------------------------------------------------------------
+
+async function writeResultToTestResultsApp(
+  attempt: {
+    id: number;
+    testPodioId: number;
+    startedAt: Date | null;
+    podioTestResultItemId: number | null;
+  },
+  submittedAt: Date,
+  scorePercent: number,
+  contactId: number
+): Promise<void> {
+  // Idempotent: never write a second Test Results row for the same attempt.
+  if (attempt.podioTestResultItemId != null) return;
+
+  const [contact] = await db
+    .select({ email: contacts.email, fullName: contacts.fullName })
+    .from(contacts)
+    .where(eq(contacts.podioItemId, contactId))
+    .limit(1);
+  if (!contact?.email) {
+    console.error(
+      `CCO-T034: no email for contact ${contactId}; cannot write Test Results row for attempt ${attempt.id}`
+    );
+    return;
+  }
+
+  const [test] = await db
+    .select({ testName: tests.testName })
+    .from(tests)
+    .where(eq(tests.podioItemId, attempt.testPodioId))
+    .limit(1);
+  if (!test?.testName) {
+    console.error(
+      `CCO-T034: no test name for test ${attempt.testPodioId}; cannot write Test Results row for attempt ${attempt.id}`
+    );
+    return;
+  }
+
+  const startedAt = attempt.startedAt ? new Date(attempt.startedAt) : submittedAt;
+  const durationSeconds = Math.max(
+    0,
+    Math.round((submittedAt.getTime() - startedAt.getTime()) / 1000)
+  );
+
+  const itemId = await writeTestResultToPodio({
+    contactEmail: contact.email,
+    contactFullName: contact.fullName ?? null,
+    testPodioId: attempt.testPodioId,
+    testName: test.testName,
+    scorePercent,
+    durationSeconds,
+    completedAt: submittedAt,
+    attemptId: attempt.id,
+  });
+
+  // Podio confirmed — now (and only now) mark the attempt as replicated.
+  await db
+    .update(attempts)
+    .set({ podioTestResultItemId: itemId })
+    .where(eq(attempts.id, attempt.id));
+
+  console.log(
+    `CCO-T034: Test Results item ${itemId} created for attempt ${attempt.id}`
+  );
 }
