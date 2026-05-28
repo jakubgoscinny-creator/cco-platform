@@ -128,13 +128,42 @@ export default function SignInPage() {
           </p>
         </form>
 
-        {/* CCO-T032 (Option A): the portal is the OAuth identity provider, so
-         *  email + password is the single front door. There is no "Sign in
-         *  with Circle" login here — Circle is a *destination* reached from
-         *  the post-login chooser (the Academy card → /oauth2/initiate logs
-         *  the user into Circle via the portal). Circle-only members get a
-         *  portal password via the reset-link launch comms (CCO-T031/T036).
-         *  See docs/CIRCLE_SSO_SETUP.md for the reasoning. */}
+        {/* CCO-T032: "Sign in with Circle" = a secondary ESCAPE HATCH to
+         *  Circle's own login (cco.academy). For members who don't know
+         *  their portal password yet — they go to Circle and sign in there
+         *  (and stay in Circle; that's fine). The portal stays the identity
+         *  provider; this is just a doorway to the Circle side. Primary
+         *  login is email/password above. (Distinct from the post-login
+         *  chooser's Academy card, which logs an already-signed-in portal
+         *  user INTO Circle via /oauth2/initiate.) Deliberately NOT a
+         *  round-trip-to-picker bridge — that over-engineered against the
+         *  IdP direction; see docs/CIRCLE_SSO_SETUP.md §7. */}
+        <div className="mt-6 flex items-center gap-3">
+          <div className="flex-1 h-px bg-cco-border" aria-hidden />
+          <span className="text-[11px] uppercase tracking-[0.18em] text-cco-muted font-semibold">
+            Or
+          </span>
+          <div className="flex-1 h-px bg-cco-border" aria-hidden />
+        </div>
+        <a
+          href="https://www.cco.academy"
+          className="mt-4 w-full inline-flex items-center justify-center gap-2.5 bg-white border-2 border-cco-purple text-cco-purple font-semibold rounded-full py-2.5 no-underline transition hover:bg-cco-purple/5"
+        >
+          {/* Concentric-ring glyph — reads as "Circle" without embedding
+           *  Circle.so's trademarked mark. */}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden
+            className="shrink-0"
+          >
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+            <circle cx="12" cy="12" r="3.25" fill="currentColor" />
+          </svg>
+          Sign in with Circle
+        </a>
 
         {/* Founder quote with gold rule above — inverts the usual cco-accent underline. */}
         <div className="mt-10 text-center px-4">
