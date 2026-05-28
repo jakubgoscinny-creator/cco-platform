@@ -128,43 +128,13 @@ export default function SignInPage() {
           </p>
         </form>
 
-        {/* CCO-T032: secondary "Sign in with Circle" path. Points at a
-         *  members-only Circle "bridge" post. Circle forces login if the
-         *  visitor has no Circle session; once authenticated, that post's
-         *  Custom HTML reads window.circleUser, mints a signer URL, and
-         *  (because the path matches the post slug) auto-redirects through
-         *  the signer → /api/sso/circle → the portal chooser (`/`). The
-         *  same post shows only a harmless button in feed/space-root views
-         *  (path guard), so members browsing Circle aren't bounced. See
-         *  docs/CIRCLE_SSO_SETUP.md "Sign-in-with-Circle bridge". */}
-        <div className="mt-6 flex items-center gap-3">
-          <div className="flex-1 h-px bg-cco-border" aria-hidden />
-          <span className="text-[11px] uppercase tracking-[0.18em] text-cco-muted font-semibold">
-            Or
-          </span>
-          <div className="flex-1 h-px bg-cco-border" aria-hidden />
-        </div>
-        <a
-          href="https://www.cco.academy/c/sign-in-to-exam-portal/continue-to-the-cco-exam-portal"
-          className="mt-4 w-full inline-flex items-center justify-center gap-2.5 bg-white border-2 border-cco-purple text-cco-purple font-semibold rounded-full py-2.5 no-underline transition hover:bg-cco-purple/5"
-        >
-          {/* Concentric-ring glyph — echoes the round CC letterforms used
-           *  across the portal and reads as "Circle" without embedding
-           *  Circle.so's trademarked mark. Swap for the official asset
-           *  later if we license it. */}
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
-            className="shrink-0"
-          >
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-            <circle cx="12" cy="12" r="3.25" fill="currentColor" />
-          </svg>
-          Sign in with Circle
-        </a>
+        {/* CCO-T032 (Option A): the portal is the OAuth identity provider, so
+         *  email + password is the single front door. There is no "Sign in
+         *  with Circle" login here — Circle is a *destination* reached from
+         *  the post-login chooser (the Academy card → /oauth2/initiate logs
+         *  the user into Circle via the portal). Circle-only members get a
+         *  portal password via the reset-link launch comms (CCO-T031/T036).
+         *  See docs/CIRCLE_SSO_SETUP.md for the reasoning. */}
 
         {/* Founder quote with gold rule above — inverts the usual cco-accent underline. */}
         <div className="mt-10 text-center px-4">
