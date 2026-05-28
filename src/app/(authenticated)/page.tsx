@@ -20,7 +20,14 @@ import { ArrowUpRight, BookOpen, GraduationCap } from "lucide-react";
 import { getSessionContact } from "@/lib/auth";
 import { PageHeader, firstName, timeOfDayGreeting } from "@/components/shared/PageHeader";
 
-const ACADEMY_URL = "https://www.cco.academy";
+// Circle's SSO-initiate URL (NOT the bare homepage). The chooser is only
+// reached with a live portal session, so hitting Circle's initiate kicks
+// off the OAuth dance against the portal (/api/sso/authorize), which sees
+// the session and signs the user straight into Circle — no second login.
+// A bare cco.academy link instead drops a session-less visitor on Circle's
+// logged-out homepage (the bug Jakub caught in a clean window 2026-05-28).
+// If the user already has a Circle session, the dance completes instantly.
+const ACADEMY_URL = "https://www.cco.academy/oauth2/initiate";
 
 export default async function ChooserPage() {
   const user = await getSessionContact();
