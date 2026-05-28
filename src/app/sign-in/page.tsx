@@ -128,13 +128,15 @@ export default function SignInPage() {
           </p>
         </form>
 
-        {/* CCO-T032: secondary "Sign in with Circle" path. Circle members
-         *  who'd rather sign in on cco.academy can hop there directly.
-         *  Once signed into Circle, the existing members-only "Take a CEU
-         *  Quiz" launch button (Laureen's HTML block) round-trips them
-         *  back via the inbound /api/sso/circle flow — no new portal-side
-         *  outbound SSO required. The user's existing Circle session
-         *  cookie does the work. */}
+        {/* CCO-T032: secondary "Sign in with Circle" path. Points at a
+         *  members-only Circle "bridge" post. Circle forces login if the
+         *  visitor has no Circle session; once authenticated, that post's
+         *  Custom HTML reads window.circleUser, mints a signer URL, and
+         *  (because the path matches the post slug) auto-redirects through
+         *  the signer → /api/sso/circle → the portal chooser (`/`). The
+         *  same post shows only a harmless button in feed/space-root views
+         *  (path guard), so members browsing Circle aren't bounced. See
+         *  docs/CIRCLE_SSO_SETUP.md "Sign-in-with-Circle bridge". */}
         <div className="mt-6 flex items-center gap-3">
           <div className="flex-1 h-px bg-cco-border" aria-hidden />
           <span className="text-[11px] uppercase tracking-[0.18em] text-cco-muted font-semibold">
@@ -143,7 +145,7 @@ export default function SignInPage() {
           <div className="flex-1 h-px bg-cco-border" aria-hidden />
         </div>
         <a
-          href="https://www.cco.academy"
+          href="https://www.cco.academy/c/sign-in-to-exam-portal/continue-to-the-cco-exam-portal"
           className="mt-4 w-full inline-flex items-center justify-center gap-2.5 bg-white border-2 border-cco-purple text-cco-purple font-semibold rounded-full py-2.5 no-underline transition hover:bg-cco-purple/5"
         >
           {/* Concentric-ring glyph — echoes the round CC letterforms used
