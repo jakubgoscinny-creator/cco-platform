@@ -24,6 +24,7 @@
  */
 
 import { jwtVerify, type JWTPayload } from "jose";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
@@ -264,13 +265,150 @@ export async function upsertCircleUser(params: {
 // ---------------------------------------------------------------------------
 
 /**
- * Stand-alone helper to flip circle_member on an existing contact. Not
- * used by the main SSO path (upsertCircleUser already sets the flag)
- * but kept for administrative/ad-hoc use.
+ * Stand-alone helper to flip circle_member on an existing contact. Used
+ * by the inbound receiver (upsertCircleUser already sets the flag) AND by
+ * the OAuth /authorize endpoint below. Idempotent.
  */
 export async function markAsCircleMember(contactId: number): Promise<void> {
   await db
     .update(contacts)
     .set({ circleMember: true })
     .where(eq(contacts.podioItemId, contactId));
+}
+
+// ===========================================================================
+// Portal-as-IdP OAuth 2.0 (Circle is the CLIENT, portal is the PROVIDER)
+// ===========================================================================
+//
+// This is the OTHER direction from verifyCircleAuthJwt/upsertCircleUser
+// above. Here cco.academy (Circle) sends a logged-out member to the
+// portal's /api/sso/authorize; the portal authenticates them via their
+// cco_session cookie and hands Circle an OAuth authorization code, which
+// Circle exchanges at /api/sso/token, then reads the profile at
+// /api/sso/userinfo. The net effect: a member signed into the portal
+// lands in Circle already authenticated.
+//
+// HISTORY: these helpers + the three routes were deleted on 2026-04-16
+// (commit d77cd5c, bundled silently into a mobile-fixes commit) and the
+// CIRCLE_SSO_SETUP.md doc was edited to claim Circle's "Enable SSO" could
+// stay OFF "indefinitely". That was wrong: Circle's SSO settings were
+// (and still are) configured + ON, pointing at the portal as OAuth
+// provider (Client ID `cco-portal-sso`, scope `email profile`). Deleting
+// the portal half silently broke "click Academy → land in Circle signed
+// in" for ~5 weeks. Restored for CCO-T032 after inspecting the live
+// Circle SSO settings. See CIRCLE_SSO_SETUP.md.
+//
+// Both `code` and `access_token` are self-verifying HS256 JWTs signed
+// with SSO_CLIENT_SECRET — no storage table, works on serverless.
+
+function requireEnvIdp(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
+}
+
+export const SSO_CODE_TTL_SECONDS = 60;
+export const SSO_ACCESS_TOKEN_TTL_SECONDS = 3600;
+
+// Hosts we accept as Circle's OAuth redirect_uri. Circle's callback is
+// https://www.cco.academy/oauth2/callback; we also accept the apex in
+// case Circle ever drops the www. Compared on full URL.origin to block
+// subdomain tricks like cco.academy.evil.com.
+export const ALLOWED_REDIRECT_ORIGINS = new Set([
+  "https://cco.academy",
+  "https://www.cco.academy",
+]);
+
+// --- Authorization code (issued by /authorize, consumed by /token) ---------
+
+interface AuthCodePayload extends JwtPayload {
+  typ: "sso_code";
+  email: string;
+  contactId: number;
+}
+
+export function issueAuthorizationCode(email: string, contactId: number): string {
+  const secret = requireEnvIdp("SSO_CLIENT_SECRET");
+  const payload: AuthCodePayload = { typ: "sso_code", email, contactId };
+  return jwt.sign(payload, secret, {
+    algorithm: "HS256",
+    expiresIn: SSO_CODE_TTL_SECONDS,
+    // Random jti so an intercepted code can't be trivially replayed
+    // (the 60s TTL already keeps the window tiny).
+    jwtid: randomBytes(16).toString("hex"),
+  });
+}
+
+export function verifyAuthorizationCode(code: string): AuthCodePayload {
+  const secret = requireEnvIdp("SSO_CLIENT_SECRET");
+  const decoded = jwt.verify(code, secret, { algorithms: ["HS256"] });
+  if (typeof decoded === "string" || decoded.typ !== "sso_code") {
+    throw new Error("Invalid authorization code");
+  }
+  return decoded as AuthCodePayload;
+}
+
+// --- Access token (issued by /token, consumed by /userinfo) -----------------
+
+interface AccessTokenPayload extends JwtPayload {
+  typ: "sso_access";
+  sub: string; // contactId as string
+  email: string;
+}
+
+export function issueAccessToken(contactId: number, email: string): string {
+  const secret = requireEnvIdp("SSO_CLIENT_SECRET");
+  const payload: AccessTokenPayload = {
+    typ: "sso_access",
+    sub: String(contactId),
+    email,
+  };
+  return jwt.sign(payload, secret, {
+    algorithm: "HS256",
+    expiresIn: SSO_ACCESS_TOKEN_TTL_SECONDS,
+  });
+}
+
+export function verifyAccessToken(token: string): AccessTokenPayload {
+  const secret = requireEnvIdp("SSO_CLIENT_SECRET");
+  const decoded = jwt.verify(token, secret, { algorithms: ["HS256"] });
+  if (typeof decoded === "string" || decoded.typ !== "sso_access") {
+    throw new Error("Invalid access token");
+  }
+  return decoded as AccessTokenPayload;
+}
+
+// --- Client credential validation -------------------------------------------
+
+export function validateClientId(clientId: string): boolean {
+  return clientId === requireEnvIdp("SSO_CLIENT_ID");
+}
+
+export function validateClientCredentials(
+  clientId: string,
+  clientSecret: string
+): boolean {
+  return (
+    clientId === requireEnvIdp("SSO_CLIENT_ID") &&
+    clientSecret === requireEnvIdp("SSO_CLIENT_SECRET")
+  );
+}
+
+// --- redirect_uri validation ------------------------------------------------
+
+/**
+ * Validate redirect_uri:
+ *  - Must parse as a URL.
+ *  - Origin (scheme + host + port) must be in ALLOWED_REDIRECT_ORIGINS.
+ * Returns the parsed URL or null if invalid.
+ */
+export function parseAllowedRedirectUri(raw: string): URL | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (!ALLOWED_REDIRECT_ORIGINS.has(url.origin)) return null;
+  return url;
 }
