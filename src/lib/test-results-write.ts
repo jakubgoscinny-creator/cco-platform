@@ -24,6 +24,7 @@ import { createItem, PODIO_APPS } from "./podio";
 // Writable Test Results (16234798) field IDs for a portal-originated row.
 export const TEST_RESULT_WRITE_FIELDS = {
   RESULT_EMAIL: 125911826, // email — flow 10 matches the Contact on this
+  RESULT_ID: 147831161, // text — portal attempt id; the "View Results" calc builds /exam/results/{this}
   RESULT_FIRST: 125913230, // text
   RESULT_LAST: 125911818, // text
   RESULT_PERCENTAGE: 125911831, // number
@@ -90,6 +91,7 @@ export function mapTestResultFields(
 
   const fields: Record<string, unknown> = {
     [F.RESULT_EMAIL]: [{ value: input.contactEmail, type: "work" }],
+    [F.RESULT_ID]: String(input.attemptId),
     [F.RESULT_PERCENTAGE]: input.scorePercent,
     [F.RESULT_DURATION]: Math.max(0, Math.round(input.durationSeconds)),
     [F.TEST_NAME]: input.testName,

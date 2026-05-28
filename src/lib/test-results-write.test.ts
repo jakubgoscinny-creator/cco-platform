@@ -50,6 +50,10 @@ describe("mapTestResultFields", () => {
     ]);
   });
 
+  it("writes result__ID = the attempt id (drives the View Results link)", () => {
+    expect(mapTestResultFields(base)[F.RESULT_ID]).toBe("42");
+  });
+
   it("writes Test Source = CCO Portal (option id 5) so flow 20's source!=null gate passes", () => {
     const f = mapTestResultFields(base);
     expect(f[F.TEST_SOURCE]).toBe(TEST_SOURCE_CCO_PORTAL);
