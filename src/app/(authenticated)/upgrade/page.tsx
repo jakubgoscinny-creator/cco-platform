@@ -19,7 +19,7 @@ import Link from "next/link";
 
 // Override-able via env so Laureen can change the upgrade destination without a deploy.
 const UPGRADE_URL =
-  process.env.NEXT_PUBLIC_CCO_UPGRADE_URL ?? "https://www.cco.academy/sign_up";
+  process.env.NEXT_PUBLIC_CCO_UPGRADE_URL ?? "https://cco.us/club#price";
 
 export default async function UpgradePage({
   searchParams,
@@ -50,6 +50,10 @@ export default async function UpgradePage({
         Back to Catalog
       </Link>
 
+      <div className="rounded-xl border border-cco-border bg-cco-bg-soft px-4 py-3 text-sm text-cco-muted mb-4">
+        If you recently joined, sign out and back in to refresh your access.
+      </div>
+
       <Card className="space-y-6 text-center py-10 px-6">
         <div className="mx-auto w-14 h-14 rounded-full bg-cco-purple/10 flex items-center justify-center">
           <Lock size={26} className="text-cco-purple" />
@@ -77,9 +81,11 @@ export default async function UpgradePage({
 
         <a
           href={UPGRADE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600 hover:shadow-lg hover:-translate-y-px"
         >
-          Join CCO Academy
+          Join CCO Club
           <ArrowRight size={16} />
         </a>
 
