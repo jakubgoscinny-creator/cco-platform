@@ -26,9 +26,23 @@ export const tests = pgTable("tests", {
   timeLimitMinutes: integer("time_limit_minutes"),
   passingScore: integer("passing_score"),
   status: text("status"),
-  // 'Free' | 'Member'. Mary tags in Podio Tests app (16243239), access_tier
-  // category field. Untagged tests default to 'Member' (fail-closed).
+  // CCO-T006 + CCO-T033: per-test access tier. Mary tags in the Podio Tests
+  // app (16243239), access-tier category field. T006 shipped Free/Member;
+  // T033 extends to 'Free' | 'Club' | 'Student' (legacy 'Member' === Club).
+  // Untagged tests fall back to Club (fail-closed) in sync; the DB default
+  // stays 'Member' (legacy — normalizeAccessTier collapses it to Club).
   accessTier: text("access_tier").notNull().default("Member"),
+  // CCO-T033: per-test progress-tracker type for Student-tier gating, mirrored
+  // from the Tests app "Progress Tracker Type" category (external_id
+  // progress-tracker-type-2), e.g. 'PBC' | 'IPC' | 'RAC'. Null for non-Student
+  // tests; a Student-tier test with this null is an admin error (stays locked).
+  studentTrackerType: text("student_tracker_type"),
+  // CCO-T044 (2026-05-28 meeting): portal visibility is driven by the dedicated
+  // "Ready for Portal" Yes/No flag (Podio field 276781364), NOT by overloading
+  // Test Status = "Active - In Portal" (cleaner separation of dev-status from
+  // student-facing readiness). getActiveTests filters on this. Default false =
+  // hidden until Mary flags it Ready.
+  readyForPortal: boolean("ready_for_portal").notNull().default(false),
   ceuItemIds: bigint("ceu_item_ids", { mode: "number" }).array(),
   payload: jsonb("payload"), // full Podio field snapshot
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
@@ -85,6 +99,12 @@ export const contacts = pgTable(
     // "Active Annual", "Monthly". Anything else (including null) is treated
     // as non-subscriber. See `circle-access.ts`.
     subscriptionStatus: text("subscription_status"),
+    // CCO-T033: the progress-tracker types this Contact is enrolled in,
+    // resolved from the Podio Progress Tracker app (16163523) at sign-in /
+    // SSO callback (mirrored like subscription_status). Drives Student-tier
+    // gating: a Student test unlocks when its studentTrackerType is in this
+    // set. Null = not yet resolved (treated as no enrollment / non-student).
+    enrolledTrackerTypes: text("enrolled_tracker_types").array(),
     // CCO-T031: single-use enforcement for password-reset JWTs. When the
     // /forgot-password action issues a token, we store its jti here. The
     // /reset-password verifier requires the jti claim to match this column

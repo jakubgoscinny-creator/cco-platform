@@ -53,12 +53,16 @@ export async function startExamAction(
   // directly (e.g. a non-subscriber who knows a test_id). This guard is the
   // integrity boundary — without it, the UI gates are advisory only.
   const [contactRow] = await db
-    .select({ subscriptionStatus: contacts.subscriptionStatus })
+    .select({
+      subscriptionStatus: contacts.subscriptionStatus,
+      enrolledTrackerTypes: contacts.enrolledTrackerTypes,
+    })
     .from(contacts)
     .where(eq(contacts.podioItemId, session.contactId))
     .limit(1);
   const decision = canAccessTest(test, {
     subscriptionStatus: contactRow?.subscriptionStatus ?? null,
+    enrolledTrackerTypes: contactRow?.enrolledTrackerTypes ?? null,
   });
   if (decision === "members_only") {
     return {

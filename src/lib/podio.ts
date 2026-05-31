@@ -350,6 +350,46 @@ export async function getLegacyTestResultsByContact(
 }
 
 // ---------------------------------------------------------------------------
+// CCO-T033: resolve a Contact's enrolled progress-tracker types — the
+// Student-tier signal. Each Progress Tracker (app 16163523) links a student
+// Contact and carries a single tracker type; we collect the distinct set.
+//
+// - Filters on the STUDENT ref (NOT the coach ref — the app has both).
+// - Returns null on Podio failure so callers can PRESERVE the prior mirrored
+//   value rather than clobbering it with an empty set (avoids a false lock-out
+//   on a transient Podio error / rate-limit).
+// - v1 counts ALL of the Contact's PTs regardless of Overall Status —
+//   inclusive, to avoid locking out active students. Status-based entitlement
+//   (e.g. revoke on Dropped/Refunded) is a deliberate v2 refinement to define
+//   with Mary; the big-ticket Club content is gated by subscription_status,
+//   not this, so the exposure here is bounded to course practice exams.
+// ---------------------------------------------------------------------------
+
+export async function getEnrolledTrackerTypesForContact(
+  contactItemId: number
+): Promise<string[] | null> {
+  try {
+    const result = await filterItems(
+      PODIO_APPS.PROGRESS_TRACKER,
+      { [PROGRESS_TRACKER_FIELDS.STUDENT]: [contactItemId] },
+      { limit: 200 }
+    );
+    const types = new Set<string>();
+    for (const item of result.items ?? []) {
+      const t = getCategoryValue(item, PROGRESS_TRACKER_FIELDS.PROGRESS_TRACKER_TYPE);
+      if (t) types.add(t);
+    }
+    return [...types];
+  } catch (err) {
+    console.error(
+      `CCO-T033: failed to resolve progress trackers for contact ${contactItemId}:`,
+      err
+    );
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Known Podio App IDs
 // ---------------------------------------------------------------------------
 
@@ -363,6 +403,7 @@ export const PODIO_APPS = {
   CONTACTS: 14660191,
   CEU_ITEMS: 14639788,
   TEST_RESULTS: 16234798, // legacy results store, 126K+ items, joins to Contacts
+  PROGRESS_TRACKER: 16163523, // CCO-T033: per-Contact course enrollment (student + tracker type)
 } as const;
 
 export const TEST_FIELDS = {
@@ -379,10 +420,18 @@ export const TEST_FIELDS = {
   TEST_RESULT_PROCESSING: 150300363,
   CEU_ITEMS: 137578199,        // app ref → CEU Items in Hub
   // CCO-T006: per-test access tier. Mary creates a category field on the
-  // Tests app (16243239) with external_id "access-tier" and options
-  // "Free" / "Member". Until that field exists / a test is tagged,
-  // mapPodioTest falls back to "Member" (fail-closed).
+  // Tests app (16243239) with external_id "access-tier". T006 options were
+  // Free / Member; CCO-T033 extends to Free / Club / Student. Until the field
+  // exists / a test is tagged, mapPodioTest falls back to "Club" (fail-closed).
   ACCESS_TIER: "access-tier",
+  // CCO-T033: per-test progress-tracker type (single-select category) — the
+  // load-bearing field for Student-tier gating, already live on the Tests app
+  // (the same field T034's GlobiFlow flow-20 reads). e.g. PBC / IPC / RAC.
+  STUDENT_TRACKER_TYPE: "progress-tracker-type-2",
+  // CCO-T044: dedicated portal-visibility flag (Yes/No category, field
+  // 276781364). The catalog source of truth as of the 2026-05-28 meeting,
+  // replacing the overloaded Test Status = "Active - In Portal".
+  READY_FOR_PORTAL: "ready-for-portal",
 } as const;
 
 // Statuses that indicate a test is available for students
@@ -508,6 +557,17 @@ export const TEST_SOURCE_OPTIONS = {
   CM_DEV: 3,
   XENFORO: 4,
   CCO_PORTAL: 5, // added by Mary 2026-04-30
+} as const;
+
+// CCO-T033: Progress Tracker app (16163523) — per-Contact course enrollment.
+// Field IDs inspected 2026-05-29 (snapshots/progress-tracker-app.json). The
+// app has TWO Contacts refs (student + coach) — Student-tier gating MUST
+// filter on STUDENT, never COACH.
+export const PROGRESS_TRACKER_FIELDS = {
+  STUDENT: 125306242,               // app ref → Contacts (the enrolled student)
+  PROGRESS_TRACKER_TYPE: 128205285, // category (single) — PBC / IPC / RAC / ...
+  OVERALL_STATUS: 149529784,        // category — Enrolled - *, Graduated, Dropped / Refunded, ...
+  COACH: 125305432,                 // app ref → Contacts (the coach — NOT the student)
 } as const;
 
 // ---------------------------------------------------------------------------

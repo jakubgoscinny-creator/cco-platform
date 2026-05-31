@@ -52,7 +52,12 @@ export default async function ExamStartPage({
   // This is layer 2 of 3 (catalog UX is layer 1; attempt-create server
   // action enforcement is layer 3 — the integrity boundary).
   const contact = await getSessionContact();
-  if (canAccessTest(test, { subscriptionStatus: contact?.subscriptionStatus ?? null }) === "members_only") {
+  if (
+    canAccessTest(test, {
+      subscriptionStatus: contact?.subscriptionStatus ?? null,
+      enrolledTrackerTypes: contact?.enrolledTrackerTypes ?? null,
+    }) === "members_only"
+  ) {
     redirect(`/upgrade?test_id=${testId}`);
   }
 

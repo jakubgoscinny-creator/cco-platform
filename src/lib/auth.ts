@@ -8,6 +8,7 @@ import {
   filterItems,
   getTextValue,
   getCategoryValue,
+  getEnrolledTrackerTypesForContact,
   PODIO_APPS,
   CONTACT_FIELDS,
 } from "./podio";
@@ -139,6 +140,14 @@ async function fetchContactFromPodio(
     const subStatusRaw = getCategoryValue(item, CONTACT_FIELDS.SUBSCRIPTION_STATUS);
     const subscriptionStatus = subStatusRaw || null;
 
+    // CCO-T033: resolve the Contact's enrolled progress-tracker types (the
+    // Student-tier signal) from the Progress Tracker app. Returns null on a
+    // Podio failure — we then PRESERVE the prior mirrored value (see the
+    // conflictUpdate below) rather than wiping a student's access.
+    const enrolledTrackerTypes = await getEnrolledTrackerTypesForContact(
+      item.item_id
+    );
+
     const record = {
       podioItemId: item.item_id,
       email: emailVal.toLowerCase().trim(),
@@ -146,6 +155,9 @@ async function fetchContactFromPodio(
       fullName: nameVal,
       circleMember: false,
       subscriptionStatus,
+      // CCO-T033: INSERT seeds this column; on a resolve failure (null) a fresh
+      // contact seeds [] and self-heals on the next successful sign-in refresh.
+      enrolledTrackerTypes: enrolledTrackerTypes ?? [],
       // CCO-T031: passwordResetJti is set by /forgot-password and cleared
       // by /reset-password — never written from the Podio sync path.
       // Default null on first upsert; preserved by not touching it in the
@@ -175,6 +187,10 @@ async function fetchContactFromPodio(
       fullName: record.fullName,
       circleMember: record.circleMember,
       subscriptionStatus: record.subscriptionStatus,
+      // CCO-T033: only overwrite enrolled types when the resolve SUCCEEDED. On
+      // a Podio failure (null) omit the column so the existing mirrored value
+      // survives — never wipe a student's access on a transient error.
+      ...(enrolledTrackerTypes !== null ? { enrolledTrackerTypes } : {}),
       payload: record.payload,
       syncedAt: record.syncedAt,
     };
@@ -250,6 +266,7 @@ export async function getSessionContact(): Promise<{
   email: string;
   fullName: string | null;
   subscriptionStatus: string | null;
+  enrolledTrackerTypes: string[] | null;
 } | null> {
   const session = await getSession();
   if (!session) return null;
@@ -265,6 +282,7 @@ export async function getSessionContact(): Promise<{
     email: contact.email,
     fullName: contact.fullName,
     subscriptionStatus: contact.subscriptionStatus,
+    enrolledTrackerTypes: contact.enrolledTrackerTypes,
   };
 }
 

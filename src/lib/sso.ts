@@ -33,6 +33,7 @@ import {
   filterItems,
   getTextValue,
   getCategoryValue,
+  getEnrolledTrackerTypesForContact,
   PODIO_APPS,
   CONTACT_FIELDS,
 } from "./podio";
@@ -224,6 +225,12 @@ export async function upsertCircleUser(params: {
   const subStatusRaw = getCategoryValue(item, CONTACT_FIELDS.SUBSCRIPTION_STATUS);
   const subscriptionStatus = subStatusRaw || null;
 
+  // CCO-T033: resolve enrolled progress-tracker types (the Student-tier
+  // signal), refreshed on every SSO callback like subscription_status. null on
+  // a Podio failure → preserve the prior mirrored value (omit from the
+  // conflict set) so a transient error never wipes a student's access.
+  const enrolledTrackerTypes = await getEnrolledTrackerTypesForContact(podioItemId);
+
   // Mirror into Neon
   await db
     .insert(contacts)
@@ -234,6 +241,7 @@ export async function upsertCircleUser(params: {
       fullName: resolvedName || null,
       circleMember: params.circleMember,
       subscriptionStatus,
+      enrolledTrackerTypes: enrolledTrackerTypes ?? [],
       payload: item.fields as unknown as Record<string, unknown>,
       syncedAt: new Date(),
     })
@@ -244,6 +252,7 @@ export async function upsertCircleUser(params: {
         fullName: resolvedName || null,
         circleMember: params.circleMember,
         subscriptionStatus,
+        ...(enrolledTrackerTypes !== null ? { enrolledTrackerTypes } : {}),
         syncedAt: new Date(),
       },
     });

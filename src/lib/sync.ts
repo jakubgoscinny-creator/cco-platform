@@ -20,7 +20,6 @@ import {
   CEU_ITEM_FIELDS,
   DOMAIN_FIELDS,
   QUESTION_FIELDS,
-  ACTIVE_TEST_STATUSES,
   type PodioItem,
 } from "./podio";
 import { eq, inArray } from "drizzle-orm";
@@ -56,10 +55,15 @@ export async function getTests(): Promise<Test[]> {
   return cached;
 }
 
-/** Returns tests with "Active - In Portal" status — controlled from Podio. */
+/**
+ * Tests visible in the portal catalog. As of the 2026-05-28 meeting (CCO-T044)
+ * this is driven by the dedicated "Ready for Portal" = Yes flag, NOT by the
+ * overloaded Test Status = "Active - In Portal" (keeps dev-status separate from
+ * student-facing readiness). Controlled by Mary in Podio.
+ */
 export async function getActiveTests(): Promise<Test[]> {
   const all = await getTests();
-  return all.filter((t) => t.status === "Active - In Portal");
+  return all.filter((t) => t.readyForPortal);
 }
 
 export async function syncTestsFromPodio(): Promise<void> {
@@ -100,12 +104,31 @@ function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
     getCategoryValue(item, TEST_FIELDS.TEST_TYPE) ||
     null;
 
-  // CCO-T006: read access_tier from Podio category field. Fall back to
-  // "Member" if Mary hasn't created the field yet or hasn't tagged the test —
-  // fail-closed default so nothing leaks to non-subscribers without explicit
-  // intent.
+  // CCO-T006 + CCO-T033: read access_tier from the Podio category field.
+  // T033 extends the options to Free / Club / Student (legacy "Member" ===
+  // Club). Pass a recognised tag through verbatim; fall back to "Club" when
+  // untagged or unknown — fail-closed (never Free). circle-access
+  // .normalizeAccessTier collapses "Member"/unknown → Club at decision time.
+  // (The earlier T006 code coerced everything-but-Free to "Member", which
+  // would have silently flattened a Podio "Club"/"Student" tag.)
   const accessTierRaw = getCategoryValue(item, TEST_FIELDS.ACCESS_TIER);
-  const accessTier = accessTierRaw === "Free" ? "Free" : "Member";
+  const accessTier =
+    accessTierRaw === "Free" ||
+    accessTierRaw === "Club" ||
+    accessTierRaw === "Club Member" ||
+    accessTierRaw === "Student" ||
+    accessTierRaw === "Member"
+      ? accessTierRaw
+      : "Club";
+
+  // CCO-T033: per-test progress-tracker type for Student-tier gating.
+  const studentTrackerType =
+    getCategoryValue(item, TEST_FIELDS.STUDENT_TRACKER_TYPE) || null;
+
+  // CCO-T044: portal-visibility flag — the catalog source of truth (replaces
+  // the Test Status = "Active - In Portal" filter). getActiveTests reads this.
+  const readyForPortal =
+    getCategoryValue(item, TEST_FIELDS.READY_FOR_PORTAL) === "Yes";
 
   return {
     podioItemId: item.item_id,
@@ -118,6 +141,8 @@ function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
     passingScore: getNumberValue(item, TEST_FIELDS.PASSING_SCORE),
     status: getCategoryValue(item, TEST_FIELDS.TEST_STATUS) || null,
     accessTier,
+    studentTrackerType,
+    readyForPortal,
     ceuItemIds: getAppReferenceIds(item, TEST_FIELDS.CEU_ITEMS),
     payload: item.fields as unknown as Record<string, unknown>,
   };
