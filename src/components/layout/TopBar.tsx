@@ -48,13 +48,12 @@ export function TopBar({
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-2.5">
-          <NavLink href="/catalog">Catalog</NavLink>
           <NavLink href="/gradebook">Gradebook</NavLink>
           <Link
-            href="/exam/start"
+            href="/catalog"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600 hover:shadow-lg hover:-translate-y-px"
           >
-            Start Exam
+            Catalog
           </Link>
 
           {userName && (
@@ -179,9 +178,6 @@ export function TopBar({
               </MobileLink>
               <MobileLink href="/gradebook" onClick={() => setNavOpen(false)}>
                 Gradebook
-              </MobileLink>
-              <MobileLink href="/exam/start" onClick={() => setNavOpen(false)}>
-                Start exam
               </MobileLink>
               <div className="h-px bg-cco-border" />
               <MobileLink

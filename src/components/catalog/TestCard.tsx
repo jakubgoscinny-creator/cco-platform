@@ -14,6 +14,10 @@ export interface TestCardProps {
   domainNames: string[];
   /** CCO-T006: true when the current user can't take this test (Member tier + non-subscriber). */
   locked?: boolean;
+  /** CCO-T046: the student's best result for this exam (completion display). */
+  passed?: boolean;
+  attempted?: boolean;
+  scorePercent?: number | null;
 }
 
 export function TestCard({

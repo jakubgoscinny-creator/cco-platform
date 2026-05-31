@@ -6,6 +6,7 @@ import { CatalogHero } from "@/components/catalog/CatalogHero";
 import { DataLineage } from "@/components/shared/DataLineage";
 import { timeOfDayGreeting, firstName } from "@/components/shared/PageHeader";
 import { getSessionContact } from "@/lib/auth";
+import { getLegacyResultsForContact } from "@/lib/legacy-results";
 import { canAccessTest, normalizeAccessTier } from "@/lib/circle-access";
 import type { TestCardProps } from "@/components/catalog/TestCard";
 import type { Test } from "@/lib/schema";
@@ -28,9 +29,9 @@ type GroupMeta = {
 function groupFor(test: Test): GroupMeta {
   const tier = normalizeAccessTier(test.accessTier);
   if (tier === "Free")
-    return { key: "free", title: "Free CEU Quizzes", accent: "green", kind: "free", order: 2 };
+    return { key: "free", title: "Free CEU Quizzes", accent: "green", kind: "free", order: 3 };
   if (tier === "Club")
-    return { key: "club", title: "CCO Club", accent: "gold", kind: "club", order: 3 };
+    return { key: "club", title: "CCO Club", accent: "gold", kind: "club", order: 2 };
   const code = test.studentTrackerType || "Course";
   return { key: `course:${code}`, title: code, accent: "purple", kind: "course", order: 1 };
 }
@@ -63,19 +64,60 @@ export default async function CatalogPage({
     t.testName.toLowerCase().includes(searchQuery) ||
     stripHtml(t.description ?? "").toLowerCase().includes(searchQuery);
 
-  const toCard = (t: Test): TestCardProps => ({
-    id: t.podioItemId,
-    name: t.testName,
-    description: t.description,
-    testType: t.testType,
-    questionCount: t.questionCount,
-    timeLimitMinutes: t.timeLimitMinutes,
-    passingScore: t.passingScore,
-    domainNames: (t.domainIds ?? [])
-      .map((id) => domainNameMap.get(id))
-      .filter((n): n is string => !!n),
-    locked: false,
-  });
+  // CCO-T046: the student's completion per exam (passed / best score), from the
+  // Neon legacy_test_results mirror (Test Results). Matched by Tests item_id,
+  // with a test-name fallback. Resilient — a failure just drops the progress
+  // marks, never the catalog.
+  type Done = { passed: boolean; attempted: boolean; score: number | null };
+  const maxScore = (x: number | null, y: number | null) => {
+    const vals = [x, y].filter((s): s is number => s != null);
+    return vals.length ? Math.max(...vals) : null;
+  };
+  const better = (a: Done | undefined, b: Done): Done =>
+    !a ? b : { passed: a.passed || b.passed, attempted: true, score: maxScore(a.score, b.score) };
+  const byId = new Map<number, Done>();
+  const byName = new Map<string, Done>();
+  if (user) {
+    try {
+      const results = await getLegacyResultsForContact(user.contactId);
+      for (const r of results) {
+        const d: Done = {
+          passed: r.passed === true,
+          attempted: true,
+          score: r.scorePercent != null ? Number(r.scorePercent) : null,
+        };
+        if (r.testItemId) byId.set(r.testItemId, better(byId.get(r.testItemId), d));
+        if (r.testName) {
+          const k = r.testName.trim().toLowerCase();
+          byName.set(k, better(byName.get(k), d));
+        }
+      }
+    } catch (err) {
+      console.error("CCO-T046: completion lookup failed (non-fatal):", err);
+    }
+  }
+  const completionFor = (t: Test): Done | undefined =>
+    byId.get(t.podioItemId) ?? byName.get(t.testName.trim().toLowerCase());
+
+  const toCard = (t: Test): TestCardProps => {
+    const d = completionFor(t);
+    return {
+      id: t.podioItemId,
+      name: t.testName,
+      description: t.description,
+      testType: t.testType,
+      questionCount: t.questionCount,
+      timeLimitMinutes: t.timeLimitMinutes,
+      passingScore: t.passingScore,
+      domainNames: (t.domainIds ?? [])
+        .map((id) => domainNameMap.get(id))
+        .filter((n): n is string => !!n),
+      locked: false,
+      passed: d?.passed ?? false,
+      attempted: d?.attempted ?? false,
+      scorePercent: d?.score ?? null,
+    };
+  };
 
   // CCO-T044 (2026-05-29 evolution): show EVERY section as a folder. A section
   // the viewer can access opens to its exam rows; one they can't is locked
@@ -134,6 +176,8 @@ export default async function CatalogPage({
         if (locked) upsell = { href: COURSE_ENROL_URL, label: "Enrol to unlock" };
       }
 
+      const done = sorted.filter((c) => c.passed).length;
+
       return {
         key: meta.key,
         title: meta.title,
@@ -146,11 +190,23 @@ export default async function CatalogPage({
         count,
         cards: sorted,
         upsell,
+        progress:
+          !locked && sorted.length > 0 ? { done, total: sorted.length } : undefined,
       };
     });
 
-  const sections = groups.length;
-  const unlocked = groups.filter((g) => !g.locked).length;
+  // CCO-T046: section layout. Locked COURSES go to the compact "Explore more
+  // courses" grid; everything else (your course folders, CCO Club, Free CEUs)
+  // stays a full-width section in tier order — your courses, then Club (above
+  // Free, so the hierarchy reads), then Free.
+  const rank: Record<GroupAccent, number> = { purple: 1, gold: 2, green: 3 };
+  const isLockedCourse = (g: CatalogGroup) => g.accent === "purple" && g.locked;
+  const lockedCourses = groups
+    .filter(isLockedCourse)
+    .sort((a, b) => a.title.localeCompare(b.title));
+  const topSections = groups
+    .filter((g) => !isLockedCourse(g))
+    .sort((a, b) => rank[a.accent] - rank[b.accent] || a.title.localeCompare(b.title));
 
   const latestSync = allTests.reduce<Date | null>((latest, t) => {
     if (!t.syncedAt) return latest;
@@ -171,12 +227,7 @@ export default async function CatalogPage({
         <CatalogFilters />
       </Suspense>
 
-      <p className="mb-4 text-sm text-cco-muted">
-        {sections} {sections === 1 ? "section" : "sections"}
-        {unlocked > 0 && ` · ${unlocked} unlocked`}
-      </p>
-
-      <CatalogGroups groups={groups} />
+      <CatalogGroups top={topSections} lockedCourses={lockedCourses} />
     </div>
   );
 }
