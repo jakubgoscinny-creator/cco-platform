@@ -10,7 +10,13 @@ import {
   Download,
   ShieldCheck,
   Sparkles,
+  CheckCircle2,
+  XCircle,
+  ListChecks,
+  Timer,
+  Flag,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { QuestionSnapshot } from "@/lib/exam-engine";
 import {
   issueCertificate,
@@ -135,17 +141,20 @@ export default async function ExamResultsPage({
         }
       />
 
-      {/* Stat tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      {/* Stat tiles — brand-gradient, matching the gradebook Scorecard */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
         <StatTile
           label="Score"
           value={`${score}%`}
-          color={passed ? "green" : "red"}
+          accent={passed ? "green" : "red"}
+          icon={passed ? CheckCircle2 : XCircle}
           sublabel={`Pass mark ${passingThreshold}%`}
         />
         <StatTile
           label="Correct"
           value={`${correct} / ${reviewQuestions.length}`}
+          accent="purple"
+          icon={ListChecks}
           sublabel={
             incorrect > 0
               ? `${incorrect} incorrect`
@@ -157,11 +166,15 @@ export default async function ExamResultsPage({
         <StatTile
           label="Duration"
           value={timeTaken != null ? formatDuration(timeTaken) : "--"}
+          accent="slate"
+          icon={Timer}
           sublabel="Start to finish"
         />
         <StatTile
           label="Flagged"
           value={`${flaggedCount}`}
+          accent="gold"
+          icon={Flag}
           sublabel={
             flaggedCount === 0 ? "None flagged" : "Marked for review"
           }
@@ -303,35 +316,89 @@ export default async function ExamResultsPage({
   );
 }
 
+type StatAccent = "purple" | "green" | "gold" | "slate" | "red";
+
+// Brand-gradient stat tiles — same system as the gradebook Scorecard (CCO-T046
+// catalog look). Contrast-safe text: white on dark purple/slate/red, ink on the
+// bright green/gold.
+const STAT_ACCENT: Record<
+  StatAccent,
+  { grad: string; text: string; label: string; sub: string; chip: string }
+> = {
+  purple: {
+    grad: "from-cco-purple to-cco-purple-700",
+    text: "text-white",
+    label: "text-white/80",
+    sub: "text-white/70",
+    chip: "bg-white/20 text-white",
+  },
+  green: {
+    grad: "from-cco-green to-cco-green-600",
+    text: "text-cco-ink",
+    label: "text-cco-ink/70",
+    sub: "text-cco-ink/70",
+    chip: "bg-black/10 text-cco-ink",
+  },
+  gold: {
+    grad: "from-cco-gold to-cco-gold-dark",
+    text: "text-cco-ink",
+    label: "text-cco-ink/70",
+    sub: "text-cco-ink/70",
+    chip: "bg-black/10 text-cco-ink",
+  },
+  slate: {
+    grad: "from-cco-slate to-cco-ink",
+    text: "text-white",
+    label: "text-white/75",
+    sub: "text-white/65",
+    chip: "bg-white/15 text-white",
+  },
+  red: {
+    grad: "from-red-500 to-red-700",
+    text: "text-white",
+    label: "text-white/80",
+    sub: "text-white/70",
+    chip: "bg-white/20 text-white",
+  },
+};
+
 function StatTile({
   label,
   value,
   sublabel,
-  color = "default",
+  accent = "slate",
+  icon: Icon,
 }: {
   label: string;
   value: string;
   sublabel?: string;
-  color?: "default" | "green" | "red";
+  accent?: StatAccent;
+  icon?: LucideIcon;
 }) {
-  const valueColor =
-    color === "green"
-      ? "text-cco-green-600"
-      : color === "red"
-        ? "text-red-600"
-        : "text-cco-ink";
+  const a = STAT_ACCENT[accent];
 
   return (
-    <div className="bg-white border border-cco-border rounded-2xl p-4 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
-      <p className="text-[10px] uppercase tracking-[0.15em] font-semibold text-cco-muted mb-2">
-        {label}
-      </p>
-      <p className={`font-heading text-3xl font-bold ${valueColor}`}>
+    <div
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${a.grad} ${a.text} p-4 shadow-[0_4px_16px_rgba(15,23,42,0.10)] transition-shadow hover:shadow-[0_14px_40px_rgba(15,23,42,0.14)]`}
+    >
+      <div className="flex items-start justify-between mb-3">
+        <span
+          className={`text-[10px] uppercase tracking-[0.15em] font-semibold ${a.label}`}
+        >
+          {label}
+        </span>
+        {Icon && (
+          <span
+            className={`inline-flex items-center justify-center w-8 h-8 rounded-xl backdrop-blur ${a.chip}`}
+          >
+            <Icon size={16} />
+          </span>
+        )}
+      </div>
+      <p className="font-heading text-2xl sm:text-3xl font-extrabold leading-tight">
         {value}
       </p>
-      {sublabel && (
-        <p className="text-[11px] text-cco-muted mt-1">{sublabel}</p>
-      )}
+      {sublabel && <p className={`text-[11px] mt-1 ${a.sub}`}>{sublabel}</p>}
     </div>
   );
 }

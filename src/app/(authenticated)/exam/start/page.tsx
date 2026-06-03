@@ -3,8 +3,7 @@ import { tests, ceuItems } from "@/lib/schema";
 import { eq, inArray } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/shared/Card";
-import { Pill } from "@/components/shared/Pill";
-import { Clock, FileText, ArrowLeft } from "lucide-react";
+import { Clock, FileText, Target, ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { StartExamButton } from "@/components/exam/StartExamButton";
 import { CeuExpirationBanner } from "@/components/exam/CeuExpirationBanner";
@@ -22,17 +21,20 @@ export default async function ExamStartPage({
   if (!testId) {
     return (
       <div className="max-w-xl mx-auto text-center py-16">
-        <h1 className="font-heading text-2xl font-bold text-cco-ink mb-4">
-          Start Exam
+        <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-cco-purple/10 text-cco-purple mb-5">
+          <BookOpen size={26} />
+        </span>
+        <h1 className="font-heading text-2xl font-bold text-cco-ink mb-3">
+          Start an exam
         </h1>
         <p className="text-cco-muted mb-6">
           Select an exam from the catalog to begin.
         </p>
         <Link
           href="/catalog"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600 hover:-translate-y-px hover:shadow-md"
         >
-          Browse Catalog
+          Browse catalog
         </Link>
       </div>
     );
@@ -79,53 +81,72 @@ export default async function ExamStartPage({
     }
   }
 
+  const hasTimeLimit = test.timeLimitMinutes != null && test.timeLimitMinutes > 0;
+  const hasPassing = test.passingScore != null && test.passingScore > 0;
+
   return (
     <div className="max-w-2xl mx-auto">
       <Link
         href="/catalog"
-        className="inline-flex items-center gap-1.5 text-sm text-cco-muted no-underline hover:text-cco-purple transition mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-cco-muted no-underline hover:text-cco-purple transition mb-5"
       >
         <ArrowLeft size={14} />
-        Back to Catalog
+        Back to catalog
       </Link>
 
-      <Card className="space-y-5">
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="font-heading text-xl font-bold text-cco-ink">
-            {test.testName}
-          </h1>
-          {test.testType && (
-            <Pill variant="purple">{test.testType}</Pill>
-          )}
+      {/* Bold gradient hero — mirrors the catalog section headers */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cco-purple to-cco-purple-700 text-white p-6 sm:p-7 shadow-[0_10px_28px_rgba(129,84,129,0.22)]">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+            <FileText size={22} />
+          </span>
+          <div className="min-w-0 flex-1">
+            {test.testType && (
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/75 mb-1">
+                {test.testType}
+              </p>
+            )}
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold leading-tight">
+              {test.testName}
+            </h1>
+          </div>
         </div>
 
+        {(test.questionCount != null || hasTimeLimit || hasPassing) && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {test.questionCount != null && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold backdrop-blur">
+                <FileText size={13} />
+                {test.questionCount} questions
+              </span>
+            )}
+            {hasTimeLimit && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold backdrop-blur">
+                <Clock size={13} />
+                {test.timeLimitMinutes} minutes
+              </span>
+            )}
+            {hasPassing && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold backdrop-blur">
+                <Target size={13} />
+                Pass at {test.passingScore}%
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Body */}
+      <Card className="mt-4 space-y-5">
         {test.description && (
-          <p className="text-sm text-cco-muted">{stripHtml(test.description)}</p>
+          <p className="text-sm text-cco-muted leading-relaxed">
+            {stripHtml(test.description)}
+          </p>
         )}
 
         {earliestCeuExpiration && (
           <CeuExpirationBanner earliestExpiration={earliestCeuExpiration} />
         )}
-
-        <div className="flex flex-wrap gap-4 text-sm text-cco-muted border-t border-b border-cco-border py-4">
-          {test.questionCount != null && (
-            <span className="flex items-center gap-1.5">
-              <FileText size={15} />
-              {test.questionCount} questions
-            </span>
-          )}
-          {test.timeLimitMinutes != null && test.timeLimitMinutes > 0 && (
-            <span className="flex items-center gap-1.5">
-              <Clock size={15} />
-              {test.timeLimitMinutes} minutes
-            </span>
-          )}
-          {test.passingScore != null && test.passingScore > 0 && (
-            <span className="flex items-center gap-1.5">
-              Passing: {test.passingScore}%
-            </span>
-          )}
-        </div>
 
         <div className="bg-cco-bg-soft rounded-xl p-4 text-sm text-cco-muted space-y-2">
           <p className="font-semibold text-cco-ink">Before you begin:</p>
@@ -133,7 +154,7 @@ export default async function ExamStartPage({
             <li>Your progress is saved automatically as you answer each question</li>
             <li>You can flag questions to review later</li>
             <li>Use the scratch pad for notes during the exam</li>
-            {test.timeLimitMinutes != null && test.timeLimitMinutes > 0 && (
+            {hasTimeLimit && (
               <li>The timer will count down from {test.timeLimitMinutes} minutes</li>
             )}
           </ul>
