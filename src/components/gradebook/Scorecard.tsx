@@ -7,13 +7,52 @@ export interface ScorecardStats {
   lastActivity: Date | null;
 }
 
+type TileAccent = "purple" | "green" | "gold" | "slate";
+
+// Brand-gradient tiles that echo the catalog's section headers (CCO-T046):
+// full brand gradient + a frosted icon medallion + big Sora value. Contrast-safe
+// text — white on the dark purple/slate, ink on the bright green/gold.
+const ACCENT: Record<
+  TileAccent,
+  { grad: string; text: string; label: string; sub: string; chip: string }
+> = {
+  purple: {
+    grad: "from-cco-purple to-cco-purple-700",
+    text: "text-white",
+    label: "text-white/80",
+    sub: "text-white/70",
+    chip: "bg-white/20 text-white",
+  },
+  green: {
+    grad: "from-cco-green to-cco-green-600",
+    text: "text-cco-ink",
+    label: "text-cco-ink/70",
+    sub: "text-cco-ink/70",
+    chip: "bg-black/10 text-cco-ink",
+  },
+  gold: {
+    grad: "from-cco-gold to-cco-gold-dark",
+    text: "text-cco-ink",
+    label: "text-cco-ink/70",
+    sub: "text-cco-ink/70",
+    chip: "bg-black/10 text-cco-ink",
+  },
+  slate: {
+    grad: "from-cco-slate to-cco-ink",
+    text: "text-white",
+    label: "text-white/75",
+    sub: "text-white/65",
+    chip: "bg-white/15 text-white",
+  },
+};
+
 export function Scorecard({ stats }: { stats: ScorecardStats }) {
   const tiles: {
     label: string;
     value: string;
     sub: string;
     icon: React.ComponentType<{ size?: number; className?: string }>;
-    accent: "purple" | "green" | "blue" | "amber";
+    accent: TileAccent;
   }[] = [
     {
       label: "Tests taken",
@@ -37,7 +76,7 @@ export function Scorecard({ stats }: { stats: ScorecardStats }) {
           : "—",
       sub: stats.averageScore != null ? "across all attempts" : "—",
       icon: TrendingUp,
-      accent: "blue",
+      accent: "gold",
     },
     {
       label: "Last activity",
@@ -46,12 +85,12 @@ export function Scorecard({ stats }: { stats: ScorecardStats }) {
         ? formatAbsolute(stats.lastActivity)
         : "no activity yet",
       icon: CalendarClock,
-      accent: "amber",
+      accent: "slate",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
       {tiles.map((t) => (
         <ScorecardTile key={t.label} {...t} />
       ))}
@@ -70,31 +109,30 @@ function ScorecardTile({
   value: string;
   sub: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  accent: "purple" | "green" | "blue" | "amber";
+  accent: TileAccent;
 }) {
-  const ring = {
-    purple: "bg-cco-purple/10 text-cco-purple",
-    green: "bg-cco-green-600/10 text-cco-green-600",
-    blue: "bg-blue-600/10 text-blue-600",
-    amber: "bg-amber-500/10 text-amber-600",
-  }[accent];
+  const a = ACCENT[accent];
 
   return (
-    <div className="bg-white border border-cco-border rounded-2xl p-4 shadow-[0_2px_8px_rgba(15,23,42,0.03)]">
+    <div
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${a.grad} ${a.text} p-4 shadow-[0_4px_16px_rgba(15,23,42,0.10)] transition-shadow hover:shadow-[0_14px_40px_rgba(15,23,42,0.14)]`}
+    >
       <div className="flex items-start justify-between mb-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-cco-muted">
+        <span
+          className={`text-[11px] font-semibold uppercase tracking-wider ${a.label}`}
+        >
           {label}
         </span>
         <span
-          className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${ring}`}
+          className={`inline-flex items-center justify-center w-8 h-8 rounded-xl backdrop-blur ${a.chip}`}
         >
           <Icon size={16} />
         </span>
       </div>
-      <p className="font-heading text-2xl font-bold text-cco-ink leading-tight">
+      <p className="font-heading text-2xl sm:text-[28px] font-extrabold leading-tight">
         {value}
       </p>
-      <p className="text-xs text-cco-muted mt-1 leading-snug">{sub}</p>
+      <p className={`text-xs mt-1 leading-snug ${a.sub}`}>{sub}</p>
     </div>
   );
 }

@@ -43,10 +43,10 @@ export function GradebookTable({ rows }: { rows: GradebookRow[] }) {
       </div>
 
       {/* --------- DESKTOP: full table with clickable rows --------- */}
-      <div className="hidden md:block overflow-hidden rounded-2xl border border-cco-border bg-white">
+      <div className="hidden md:block overflow-hidden rounded-2xl border border-cco-border bg-white shadow-[0_4px_16px_rgba(15,23,42,0.06)]">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#f3f5fa]">
+            <tr className="bg-cco-bg-soft">
               <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-cco-muted">
                 Exam
               </th>

@@ -6,6 +6,7 @@ import {
   Award,
   Info,
   ArrowUpRight,
+  CheckCircle2,
 } from "lucide-react";
 import { Pill } from "@/components/shared/Pill";
 
@@ -42,8 +43,8 @@ export function PastResults({ rows }: { rows: PastResultRow[] }) {
         </span>
       </div>
 
-      <div className="rounded-xl border border-blue-200 bg-blue-50/50 px-4 py-3 mb-4 flex items-start gap-3 text-sm text-blue-900">
-        <Info size={16} className="mt-0.5 shrink-0" />
+      <div className="rounded-xl border border-cco-purple/15 bg-cco-purple/5 px-4 py-3 mb-4 flex items-start gap-3 text-sm text-cco-ink/80">
+        <Info size={16} className="mt-0.5 shrink-0 text-cco-purple" />
         <p>
           Detailed answer review is only available for tests taken in the new
           portal. Retake an exam to see questions and rationale.
@@ -58,10 +59,10 @@ export function PastResults({ rows }: { rows: PastResultRow[] }) {
       </div>
 
       {/* --------- DESKTOP: table --------- */}
-      <div className="hidden md:block overflow-hidden rounded-2xl border border-cco-border bg-white">
+      <div className="hidden md:block overflow-hidden rounded-2xl border border-cco-border bg-white shadow-[0_4px_16px_rgba(15,23,42,0.06)]">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#f3f5fa]">
+            <tr className="bg-cco-bg-soft">
               <Th>Date</Th>
               <Th>Exam</Th>
               <Th>Score</Th>
@@ -193,7 +194,13 @@ function ResultPill({
 }) {
   // Defer to derived pass when explicit field is null
   const effective = passed ?? (score != null ? score >= 70 : null);
-  if (effective === true) return <Pill variant="green">Passed</Pill>;
+  if (effective === true)
+    return (
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-cco-green-600">
+        <CheckCircle2 size={13} />
+        Passed
+      </span>
+    );
   if (effective === false) return <Pill>Did not pass</Pill>;
   return <Pill>—</Pill>;
 }
