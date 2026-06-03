@@ -335,7 +335,9 @@ export function ExamClient({
       {state.status === "paused" && (
         <div className="absolute inset-0 z-30 bg-white/95 flex items-center justify-center">
           <div className="text-center">
-            <Pause size={48} className="text-cco-muted mx-auto mb-4" />
+            <span className="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-cco-purple/10 text-cco-purple">
+              <Pause size={32} />
+            </span>
             <h2 className="font-heading text-xl font-bold text-cco-ink mb-2">
               Exam Paused
             </h2>
@@ -366,7 +368,7 @@ export function ExamClient({
             const flagged = a?.flagged;
             let cls = "bg-cco-bg-soft text-cco-muted border-cco-border";
             if (answered) cls = "bg-cco-green/15 text-cco-green-600 border-cco-green/30";
-            if (flagged) cls = "bg-amber-100 text-amber-700 border-amber-200";
+            if (flagged) cls = "bg-cco-gold/20 text-cco-gold-dark border-cco-gold/40";
             if (isCurrent) cls += " ring-2 ring-cco-purple";
             return (
               <button
@@ -406,7 +408,7 @@ export function ExamClient({
                   {currentAnswer?.flagged && (
                     <Flag
                       size={16}
-                      className="text-amber-500 fill-amber-500"
+                      className="text-cco-gold-dark fill-cco-gold-dark"
                     />
                   )}
                 </div>
@@ -473,8 +475,8 @@ export function ExamClient({
                   onClick={handleFlag}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
                     currentAnswer?.flagged
-                      ? "border-amber-400 bg-amber-50 text-amber-700"
-                      : "border-cco-border text-cco-muted hover:border-amber-400 hover:bg-amber-50"
+                      ? "border-cco-gold/50 bg-cco-gold/15 text-cco-gold-dark"
+                      : "border-cco-border text-cco-muted hover:border-cco-gold/50 hover:bg-cco-gold/10"
                   }`}
                 >
                   <Flag size={12} />
@@ -568,9 +570,13 @@ export function ExamClient({
       {showSubmitConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm mx-4 space-y-4">
-            <div className="flex items-center gap-2 text-amber-600">
-              <AlertTriangle size={20} />
-              <h3 className="font-heading font-bold text-lg">Submit Exam?</h3>
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cco-gold/15 text-cco-gold-dark">
+                <AlertTriangle size={18} />
+              </span>
+              <h3 className="font-heading font-bold text-lg text-cco-ink">
+                Submit Exam?
+              </h3>
             </div>
             <div className="text-sm text-cco-muted space-y-1">
               <p>

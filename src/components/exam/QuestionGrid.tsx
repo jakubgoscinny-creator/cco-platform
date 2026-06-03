@@ -27,7 +27,7 @@ export function QuestionGrid({
 
           let bg = "bg-cco-bg-soft text-cco-muted";
           if (isAnswered) bg = "bg-cco-green/20 text-cco-green-600";
-          if (isFlagged) bg = "bg-amber-100 text-amber-700";
+          if (isFlagged) bg = "bg-cco-gold/20 text-cco-gold-dark";
           if (isCurrent) bg += " ring-2 ring-cco-purple";
 
           return (
@@ -51,7 +51,7 @@ export function QuestionGrid({
           Answered
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-amber-100" />
+          <span className="w-3 h-3 rounded bg-cco-gold/20" />
           Flagged
         </span>
       </div>
