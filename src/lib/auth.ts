@@ -3,7 +3,7 @@ import { db } from "./db";
 import { contacts, sessions } from "./schema";
 import { eq, and, gt } from "drizzle-orm";
 import { hash as bcryptHash } from "bcryptjs";
-import { verifyPassword } from "./password";
+import { verifyPassword, RESET_PENDING_PREFIX } from "./password";
 import {
   filterItems,
   getTextValue,
@@ -29,13 +29,22 @@ export async function authenticate(
     where: eq(contacts.email, email.toLowerCase().trim()),
   });
 
-  // If not in mirror, fetch from Podio
-  if (!contact) {
+  // If not in mirror — or the mirror row only carries the CCO-T048
+  // reset-pending sentinel (created by /forgot-password before the user
+  // ever signed in) — fetch from Podio. The sentinel is never a valid
+  // credential, but the user may know their real Podio PASSWORD_MASTER;
+  // fetchContactFromPodio returns the Podio-truth record (the conflict
+  // path preserves the stored row's hash, and the upgrade-on-login write
+  // below then replaces the sentinel with a real hash on success).
+  if (!contact || contact.passwordHash.startsWith(RESET_PENDING_PREFIX)) {
     const podioContact = await fetchContactFromPodio(email);
-    if (!podioContact) {
+    if (!podioContact && !contact) {
       return { success: false, error: "Invalid email or password" };
     }
-    contact = podioContact;
+    contact = podioContact ?? contact;
+  }
+  if (!contact) {
+    return { success: false, error: "Invalid email or password" };
   }
 
   // Verify password: try bcrypt first, then MD5 legacy, then plaintext
@@ -88,7 +97,18 @@ export async function authenticate(
 // → plaintext ladder); argon2 is a new branch for hashes written by
 // the T031 reset and change-password paths.
 
-async function fetchContactFromPodio(
+/**
+ * Fetch the Contact from Podio by email and upsert the Neon mirror row
+ * (INSERT seeds all columns incl. passwordHash from PASSWORD_MASTER; the
+ * conflict path deliberately preserves passwordHash + passwordResetJti).
+ * Returns the Podio-truth record, or null when no Contact matches or the
+ * Contact has no email/password to seed from.
+ *
+ * Exported for CCO-T048: /forgot-password seeds the mirror row through
+ * this same path before storing the single-use jti, so reset and sign-in
+ * share one row-creation semantics.
+ */
+export async function fetchContactFromPodio(
   email: string
 ): Promise<typeof contacts.$inferSelect | null> {
   try {

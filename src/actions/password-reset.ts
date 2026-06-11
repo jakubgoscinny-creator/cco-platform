@@ -5,7 +5,8 @@ import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { contacts } from "@/lib/schema";
-import { hashPassword } from "@/lib/password";
+import { fetchContactFromPodio } from "@/lib/auth";
+import { hashPassword, makeResetPendingSentinel } from "@/lib/password";
 import { validatePassword } from "@/lib/password-policy";
 import { checkAndIncrement } from "@/lib/rate-limit";
 import {
@@ -88,7 +89,34 @@ export async function forgotPasswordAction(
     }
 
     if (contact) {
-      const { token, jti, expiresAt } = await signResetToken(contact.podioItemId);
+      // CCO-T048: the single-use jti lives on the Neon mirror row — but a
+      // contact who has never signed in has NO row, and the previous bare
+      // UPDATE silently affected 0 rows, making every emailed link fail
+      // the submit-time cross-check ("already been used or invalidated").
+      // That population — never-signed-in legacy users — is exactly who
+      // forgot-password exists for, so:
+      //   1. If no mirror row owns this email, seed one from Podio the
+      //      same way first-sign-in does (preserves "I remembered my
+      //      password after all" sign-ins — authenticate() is mirror-first
+      //      and must keep verifying against the real legacy hash).
+      //   2. If Podio has nothing to seed from (no PASSWORD_MASTER —
+      //      fetchContactFromPodio returns null), fall through to an
+      //      INSERT with a reset-pending sentinel hash below. The ladder
+      //      rejects the sentinel outright, and authenticate() treats a
+      //      sentinel row as not-yet-seeded.
+      //   3. Sign the token for the row that actually holds the jti
+      //      (effectiveId), so token.sub == row key == the row sign-in
+      //      resolves by email — even when Podio holds duplicate contacts
+      //      and the duplicate-aware pick differs from the seeded row.
+      let mirror = await db.query.contacts.findFirst({
+        where: eq(contacts.email, email),
+      });
+      if (!mirror) {
+        mirror = (await fetchContactFromPodio(emailAsTyped)) ?? undefined;
+      }
+      const effectiveId = mirror?.podioItemId ?? contact.podioItemId;
+
+      const { token, jti, expiresAt } = await signResetToken(effectiveId);
       const resetUrl = await buildResetUrl(token);
 
       // Order matters: do the failable Podio call FIRST. If it throws
@@ -99,6 +127,8 @@ export async function forgotPasswordAction(
       // every old link would fail the single-use cross-check, and the
       // new forgot would error before creating the replacement Podio
       // item. (This is exactly the failure mode Jakub hit 2026-05-21.)
+      // The Recipient Contact ref stays the duplicate-aware Podio pick
+      // (a real, current Podio item) even if the jti row differs.
       await createPasswordResetItem({
         recipientEmail: email,
         contactItemId: contact.podioItemId,
@@ -109,11 +139,22 @@ export async function forgotPasswordAction(
       // Single-use marker — /reset-password requires the inbound jti
       // to match what's stored here, then clears it on consume. A
       // second /forgot-password request before the first is consumed
-      // overwrites the jti, invalidating the older link.
+      // overwrites the jti, invalidating the older link. UPSERT, not
+      // UPDATE: the row is guaranteed to exist afterwards (CCO-T048).
+      // The conflict path sets ONLY the jti — never an existing row's
+      // hash/email/tier columns.
       await db
-        .update(contacts)
-        .set({ passwordResetJti: jti })
-        .where(eq(contacts.podioItemId, contact.podioItemId));
+        .insert(contacts)
+        .values({
+          podioItemId: effectiveId,
+          email,
+          passwordHash: makeResetPendingSentinel(),
+          passwordResetJti: jti,
+        })
+        .onConflictDoUpdate({
+          target: contacts.podioItemId,
+          set: { passwordResetJti: jti },
+        });
     } else {
       // Enumeration-safe branch: still create a Podio item so the
       // outside-visible response shape + timing matches a hit. The

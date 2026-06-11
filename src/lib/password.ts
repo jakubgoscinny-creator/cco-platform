@@ -24,7 +24,7 @@
 
 import { hash as argon2Hash, verify as argon2Verify } from "@node-rs/argon2";
 import { compare as bcryptCompare } from "bcryptjs";
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
 
 // OWASP Password Storage Cheat Sheet 2024 minimums. Tune memoryCost
 // upward later if Vercel function CPU/memory headroom allows.
@@ -46,6 +46,22 @@ const ARGON2ID_OPTIONS = {
 
 const MD5_RE = /^[a-f0-9]{32}$/i;
 
+/**
+ * CCO-T048: placeholder `password_hash` for mirror rows created by
+ * /forgot-password when the Contact has no Podio PASSWORD_MASTER to seed
+ * from (the column is NOT NULL). The random uuid makes the value
+ * unguessable, and verifyPassword() rejects the prefix outright so the
+ * plain-text-equality ladder branch can never be satisfied — even by
+ * someone who learns the exact stored value. A successful /reset-password
+ * overwrites it with a real argon2id hash; authenticate() treats a
+ * sentinel row as not-yet-seeded and falls back to the Podio fetch.
+ */
+export const RESET_PENDING_PREFIX = "RESET_PENDING:";
+
+export function makeResetPendingSentinel(): string {
+  return `${RESET_PENDING_PREFIX}${randomUUID()}`;
+}
+
 export async function hashPassword(plaintext: string): Promise<string> {
   return argon2Hash(plaintext, ARGON2ID_OPTIONS);
 }
@@ -55,6 +71,10 @@ export async function verifyPassword(
   storedHash: string
 ): Promise<boolean> {
   if (!storedHash) return false;
+
+  // Reset-pending sentinel (CCO-T048) — never a valid credential. Checked
+  // before the ladder so it can't fall through to plain-text equality.
+  if (storedHash.startsWith(RESET_PENDING_PREFIX)) return false;
 
   // argon2 — modular crypt format starts "$argon2id$", "$argon2i$", "$argon2d$"
   if (storedHash.startsWith("$argon2")) {
