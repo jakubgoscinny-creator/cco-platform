@@ -78,6 +78,40 @@ function normalizeTrackerType(t: string | null | undefined): string {
 }
 
 /**
+ * CCO-T056c: PT Overall Status (field 149529784) option IDs that POSITIVELY
+ * mean a student's enrollment has ended — billing failure, expiry, refund/drop,
+ * or cancellation. A Progress Tracker in one of these states must NOT grant the
+ * Student-tier exams for its course (the "cut off expired students" ask).
+ *
+ * IDs (not labels) are used so a Podio relabel can't silently change gating.
+ * Captured from snapshots/progress-tracker-app.json:
+ *   5  Dropped / Refunded
+ *   11 Subscription Suspended / Billing Failure
+ *   12 Subscription Expired / Not Club Member
+ *   14 Course Subscription Canceled
+ * Everything else (Enrolled - *, Club Member - Ad Hoc, Graduated, Error,
+ * On Hold, Lost Sheep, Inactive, …) is treated as STILL-ENTITLED — fail-open.
+ */
+export const TEARDOWN_TRACKER_STATUS_IDS: ReadonlySet<number> = new Set([
+  5, 11, 12, 14,
+]);
+
+/**
+ * Is this PT Overall Status option id a still-entitled enrollment?
+ *
+ * Fail-open by design: ONLY a known teardown id returns false. null / unknown /
+ * any other id returns true (count the enrollment), preserving the v1
+ * "never lock out an active student on missing or ambiguous status" safeguard
+ * (CCO-T033 podio.ts:361). Deny only on PROVEN-bad.
+ */
+export function isEntitledTrackerStatus(
+  overallStatusId: number | null | undefined
+): boolean {
+  if (overallStatusId == null) return true; // unknown → grant
+  return !TEARDOWN_TRACKER_STATUS_IDS.has(overallStatusId);
+}
+
+/**
  * True if the Contact is enrolled in at least one course (has any progress
  * tracker types). Drives the catalog presentation split: enrolled students
  * see only the tests they can actually take; everyone else keeps the T006

@@ -4,6 +4,8 @@
  * Supports accessing multiple apps across workspaces.
  */
 
+import { isEntitledTrackerStatus } from "./circle-access";
+
 const PODIO_API = "https://api.podio.com";
 
 let tokenCache: {
@@ -358,26 +360,53 @@ export async function getLegacyTestResultsByContact(
 // - Returns null on Podio failure so callers can PRESERVE the prior mirrored
 //   value rather than clobbering it with an empty set (avoids a false lock-out
 //   on a transient Podio error / rate-limit).
-// - v1 counts ALL of the Contact's PTs regardless of Overall Status —
-//   inclusive, to avoid locking out active students. Status-based entitlement
-//   (e.g. revoke on Dropped/Refunded) is a deliberate v2 refinement to define
-//   with Mary; the big-ticket Club content is gated by subscription_status,
-//   not this, so the exposure here is bounded to course practice exams.
+// - CCO-T056c: counts the Contact's PTs EXCEPT those in a positively-known
+//   teardown Overall Status (Dropped/Refunded, Billing Failure, Expired,
+//   Course Subscription Canceled — see isEntitledTrackerStatus). Fail-open on
+//   every other/unknown status, so an active student is never locked out on
+//   ambiguous data. Club content is gated separately by subscription_status,
+//   so the exposure here is bounded to course practice exams.
 // ---------------------------------------------------------------------------
 
 export async function getEnrolledTrackerTypesForContact(
   contactItemId: number
 ): Promise<string[] | null> {
   try {
-    const result = await filterItems(
-      PODIO_APPS.PROGRESS_TRACKER,
-      { [PROGRESS_TRACKER_FIELDS.STUDENT]: [contactItemId] },
-      { limit: 200 }
-    );
+    // CCO-T056c: paginate. With teardown-status filtering, silently truncating
+    // a contact's PTs is now a false-lockout vector — if a torn-down PT of a
+    // tracker type lands inside the page while the still-active PT of the SAME
+    // type lands outside it, the type would be wrongly dropped. So read ALL
+    // pages; never truncate silently (defensive MAX_PAGES cap logs if hit).
     const types = new Set<string>();
-    for (const item of result.items ?? []) {
-      const t = getCategoryValue(item, PROGRESS_TRACKER_FIELDS.PROGRESS_TRACKER_TYPE);
-      if (t) types.add(t);
+    const PAGE = 200;
+    const MAX_PAGES = 25; // 5000 PTs — far above any real per-student count
+    let offset = 0;
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const result = await filterItems(
+        PODIO_APPS.PROGRESS_TRACKER,
+        { [PROGRESS_TRACKER_FIELDS.STUDENT]: [contactItemId] },
+        { limit: PAGE, offset }
+      );
+      const items = result.items ?? [];
+      for (const item of items) {
+        // Skip enrollments whose Overall Status is a positively-known teardown
+        // (billing failure / expired / refunded / cancelled). Any other/unknown
+        // status counts — fail-open. An active PT of the same type re-adds it.
+        const statusId = getCategoryOptionId(
+          item,
+          PROGRESS_TRACKER_FIELDS.OVERALL_STATUS
+        );
+        if (!isEntitledTrackerStatus(statusId)) continue;
+        const t = getCategoryValue(item, PROGRESS_TRACKER_FIELDS.PROGRESS_TRACKER_TYPE);
+        if (t) types.add(t);
+      }
+      offset += items.length;
+      if (items.length < PAGE) break; // last page reached
+      if (page === MAX_PAGES - 1) {
+        console.error(
+          `CCO-T056c: contact ${contactItemId} has >${MAX_PAGES * PAGE} progress trackers; tracker-type resolution may be truncated (review pagination cap).`
+        );
+      }
     }
     return [...types];
   } catch (err) {

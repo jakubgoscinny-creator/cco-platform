@@ -7,6 +7,8 @@ import {
   isStudentTestMisconfigured,
   catalogTreatment,
   ACTIVE_SUBSCRIBER_STATUSES,
+  isEntitledTrackerStatus,
+  TEARDOWN_TRACKER_STATUS_IDS,
 } from "./circle-access";
 
 // ---------------------------------------------------------------------------
@@ -144,6 +146,36 @@ describe("canAccessTest — Student tier", () => {
     expect(canAccessTest(brokenStudentTest, pbcStudent)).toBe("members_only");
     expect(canAccessTest(brokenStudentTest, pbcStudentAlsoClub)).toBe("members_only");
     expect(canAccessTest(brokenStudentTest, clubOnly)).toBe("members_only");
+  });
+});
+
+describe("isEntitledTrackerStatus (CCO-T056c)", () => {
+  it("treats unknown/null/undefined status as entitled (fail-open)", () => {
+    expect(isEntitledTrackerStatus(null)).toBe(true);
+    expect(isEntitledTrackerStatus(undefined)).toBe(true);
+  });
+
+  it("counts every active/ambiguous enrollment status — never locks out", () => {
+    // 1 Active, 2 On Hold, 3 Lost Sheep, 4 Inactive/Unresponsive, 6 F&F,
+    // 7 Complimentary, 8 Graduated, 9 Error, 10 Club Ad Hoc, 13 No Coaching.
+    for (const id of [1, 2, 3, 4, 6, 7, 8, 9, 10, 13]) {
+      expect(isEntitledTrackerStatus(id)).toBe(true);
+    }
+  });
+
+  it("excludes ONLY the four positively-known teardown statuses", () => {
+    // 5 Dropped/Refunded, 11 Suspended/Billing Failure,
+    // 12 Expired/Not Club Member, 14 Course Subscription Canceled.
+    for (const id of [5, 11, 12, 14]) {
+      expect(isEntitledTrackerStatus(id)).toBe(false);
+      expect(TEARDOWN_TRACKER_STATUS_IDS.has(id)).toBe(true);
+    }
+  });
+
+  it("the teardown set is exactly those four ids (guards against scope creep)", () => {
+    expect([...TEARDOWN_TRACKER_STATUS_IDS].sort((a, b) => a - b)).toEqual([
+      5, 11, 12, 14,
+    ]);
   });
 });
 
