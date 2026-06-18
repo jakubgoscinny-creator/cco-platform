@@ -173,7 +173,8 @@ export default function SignInPage() {
             get you certified.&rdquo;
           </p>
           <p className="mt-3 text-xs text-cco-muted">
-            — Laureen Jandroep, CPC, COC, CPC-I · Founder, CCO
+            — Laureen Jandroep, CC-MCS-P/O/IRA, CC-MBS, CC-MAS, CC-CDIS,
+            CC-FMCS, CC-PINS · Founder, CCO
           </p>
         </div>
       </div>

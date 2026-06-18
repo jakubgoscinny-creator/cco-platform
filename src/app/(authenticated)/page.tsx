@@ -50,7 +50,7 @@ export default async function ChooserPage() {
           icon={<GraduationCap size={26} strokeWidth={1.5} />}
           eyebrow="Coaching · Community"
           title="CCO Academy"
-          description="Live coaching, community discussions, and your CCO Club lessons."
+          description="Access your courses, coaching, community conversations and event calendar."
           cta="Go to Academy"
         />
         <DestinationCard
@@ -59,7 +59,7 @@ export default async function ChooserPage() {
           icon={<BookOpen size={26} strokeWidth={1.5} />}
           eyebrow="CEU · Practice exams"
           title="Exam Portal"
-          description="Take a CEU quiz, sit a mock certification exam, or review your gradebook."
+          description="Access to course exams, CEU quizzes, Certification Practice Exams and Gradebook."
           cta="Open Catalog"
         />
       </div>
