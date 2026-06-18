@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Clock, FileText, BarChart3, Lock } from "lucide-react";
 import { Pill } from "@/components/shared/Pill";
 import { Card } from "@/components/shared/Card";
+import { CLUB_URL } from "@/lib/course-links";
 
 export interface TestCardProps {
   id: number;
@@ -75,7 +76,7 @@ export function TestCard({
 
       {locked ? (
         <a
-          href="https://cco.us/club#price"
+          href={CLUB_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-cco-gold text-cco-ink text-sm font-semibold no-underline transition hover:bg-cco-gold-dark hover:shadow-lg hover:-translate-y-px"

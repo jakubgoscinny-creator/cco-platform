@@ -8,14 +8,9 @@ import { timeOfDayGreeting, firstName } from "@/components/shared/PageHeader";
 import { getSessionContact } from "@/lib/auth";
 import { getLegacyResultsForContact } from "@/lib/legacy-results";
 import { canAccessTest, normalizeAccessTier } from "@/lib/circle-access";
+import { CLUB_URL, courseEnrolUrl } from "@/lib/course-links";
 import type { TestCardProps } from "@/components/catalog/TestCard";
 import type { Test } from "@/lib/schema";
-
-// Upsell targets for locked sections. The Club link is the live one; the course
-// link is a placeholder until we confirm the real per-course / courses-catalog
-// enrol URL with Laureen (see CCO-T044 catalog notes).
-const CLUB_URL = "https://cco.us/club#price";
-const COURSE_ENROL_URL = "https://www.cco.us";
 
 type GroupKind = "course" | "free" | "club";
 type GroupMeta = {
@@ -173,7 +168,9 @@ export default async function CatalogPage({
         subtitle = locked
           ? "Enrol to unlock this course's chapter exams"
           : "Chapter exams for your enrolled course";
-        if (locked) upsell = { href: COURSE_ENROL_URL, label: "Enrol to unlock" };
+        // meta.title is the Progress-Tracker-Type code for course folders;
+        // deep-link the lock to that course's cco.us sales page (CCO-T061).
+        if (locked) upsell = { href: courseEnrolUrl(meta.title), label: "Enrol to unlock" };
       }
 
       const done = sorted.filter((c) => c.passed).length;

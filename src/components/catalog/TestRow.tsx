@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Lock, ArrowRight, CheckCircle2 } from "lucide-react";
 import type { TestCardProps } from "./TestCard";
+import { CLUB_URL } from "@/lib/course-links";
 
 /** Shorten "PBC Chapter 03 Exam" -> "Chapter 03" so a grid of chapter cells
  *  reads cleanly. Non-chapter exams (CEUs) keep their full name. */
@@ -55,7 +56,7 @@ export function TestRow({ test }: { test: TestCardProps }) {
 
         {locked ? (
           <a
-            href="https://cco.us/club#price"
+            href={CLUB_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 inline-flex items-center gap-1 rounded-full bg-cco-gold/15 px-3 py-1 text-xs font-semibold text-cco-gold-dark no-underline transition hover:bg-cco-gold/25"
