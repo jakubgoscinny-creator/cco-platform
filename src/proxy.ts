@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/api/health",
   "/api/sso/",
+  "/api/cron/", // CCO-T045: secret-guarded resync trigger (self-authorizes via CRON_SECRET)
 ];
 
 export function proxy(request: NextRequest) {
