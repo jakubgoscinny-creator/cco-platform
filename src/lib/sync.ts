@@ -20,6 +20,7 @@ import {
   CEU_ITEM_FIELDS,
   DOMAIN_FIELDS,
   QUESTION_FIELDS,
+  withPodioFallback,
   type PodioItem,
 } from "./podio";
 import { eq, inArray, arrayContains } from "drizzle-orm";
@@ -87,7 +88,16 @@ export async function getTests(): Promise<Test[]> {
   }
 
   if (cached.length === 0) {
-    await syncTestsFromPodio();
+    // CCO-T066: a cold/empty mirror + a Podio 420 must not 500 the catalog.
+    // Serve whatever the mirror holds (empty here) rather than throwing.
+    await withPodioFallback(
+      () => syncTestsFromPodio(),
+      (err) =>
+        console.error(
+          "CCO-T066: cold-start test sync failed; serving empty catalog:",
+          err
+        )
+    );
     return db.select().from(tests);
   }
 
@@ -207,7 +217,15 @@ export async function getDomains(): Promise<Domain[]> {
   }
 
   if (cached.length === 0) {
-    await syncDomainsFromPodio();
+    // CCO-T066: cold mirror + Podio 420 → serve the (empty) mirror, not a 500.
+    await withPodioFallback(
+      () => syncDomainsFromPodio(),
+      (err) =>
+        console.error(
+          "CCO-T066: cold-start domain sync failed; serving empty domains:",
+          err
+        )
+    );
     return db.select().from(domains);
   }
 

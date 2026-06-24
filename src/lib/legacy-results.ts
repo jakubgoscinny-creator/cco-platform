@@ -12,7 +12,7 @@
 import { db } from "./db";
 import { legacyTestResults, type LegacyTestResult } from "./schema";
 import { eq, desc, max } from "drizzle-orm";
-import { getLegacyTestResultsByContact } from "./podio";
+import { getLegacyTestResultsByContact, withPodioFallback } from "./podio";
 import { getCeuItemsForTest } from "./sync";
 
 const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -31,7 +31,19 @@ export async function getLegacyResultsForContact(
     Date.now() - new Date(freshness.latest).getTime() > TTL_MS;
 
   if (isStale) {
-    await refreshLegacyResultsForContact(contactItemId);
+    // CCO-T066: honor stale-while-revalidate — if the refresh fails (e.g. Podio
+    // 420), fall through to the mirror read below and serve the stale rows
+    // rather than throwing them away with a hard error.
+    await withPodioFallback(
+      async () => {
+        await refreshLegacyResultsForContact(contactItemId);
+      },
+      (err) =>
+        console.error(
+          "CCO-T066: legacy results refresh failed; serving stale mirror:",
+          err
+        )
+    );
   }
 
   return db

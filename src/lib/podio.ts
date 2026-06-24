@@ -24,6 +24,30 @@ export class PodioRateLimitError extends Error {
   }
 }
 
+/** Type guard: did this error come from a Podio rate-limit (HTTP 420 / open breaker)? */
+export function isPodioRateLimit(err: unknown): err is PodioRateLimitError {
+  return err instanceof PodioRateLimitError;
+}
+
+/**
+ * CCO-T066: the portal's resilience primitive. Run a per-request Podio
+ * operation; if it throws, run `fallback` instead of letting the error become a
+ * hard 500. The fallback receives the error so it can branch (e.g. serve the
+ * Neon mirror on any failure, or `isPodioRateLimit(err)` → a friendly retry
+ * message). Catches ALL errors — use the cert-route try/catch form instead when
+ * only a rate-limit should degrade and genuine errors must still surface.
+ */
+export async function withPodioFallback<T>(
+  op: () => Promise<T>,
+  fallback: (err: unknown) => T | Promise<T>
+): Promise<T> {
+  try {
+    return await op();
+  } catch (err) {
+    return await fallback(err);
+  }
+}
+
 // CCO-T065 circuit breaker. Once Podio rate-limits us (HTTP 420), every Podio
 // call short-circuits until the Retry-After window elapses instead of hammering
 // an already-throttled API and deepening the burn — the 2026-06-24 exam outage

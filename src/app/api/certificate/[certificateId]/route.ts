@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { getCertificateById } from "@/lib/certificate";
 import { renderCertificatePdf } from "@/lib/certificate-pdf";
 import { renderAapcCertificate } from "@/lib/certificate-aapc";
+import { isPodioRateLimit } from "@/lib/podio";
 import { db } from "@/lib/db";
 import { attempts } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -36,12 +37,24 @@ export async function GET(
   let filenameSuffix: string;
 
   if (cert.type === "aapc_ceu" && cert.templateFileId) {
-    // AAPC CEU certificate — uses Podio PDF template with name + date overlay
-    pdfBytes = await renderAapcCertificate({
-      templateFileId: cert.templateFileId,
-      studentName: cert.studentName,
-      completionDate: new Date(cert.completionDate),
-    });
+    // AAPC CEU certificate — uses Podio PDF template with name + date overlay.
+    // CCO-T066: the template is fetched live from Podio; degrade a 420 to a
+    // friendly 503 rather than a hard 500 (genuine errors still surface).
+    try {
+      pdfBytes = await renderAapcCertificate({
+        templateFileId: cert.templateFileId,
+        studentName: cert.studentName,
+        completionDate: new Date(cert.completionDate),
+      });
+    } catch (err) {
+      if (isPodioRateLimit(err)) {
+        return new Response(
+          "Your certificate is temporarily unavailable due to high demand. Please try again in a minute.",
+          { status: 503, headers: { "Retry-After": String(err.retryAfterSeconds) } }
+        );
+      }
+      throw err;
+    }
     filenameSuffix = "AAPC-CEU";
   } else {
     // CCO Academy — branded React-PDF design

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { legacyTestResults } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { renderAapcCertificate } from "@/lib/certificate-aapc";
+import { isPodioRateLimit } from "@/lib/podio";
 
 export const runtime = "nodejs";
 
@@ -38,11 +39,25 @@ export async function GET(
     ? new Date(row.dateTaken)
     : (row.syncedAt ? new Date(row.syncedAt) : new Date());
 
-  const pdfBytes = await renderAapcCertificate({
-    templateFileId: row.aapcTemplateFileId,
-    studentName,
-    completionDate,
-  });
+  // CCO-T066: the AAPC template PDF is fetched live from Podio (no Neon mirror
+  // for the bytes), so a Podio 420 here would otherwise be a hard 500. Degrade
+  // to a friendly 503 instead; genuine errors still surface.
+  let pdfBytes: Uint8Array;
+  try {
+    pdfBytes = await renderAapcCertificate({
+      templateFileId: row.aapcTemplateFileId,
+      studentName,
+      completionDate,
+    });
+  } catch (err) {
+    if (isPodioRateLimit(err)) {
+      return new Response(
+        "Your certificate is temporarily unavailable due to high demand. Please try again in a minute.",
+        { status: 503, headers: { "Retry-After": String(err.retryAfterSeconds) } }
+      );
+    }
+    throw err;
+  }
 
   // Same shape as the new-portal certificate route — copy into a fresh
   // ArrayBuffer so the Response body has a standard backing buffer.

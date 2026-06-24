@@ -141,3 +141,37 @@ describe("Podio circuit breaker (CCO-T065)", () => {
     });
   });
 });
+
+describe("withPodioFallback / isPodioRateLimit (CCO-T066)", () => {
+  it("returns the op result when the Podio op succeeds", async () => {
+    const { withPodioFallback } = await import("./podio");
+    await expect(withPodioFallback(async () => "live", () => "mirror")).resolves.toBe("live");
+  });
+
+  it("returns the fallback when the op throws (no error escapes)", async () => {
+    const { withPodioFallback } = await import("./podio");
+    await expect(
+      withPodioFallback(async () => {
+        throw new Error("boom");
+      }, () => "mirror")
+    ).resolves.toBe("mirror");
+  });
+
+  it("passes the error to the fallback so it can branch on isPodioRateLimit", async () => {
+    const { withPodioFallback, isPodioRateLimit, PodioRateLimitError } = await import("./podio");
+    const out = await withPodioFallback(
+      async () => {
+        throw new PodioRateLimitError(42);
+      },
+      (err) => (isPodioRateLimit(err) ? `retry:${err.retryAfterSeconds}` : "other")
+    );
+    expect(out).toBe("retry:42");
+  });
+
+  it("isPodioRateLimit is true only for PodioRateLimitError", async () => {
+    const { isPodioRateLimit, PodioRateLimitError } = await import("./podio");
+    expect(isPodioRateLimit(new PodioRateLimitError(1))).toBe(true);
+    expect(isPodioRateLimit(new Error("plain"))).toBe(false);
+    expect(isPodioRateLimit(null)).toBe(false);
+  });
+});
