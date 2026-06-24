@@ -5,8 +5,8 @@ import { db } from "@/lib/db";
 import { attempts, answers, tests, contacts } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
-import { syncQuestionsForTest } from "@/lib/sync";
-import { createItem, getItem, PODIO_APPS } from "@/lib/podio";
+import { syncQuestionsForTest, getMirroredQuestionsForTest } from "@/lib/sync";
+import { createItem, getItem } from "@/lib/podio";
 import { canAccessTest } from "@/lib/circle-access";
 import { writeTestResultToPodio } from "@/lib/test-results-write";
 
@@ -71,9 +71,43 @@ export async function startExamAction(
     };
   }
 
-  // Sync questions from Podio
-  const questionList = await syncQuestionsForTest(testPodioId);
-  if (!questionList.length) return { error: "No questions available for this test" };
+  // Load questions. Prefer a live Podio sync (freshest), but NEVER let a Podio
+  // failure become a hard 500 — that was the 2026-06-24 outage (CCO-T065): a
+  // Podio HTTP 420 rate-limit threw straight out of this uncaught
+  // syncQuestionsForTest call, so /exam/start returned a blank Vercel error
+  // page. Every sibling route (catalog, sign-in, gradebook, exam/take) already
+  // falls back to the Neon mirror; exam-start now does too.
+  let questionList: Awaited<ReturnType<typeof syncQuestionsForTest>>;
+  let usedMirrorFallback = false;
+  try {
+    questionList = await syncQuestionsForTest(testPodioId);
+  } catch (err) {
+    usedMirrorFallback = true;
+    console.error(
+      `CCO-T065: live question sync failed for test ${testPodioId}; falling back to the Neon mirror:`,
+      err
+    );
+    questionList = await getMirroredQuestionsForTest(testPodioId).catch(
+      (mirrorErr) => {
+        console.error(
+          `CCO-T065: Neon mirror fallback also failed for test ${testPodioId}:`,
+          mirrorErr
+        );
+        return [];
+      }
+    );
+  }
+
+  if (!questionList.length) {
+    // No questions to serve. Distinguish the two causes: a degraded Podio with
+    // an empty mirror is transient (ask the student to retry); a genuinely
+    // empty test is a content/config issue (the original message).
+    return {
+      error: usedMirrorFallback
+        ? "The exam couldn't load due to high demand — please try again in a minute."
+        : "No questions available for this test",
+    };
+  }
 
   // Create attempt
   const questionOrder = questionList.map((q) => q.podioItemId);

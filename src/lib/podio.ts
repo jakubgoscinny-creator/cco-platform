@@ -8,6 +8,67 @@ import { isEntitledTrackerStatus } from "./circle-access";
 
 const PODIO_API = "https://api.podio.com";
 
+/**
+ * Thrown when Podio returns HTTP 420 (rate limit), or while the in-process
+ * circuit breaker below is open. Carries the Retry-After window so callers can
+ * surface an honest wait time. The message text is kept verbatim ("Podio rate
+ * limited. Retry after Ns") because some callers string-match it
+ * (e.g. forgotPasswordAction) — do not reword without updating them.
+ */
+export class PodioRateLimitError extends Error {
+  readonly retryAfterSeconds: number;
+  constructor(retryAfterSeconds: number) {
+    super(`Podio rate limited. Retry after ${retryAfterSeconds}s`);
+    this.name = "PodioRateLimitError";
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
+// CCO-T065 circuit breaker. Once Podio rate-limits us (HTTP 420), every Podio
+// call short-circuits until the Retry-After window elapses instead of hammering
+// an already-throttled API and deepening the burn — the 2026-06-24 exam outage
+// amplified itself exactly this way (see the 2026-05-21 rate-limit postmortem
+// in CONTINUITY). Module-scoped, so it trips PER serverless instance: enough to
+// flatten a concurrent burst on a warm instance, with the Neon mirror
+// fallbacks (catalog/sign-in/gradebook/exam-start) covering reads while it is
+// open. A Neon-shared breaker (the rate-limit.ts pattern) is the cross-instance
+// next step if per-instance proves insufficient.
+let rateLimitedUntil = 0;
+
+/** Clamp a retry-after delta to a sane 1s..1h window. */
+function clampRetrySeconds(seconds: number): number {
+  return Math.min(3600, Math.max(1, Math.floor(seconds)));
+}
+
+/**
+ * Parse a Retry-After header. RFC 7231 allows delta-seconds OR an HTTP-date;
+ * handle both, defaulting to 60s when absent/unparseable.
+ */
+function parseRetryAfter(headerValue: string | null): number {
+  if (headerValue) {
+    const asSeconds = Number(headerValue);
+    if (Number.isFinite(asSeconds) && asSeconds > 0) {
+      return clampRetrySeconds(asSeconds);
+    }
+    const asDate = Date.parse(headerValue);
+    if (Number.isFinite(asDate)) {
+      return clampRetrySeconds((asDate - Date.now()) / 1000);
+    }
+  }
+  return 60;
+}
+
+/**
+ * Trip the breaker for a rate-limited response's window and throw. Shared by
+ * podioFetch (initial + post-401 retry) and getAccessToken so EVERY Podio
+ * entry point — including the OAuth token endpoint — backs off uniformly.
+ */
+function tripBreakerFromResponse(res: Response): never {
+  const retryAfter = parseRetryAfter(res.headers.get("Retry-After"));
+  rateLimitedUntil = Date.now() + retryAfter * 1000;
+  throw new PodioRateLimitError(retryAfter);
+}
+
 let tokenCache: {
   accessToken: string;
   refreshToken: string;
@@ -38,6 +99,12 @@ async function getAccessToken(): Promise<string> {
     }),
   });
 
+  // The OAuth token endpoint shares Podio's rate cap; trip the breaker here too
+  // so a throttled token refresh doesn't get re-attempted on every request.
+  if (res.status === 420 || res.status === 429) {
+    tripBreakerFromResponse(res);
+  }
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Podio auth failed (${res.status}): ${text}`);
@@ -57,8 +124,15 @@ async function podioFetch(
   path: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  // Breaker open? Fail fast without touching Podio (anti-amplification).
+  if (Date.now() < rateLimitedUntil) {
+    throw new PodioRateLimitError(
+      clampRetrySeconds((rateLimitedUntil - Date.now()) / 1000)
+    );
+  }
+
   const token = await getAccessToken();
-  const res = await fetch(`${PODIO_API}${path}`, {
+  let res = await fetch(`${PODIO_API}${path}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -70,7 +144,7 @@ async function podioFetch(
   if (res.status === 401) {
     tokenCache = null;
     const newToken = await getAccessToken();
-    return fetch(`${PODIO_API}${path}`, {
+    res = await fetch(`${PODIO_API}${path}`, {
       ...options,
       headers: {
         Authorization: `Bearer ${newToken}`,
@@ -80,9 +154,12 @@ async function podioFetch(
     });
   }
 
-  if (res.status === 420) {
-    const retryAfter = res.headers.get("Retry-After") || "60";
-    throw new Error(`Podio rate limited. Retry after ${retryAfter}s`);
+  // Podio uses HTTP 420 for rate limiting (429 handled too, defensively). Trip
+  // the breaker for the Retry-After window and throw a typed error so the whole
+  // instance backs off rather than hammering Podio. Runs for BOTH the initial
+  // response and the post-401 retry (the retry no longer returns raw).
+  if (res.status === 420 || res.status === 429) {
+    tripBreakerFromResponse(res);
   }
 
   return res;
@@ -462,11 +539,6 @@ export const TEST_FIELDS = {
   // replacing the overloaded Test Status = "Active - In Portal".
   READY_FOR_PORTAL: "ready-for-portal",
 } as const;
-
-// Statuses that indicate a test is available for students
-export const ACTIVE_TEST_STATUSES = new Set([
-  "Active - In Portal",
-]);
 
 export const CEU_ITEM_FIELDS = {
   CEU_INDEX_NUMBER: 112490651,

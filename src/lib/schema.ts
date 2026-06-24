@@ -48,19 +48,33 @@ export const tests = pgTable("tests", {
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
 });
 
-export const questions = pgTable("questions", {
-  podioItemId: bigint("podio_item_id", { mode: "number" }).primaryKey(),
-  domainId: bigint("domain_id", { mode: "number" }),
-  questionText: text("question_text").notNull(),
-  options: jsonb("options").notNull(), // [{key, text}]
-  correctKey: text("correct_key").notNull(),
-  rationale: text("rationale"),
-  difficulty: text("difficulty"), // 'Foundational' | 'Intermediate' | 'Advanced'
-  disposition: text("disposition"), // 'Course Exam' | 'Practice Exam' | etc.
-  status: text("status"),
-  payload: jsonb("payload"),
-  syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
-});
+export const questions = pgTable(
+  "questions",
+  {
+    podioItemId: bigint("podio_item_id", { mode: "number" }).primaryKey(),
+    domainId: bigint("domain_id", { mode: "number" }),
+    questionText: text("question_text").notNull(),
+    options: jsonb("options").notNull(), // [{key, text}]
+    correctKey: text("correct_key").notNull(),
+    rationale: text("rationale"),
+    difficulty: text("difficulty"), // 'Foundational' | 'Intermediate' | 'Advanced'
+    disposition: text("disposition"), // 'Course Exam' | 'Practice Exam' | etc.
+    status: text("status"),
+    // CCO-T065: the Podio Tests (16243239) item_ids this question is linked to,
+    // mirrored from the QB Multi Choice "Tests" app-ref field (137526907) at
+    // sync time. This is the linkage that makes the questions mirror queryable
+    // by test — so exam-start can fall back to the last-synced questions when a
+    // live Podio sync fails (e.g. HTTP 420 rate-limit — the 2026-06-24 outage).
+    // A question can belong to multiple tests, so this is an array; GIN-indexed
+    // for the `test_podio_ids @> ARRAY[testId]` containment lookup.
+    testPodioIds: bigint("test_podio_ids", { mode: "number" }).array(),
+    payload: jsonb("payload"),
+    syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index("questions_test_podio_ids_idx").using("gin", table.testPodioIds),
+  ]
+);
 
 export const domains = pgTable("domains", {
   podioItemId: bigint("podio_item_id", { mode: "number" }).primaryKey(),

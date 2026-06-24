@@ -22,9 +22,50 @@ import {
   QUESTION_FIELDS,
   type PodioItem,
 } from "./podio";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, arrayContains } from "drizzle-orm";
 
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+
+// CCO-T065: single-flight + min-interval guard for the fire-and-forget
+// background refreshes. getTests/getDomains fire a full paginated Podio sync on
+// EVERY request once the mirror is >5 min stale; under a traffic spike that is
+// N concurrent full syncs hammering Podio and amplifying a rate-limit burn (a
+// contributor to the 2026-06-24 outage). This collapses concurrent refreshes to
+// one in-flight run per serverless instance and refuses to re-fire within
+// MIN_BACKGROUND_SYNC_INTERVAL_MS of the last completed one.
+const MIN_BACKGROUND_SYNC_INTERVAL_MS = 60 * 1000;
+
+function makeBackgroundRefresher(
+  syncFn: () => Promise<void>,
+  label: string
+): () => void {
+  let inFlight: Promise<void> | null = null;
+  let lastRunAt = 0;
+  return () => {
+    if (inFlight) return; // a refresh is already running this instance
+    if (Date.now() - lastRunAt < MIN_BACKGROUND_SYNC_INTERVAL_MS) return;
+    inFlight = syncFn()
+      .catch((err) => console.error(`${label} failed:`, err))
+      .finally(() => {
+        // Stamp on COMPLETION (success OR failure) so a failing sync also honors
+        // the 60s cooldown — otherwise every request during a Podio outage would
+        // re-fire it (the breaker stops Podio amplification, but not the log/CPU
+        // churn). Caught above, so this finally never sees a rejection.
+        lastRunAt = Date.now();
+        inFlight = null;
+      });
+  };
+}
+
+// Thunks defer to the hoisted sync function declarations below.
+const refreshTestsInBackground = makeBackgroundRefresher(
+  () => syncTestsFromPodio(),
+  "Background test sync"
+);
+const refreshDomainsInBackground = makeBackgroundRefresher(
+  () => syncDomainsFromPodio(),
+  "Background domain sync"
+);
 
 // ---------------------------------------------------------------------------
 // Tests sync
@@ -42,9 +83,7 @@ export async function getTests(): Promise<Test[]> {
     );
 
   if (needsRefresh) {
-    syncTestsFromPodio().catch((err) =>
-      console.error("Background test sync failed:", err)
-    );
+    refreshTestsInBackground();
   }
 
   if (cached.length === 0) {
@@ -164,9 +203,7 @@ export async function getDomains(): Promise<Domain[]> {
     );
 
   if (needsRefresh) {
-    syncDomainsFromPodio().catch((err) =>
-      console.error("Background domain sync failed:", err)
-    );
+    refreshDomainsInBackground();
   }
 
   if (cached.length === 0) {
@@ -247,26 +284,34 @@ export async function getDomainNames(
 // Questions sync — fetches questions linked to a specific test
 // ---------------------------------------------------------------------------
 
-export async function getQuestionsForTest(
+/**
+ * CCO-T065: read the last-synced questions for a test straight from the Neon
+ * mirror — NO Podio call. This is the exam-start fallback for when a live Podio
+ * sync fails (e.g. an HTTP 420 rate-limit, the 2026-06-24 outage): every other
+ * student-facing route already degrades to the mirror, and now exam-start can
+ * too. Matches on the test linkage that mapPodioQuestion persists
+ * (questions.testPodioIds), which is GIN-indexed for the `@>` containment.
+ *
+ * Rows come back in a stable order (podioItemId) so a fallback attempt serves a
+ * deterministic question set. Replaces the old getQuestionsForTest, which
+ * computed an unused cache query and then always fell through to the live sync
+ * (dead code — it was never called anywhere).
+ *
+ * Staleness caveat: syncQuestionsForTest is upsert-only (never prunes), so if a
+ * question is UNLINKED from this test in Podio, its mirror row keeps the stale
+ * testPodioId until it is re-synced via another test. During a Podio outage the
+ * fallback could therefore serve a since-unlinked question. Bounded and rare
+ * (requires an unlink AND a concurrent outage; the question is still valid) —
+ * the reconcile-on-sync prune is a deferred CCO-T065 follow-up.
+ */
+export async function getMirroredQuestionsForTest(
   testPodioId: number
 ): Promise<Question[]> {
-  // Check local cache first
-  const cached = await db
+  return db
     .select()
     .from(questions)
-    .where(
-      inArray(
-        questions.podioItemId,
-        db
-          .select({ id: questions.podioItemId })
-          .from(questions)
-          .where(eq(questions.payload as never, testPodioId as never))
-      )
-    );
-
-  // For now, always fetch from Podio (questions are test-specific and the
-  // relationship is stored on the question side via the Tests field)
-  return syncQuestionsForTest(testPodioId);
+    .where(arrayContains(questions.testPodioIds, [testPodioId]))
+    .orderBy(questions.podioItemId);
 }
 
 export async function syncQuestionsForTest(
@@ -309,7 +354,9 @@ export async function syncQuestionsForTest(
   return records;
 }
 
-function mapPodioQuestion(
+// Exported for unit testing (the test linkage + correct-answer mapping are the
+// load-bearing fields the exam-start fallback depends on). CCO-T065.
+export function mapPodioQuestion(
   item: PodioItem
 ): Omit<Question, "syncedAt"> | null {
   const questionText = getTextValue(item, QUESTION_FIELDS.QUESTION_TEXT);
@@ -343,6 +390,10 @@ function mapPodioQuestion(
     difficulty: null, // not reliably populated
     disposition: disposition || null,
     status: status || null,
+    // CCO-T065: persist the test linkage so the questions mirror is queryable
+    // by test (getMirroredQuestionsForTest). Without this the exam-start Neon
+    // fallback has nothing to read on a Podio outage.
+    testPodioIds: getAppReferenceIds(item, QUESTION_FIELDS.TESTS),
     payload: item.fields as unknown as Record<string, unknown>,
   };
 }
