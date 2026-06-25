@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Menu, Shield, X } from "lucide-react";
+import { GraduationCap, LogOut, Menu, Shield, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { logoutAction } from "@/actions/auth";
 import { Logo } from "@/components/shared/Logo";
+import { ACADEMY_URL } from "@/lib/links";
+import { useExamGuard } from "@/components/exam/ExamGuard";
 
 export function TopBar({
   userName,
@@ -17,6 +19,13 @@ export function TopBar({
   const [accountOpen, setAccountOpen] = useState(false);
   const initials = getInitials(userName ?? "");
   const accountRef = useRef<HTMLDivElement>(null);
+  const guard = useExamGuard();
+
+  // Same-tab nav during an active exam → confirm before leaving (CCO-T075).
+  // (The Academy link opens a new tab, so it is intentionally not guarded.)
+  const guardNav = (e: React.MouseEvent, href: string) => {
+    if (!guard.requestLeave(href)) e.preventDefault();
+  };
 
   // Click-outside + Escape closes the account dropdown.
   useEffect(() => {
@@ -48,13 +57,27 @@ export function TopBar({
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-2.5">
-          <NavLink href="/gradebook">Gradebook</NavLink>
+          <NavLink href="/gradebook" onClick={(e) => guardNav(e, "/gradebook")}>
+            Gradebook
+          </NavLink>
           <Link
             href="/catalog"
+            onClick={(e) => guardNav(e, "/catalog")}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-cco-purple text-white font-semibold no-underline transition hover:bg-cco-purple-600 hover:shadow-lg hover:-translate-y-px"
           >
             Catalog
           </Link>
+          {/* Academy → Circle. New tab so a mid-exam student keeps their place
+              (exam auto-saves regardless), so no leave-confirm needed. */}
+          <a
+            href={ACADEMY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-cco-muted font-semibold px-3 py-1.5 rounded-full no-underline transition hover:bg-cco-bg-soft hover:text-cco-purple"
+          >
+            <GraduationCap size={16} />
+            Academy
+          </a>
 
           {userName && (
             <div
@@ -103,7 +126,10 @@ export function TopBar({
                   <Link
                     href="/account/security"
                     role="menuitem"
-                    onClick={() => setAccountOpen(false)}
+                    onClick={(e) => {
+                      setAccountOpen(false);
+                      guardNav(e, "/account/security");
+                    }}
                     className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-cco-ink font-medium no-underline hover:bg-cco-bg-soft transition"
                   >
                     <Shield size={16} className="text-cco-muted" />
@@ -173,16 +199,44 @@ export function TopBar({
                 </div>
               )}
               <div className="h-px bg-cco-border" />
-              <MobileLink href="/catalog" onClick={() => setNavOpen(false)}>
+              <MobileLink
+                href="/catalog"
+                onClick={(e) => {
+                  guardNav(e, "/catalog");
+                  setNavOpen(false);
+                }}
+              >
                 Catalog
               </MobileLink>
-              <MobileLink href="/gradebook" onClick={() => setNavOpen(false)}>
+              <MobileLink
+                href="/gradebook"
+                onClick={(e) => {
+                  guardNav(e, "/gradebook");
+                  setNavOpen(false);
+                }}
+              >
                 Gradebook
               </MobileLink>
+              {/* Academy → Circle, new tab (no leave-confirm — doesn't leave the page). */}
+              <a
+                href={ACADEMY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setNavOpen(false)}
+                className="block px-3 py-2.5 rounded-xl text-cco-ink font-semibold text-base no-underline hover:bg-cco-bg-soft transition"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <GraduationCap size={16} className="text-cco-muted" />
+                  CCO Academy
+                </span>
+              </a>
               <div className="h-px bg-cco-border" />
               <MobileLink
                 href="/account/security"
-                onClick={() => setNavOpen(false)}
+                onClick={(e) => {
+                  guardNav(e, "/account/security");
+                  setNavOpen(false);
+                }}
               >
                 <span className="inline-flex items-center gap-2">
                   <Shield size={16} className="text-cco-muted" />
@@ -208,14 +262,17 @@ export function TopBar({
 
 function NavLink({
   href,
+  onClick,
   children,
 }: {
   href: string;
+  onClick?: (e: React.MouseEvent) => void;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href}
+      onClick={onClick}
       className="text-cco-muted font-semibold px-3 py-1.5 rounded-full no-underline transition hover:bg-cco-bg-soft hover:text-cco-purple"
     >
       {children}
@@ -229,7 +286,7 @@ function MobileLink({
   children,
 }: {
   href: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   children: React.ReactNode;
 }) {
   return (

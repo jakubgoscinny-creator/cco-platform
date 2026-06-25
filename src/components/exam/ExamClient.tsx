@@ -8,6 +8,7 @@ import {
   getAnsweredCount,
   getFlaggedCount,
   getSkippedCount,
+  PANE_WIDTH_DEFAULT,
   type ExamState,
   type QuestionSnapshot,
   type AnswerState,
@@ -21,6 +22,9 @@ import { QuestionGrid } from "./QuestionGrid";
 import { ScratchPad } from "./ScratchPad";
 import { PaneResizer } from "./PaneResizer";
 import { HighlightTools } from "./HighlightTools";
+import { QuestionBody } from "./QuestionBody";
+import { QuestionFeedback } from "./QuestionFeedback";
+import { useExamGuard } from "./ExamGuard";
 import {
   ChevronLeft,
   ChevronRight,
@@ -63,7 +67,7 @@ export function ExamClient({
     status: "active",
     scratchPad: initialScratchPad,
     highlights: initialHighlights ?? {},
-    paneWidth: initialPaneWidth ?? 58,
+    paneWidth: initialPaneWidth ?? PANE_WIDTH_DEFAULT,
   };
 
   const [state, dispatch] = useReducer(examReducer, initialState);
@@ -71,7 +75,9 @@ export function ExamClient({
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mobileStripRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const guard = useExamGuard();
 
   const currentQuestion = state.questions[state.currentIndex];
   const currentAnswer = currentQuestion
@@ -84,6 +90,16 @@ export function ExamClient({
     const interval = setInterval(() => dispatch({ type: "TICK" }), 1000);
     return () => clearInterval(interval);
   }, [state.status]);
+
+  // CCO-T075: tell the nav guard an exam is in progress, so same-tab nav links
+  // (Catalog / Gradebook / account) confirm before leaving. Live while the
+  // attempt is active or paused; cleared on submit or when the page unmounts.
+  // (Academy opens a new tab and never leaves this page, so it isn't guarded.)
+  useEffect(() => {
+    const live = state.status === "active" || state.status === "paused";
+    guard.setExamActive(live);
+    return () => guard.setExamActive(false);
+  }, [state.status, guard]);
 
   // Auto-submit when time runs out
   useEffect(() => {
@@ -190,13 +206,27 @@ export function ExamClient({
     dispatch({ type: "SET_PANE_WIDTH", width });
   }
 
-  function handlePaneResizeEnd() {
+  function handlePaneResizeEnd(width?: number) {
+    // The keyboard path passes the just-nudged width explicitly because the
+    // SET_PANE_WIDTH dispatch hasn't committed to `state` yet in the same event
+    // (drag relies on the event boundary, so it omits the arg). CCO-T074.
     saveExamStateAction(
       attemptId,
       state.timeRemaining,
       state.scratchPad,
       state.highlights,
-      state.paneWidth
+      width ?? state.paneWidth
+    );
+  }
+
+  function handlePaneReset() {
+    dispatch({ type: "SET_PANE_WIDTH", width: PANE_WIDTH_DEFAULT });
+    saveExamStateAction(
+      attemptId,
+      state.timeRemaining,
+      state.scratchPad,
+      state.highlights,
+      PANE_WIDTH_DEFAULT
     );
   }
 
@@ -387,6 +417,7 @@ export function ExamClient({
 
       {/* Main content — split pane on desktop, single column on mobile */}
       <div
+        ref={gridRef}
         className="flex-1 overflow-hidden md:grid block"
         style={
           // Only apply grid columns on md+ screens; on mobile the single column flows naturally
@@ -412,19 +443,25 @@ export function ExamClient({
                     />
                   )}
                 </div>
-                <div
-                  id={`tp-question-text-${currentQuestion.podioItemId}`}
-                  className="text-cco-ink leading-relaxed prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: questionHtml }}
+                <QuestionBody
+                  questionPodioId={currentQuestion.podioItemId}
+                  html={questionHtml}
                 />
-                <HighlightTools
-                  questionId={currentQuestion.podioItemId}
-                  onHighlight={handleHighlight}
-                  onClear={handleClearHighlight}
-                  hasHighlights={
-                    !!state.highlights[currentQuestion.podioItemId]
-                  }
-                />
+                <div className="mt-4 flex items-start justify-between gap-3 flex-wrap rounded-2xl border border-cco-border/70 bg-cco-bg-soft/50 px-3.5 py-3">
+                  <HighlightTools
+                    questionId={currentQuestion.podioItemId}
+                    onHighlight={handleHighlight}
+                    onClear={handleClearHighlight}
+                    hasHighlights={
+                      !!state.highlights[currentQuestion.podioItemId]
+                    }
+                  />
+                  <QuestionFeedback
+                    attemptId={attemptId}
+                    questionPodioId={currentQuestion.podioItemId}
+                    questionNumber={state.currentIndex + 1}
+                  />
+                </div>
               </div>
 
               {/* Options */}
@@ -473,15 +510,21 @@ export function ExamClient({
                 </button>
                 <button
                   onClick={handleFlag}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                  aria-pressed={currentAnswer?.flagged ?? false}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold border transition active:scale-95 ${
                     currentAnswer?.flagged
-                      ? "border-cco-gold/50 bg-cco-gold/15 text-cco-gold-dark"
-                      : "border-cco-border text-cco-muted hover:border-cco-gold/50 hover:bg-cco-gold/10"
+                      ? "border-cco-gold bg-cco-gold/20 text-cco-gold-dark shadow-sm"
+                      : "border-cco-gold/40 bg-cco-gold/[0.06] text-cco-gold-dark hover:bg-cco-gold/15 hover:-translate-y-0.5 hover:shadow-sm"
                   }`}
                 >
-                  <Flag size={12} />
+                  <Flag
+                    size={14}
+                    className={currentAnswer?.flagged ? "fill-cco-gold-dark" : ""}
+                  />
                   {currentAnswer?.flagged ? (
-                    "Flagged"
+                    <>
+                      Flagged<span className="hidden sm:inline"> for review</span>
+                    </>
                   ) : (
                     <>
                       Flag<span className="hidden sm:inline"> for review</span>
@@ -516,13 +559,14 @@ export function ExamClient({
           )}
         </div>
 
-        {/* Resizer — desktop only */}
-        <div className="hidden md:block">
-          <PaneResizer
-            onResize={handlePaneResize}
-            onResizeEnd={handlePaneResizeEnd}
-          />
-        </div>
+        {/* Resizer — desktop only (CCO-T074: measures against the grid ref) */}
+        <PaneResizer
+          widthPercent={state.paneWidth}
+          containerRef={gridRef}
+          onResize={handlePaneResize}
+          onResizeEnd={handlePaneResizeEnd}
+          onReset={handlePaneReset}
+        />
 
         {/* Right pane: scratch pad + question grid */}
         <div className="hidden md:flex flex-col gap-4 overflow-y-auto p-4 bg-white border-l border-cco-border">

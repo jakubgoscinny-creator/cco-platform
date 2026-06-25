@@ -2,13 +2,24 @@
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { attempts, answers, tests, contacts } from "@/lib/schema";
+import { attempts, answers, tests, contacts, feedback } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { syncQuestionsForTest, getMirroredQuestionsForTest } from "@/lib/sync";
-import { createItem, getItem } from "@/lib/podio";
+import {
+  createItem,
+  getItem,
+  PODIO_APPS,
+  QUESTION_FEEDBACK_FIELDS,
+  QUESTION_FEEDBACK_OPTIONS,
+} from "@/lib/podio";
 import { canAccessTest } from "@/lib/circle-access";
 import { writeTestResultToPodio } from "@/lib/test-results-write";
+import {
+  FEEDBACK_COMMENT_MAX,
+  isFeedbackDifficulty,
+  isFeedbackIssueType,
+} from "@/lib/feedback-options";
 
 // Podio Test Attempts app (30626082) field IDs
 const ATTEMPT_FIELDS = {
@@ -219,6 +230,128 @@ export async function saveExamStateAction(
   }
 
   await db.update(attempts).set(update).where(eq(attempts.id, attemptId));
+}
+
+// ---------------------------------------------------------------------------
+// CCO-T068: per-question feedback — student reports a problem with a question.
+// Distinct from the personal Flag-for-review (answers.flagged, untouched).
+// Resilient write-through: capture to Neon first (durable), then best-effort
+// mirror to the dedicated "CCO Question Feedback" Podio app (30767002). A Podio
+// failure keeps the Neon row + logs (recoverable) and never hard-fails the
+// student — mirrors submitExamAction's Promise.allSettled resilience.
+// Ownership-guarded exactly like saveAnswerAction (attempt.contactId === session).
+// No exam answer/score/gating state is touched.
+// ---------------------------------------------------------------------------
+
+export async function submitQuestionFeedbackAction(input: {
+  attemptId: number;
+  questionPodioId: number;
+  comment: string;
+  difficulty?: string | null;
+  issueType?: string | null;
+}): Promise<{ ok: true } | { error: string }> {
+  const session = await getSession();
+  if (!session) return { error: "Please sign in to send feedback." };
+
+  const attemptId = Number(input.attemptId);
+  const questionPodioId = Number(input.questionPodioId);
+  if (!Number.isFinite(attemptId) || !Number.isFinite(questionPodioId)) {
+    return { error: "Invalid request." };
+  }
+
+  // Ownership guard — same boundary as saveAnswerAction/saveExamStateAction.
+  const [attempt] = await db
+    .select({
+      contactId: attempts.contactId,
+      testPodioId: attempts.testPodioId,
+    })
+    .from(attempts)
+    .where(eq(attempts.id, attemptId))
+    .limit(1);
+  if (!attempt || attempt.contactId !== session.contactId) {
+    return { error: "We couldn't find that exam attempt." };
+  }
+
+  // Validate / normalize.
+  const comment = (input.comment ?? "").trim().slice(0, FEEDBACK_COMMENT_MAX);
+  if (!comment) return { error: "Please add a short note about the problem." };
+  const difficulty = isFeedbackDifficulty(input.difficulty)
+    ? input.difficulty
+    : null;
+  const issueType = isFeedbackIssueType(input.issueType) ? input.issueType : null;
+
+  // 1) Durable capture to Neon (the source of truth for recovery).
+  let feedbackRowId: number | null = null;
+  try {
+    const [row] = await db
+      .insert(feedback)
+      .values({
+        attemptId,
+        questionPodioId,
+        comment,
+        difficultyRating: difficulty,
+        issueType,
+        contactId: session.contactId,
+      })
+      .returning({ id: feedback.id });
+    feedbackRowId = row?.id ?? null;
+  } catch (err) {
+    console.error("CCO-T068: failed to persist feedback to Neon:", err);
+    return { error: "Couldn't send feedback right now — please try again." };
+  }
+
+  // Resolve the reporter's name for the Podio item (best-effort).
+  let studentName: string | null = null;
+  try {
+    const [contact] = await db
+      .select({ fullName: contacts.fullName })
+      .from(contacts)
+      .where(eq(contacts.podioItemId, session.contactId))
+      .limit(1);
+    studentName = contact?.fullName ?? null;
+  } catch {
+    /* non-fatal — Podio item just omits the name */
+  }
+
+  // 2) Best-effort Podio mirror. Failures keep the Neon row + log only.
+  try {
+    const fields: Record<string, unknown> = {
+      [QUESTION_FEEDBACK_FIELDS.COMMENT]: comment,
+      [QUESTION_FEEDBACK_FIELDS.QUESTION]: [questionPodioId], // app-ref → QB item
+      [QUESTION_FEEDBACK_FIELDS.QUESTION_ITEM_ID]: questionPodioId,
+      [QUESTION_FEEDBACK_FIELDS.ATTEMPT_ID]: attemptId,
+      [QUESTION_FEEDBACK_FIELDS.CONTACT_ID]: session.contactId,
+      [QUESTION_FEEDBACK_FIELDS.STATUS]: QUESTION_FEEDBACK_OPTIONS.STATUS_NEW,
+      [QUESTION_FEEDBACK_FIELDS.SOURCE]: "CCO Portal",
+    };
+    if (attempt.testPodioId) {
+      fields[QUESTION_FEEDBACK_FIELDS.TEST] = [Number(attempt.testPodioId)];
+    }
+    if (studentName) fields[QUESTION_FEEDBACK_FIELDS.STUDENT] = studentName;
+    if (difficulty) {
+      fields[QUESTION_FEEDBACK_FIELDS.DIFFICULTY] =
+        QUESTION_FEEDBACK_OPTIONS.DIFFICULTY[difficulty];
+    }
+    if (issueType) {
+      fields[QUESTION_FEEDBACK_FIELDS.ISSUE_TYPE] =
+        QUESTION_FEEDBACK_OPTIONS.ISSUE_TYPE[issueType];
+    }
+
+    const created = await createItem(PODIO_APPS.QUESTION_FEEDBACK, fields);
+    if (feedbackRowId != null && created?.item_id) {
+      await db
+        .update(feedback)
+        .set({ podioItemId: created.item_id })
+        .where(eq(feedback.id, feedbackRowId));
+    }
+  } catch (err) {
+    console.error(
+      `CCO-T068: Podio feedback write failed (Neon row ${feedbackRowId} kept for recovery):`,
+      err
+    );
+  }
+
+  return { ok: true };
 }
 
 // ---------------------------------------------------------------------------

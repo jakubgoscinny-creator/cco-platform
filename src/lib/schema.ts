@@ -270,6 +270,15 @@ export const feedback = pgTable("feedback", {
   questionPodioId: bigint("question_podio_id", { mode: "number" }).notNull(),
   difficultyRating: text("difficulty_rating"), // 'easy' | 'medium' | 'hard'
   comment: text("comment"),
+  // CCO-T068: issue category from FEEDBACK_ISSUE_TYPES (wrong_answer | typo |
+  // unclear | outdated | other). Nullable — optional in the form.
+  issueType: text("issue_type"),
+  // CCO-T068: item_id of the row created in the dedicated "CCO Question
+  // Feedback" Podio app. Null = Neon-captured but not (yet) mirrored to Podio
+  // (a Podio outage at submit time leaves it null + logged, recoverable);
+  // mirrors the attempts.podioTestResultItemId idempotency/traceability pattern.
+  podioItemId: bigint("podio_item_id", { mode: "number" }),
+  contactId: bigint("contact_id", { mode: "number" }), // reporter (resolved from the attempt)
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

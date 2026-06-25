@@ -24,7 +24,20 @@ export interface ExamState {
   status: "active" | "paused" | "submitting" | "submitted";
   scratchPad: string;
   highlights: Record<number, string>; // questionId → highlighted HTML
-  paneWidth: number; // 35-70, default 58
+  paneWidth: number; // PANE_WIDTH_MIN..MAX, default PANE_WIDTH_DEFAULT
+}
+
+// CCO-T074: split-pane geometry. Kept as exported constants + a pure clamp so
+// the reducer, the PaneResizer control, and the unit tests share one source of
+// truth (and the clamp is testable without a DOM).
+export const PANE_WIDTH_MIN = 35;
+export const PANE_WIDTH_MAX = 70;
+export const PANE_WIDTH_DEFAULT = 58;
+
+/** Clamp a left-pane width to the allowed band, rounded to 0.1%. */
+export function clampPaneWidth(width: number): number {
+  const clamped = Math.max(PANE_WIDTH_MIN, Math.min(PANE_WIDTH_MAX, width));
+  return Math.round(clamped * 10) / 10;
 }
 
 export type ExamAction =
@@ -143,7 +156,7 @@ export function examReducer(state: ExamState, action: ExamAction): ExamState {
     case "SET_PANE_WIDTH":
       return {
         ...state,
-        paneWidth: Math.max(35, Math.min(70, action.width)),
+        paneWidth: clampPaneWidth(action.width),
       };
 
     default:

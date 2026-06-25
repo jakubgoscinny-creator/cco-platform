@@ -567,6 +567,42 @@ export const PODIO_APPS = {
   CEU_ITEMS: 14639788,
   TEST_RESULTS: 16234798, // legacy results store, 126K+ items, joins to Contacts
   PROGRESS_TRACKER: 16163523, // CCO-T033: per-Contact course enrollment (student + tracker type)
+  QUESTION_FEEDBACK: 30767002, // CCO-T068: student question-feedback app (space 4698044, next to QB+Tests)
+} as const;
+
+// CCO-T068: field IDs for the dedicated "CCO Question Feedback" Podio app
+// (30767002), created 2026-06-25 via scripts/create-question-feedback-app.mjs.
+export const QUESTION_FEEDBACK_FIELDS = {
+  COMMENT: 277340078,
+  ISSUE_TYPE: 277340079, // category — set by option id (see QUESTION_FEEDBACK_OPTIONS)
+  DIFFICULTY: 277340080, // category
+  STATUS: 277340081, // category
+  QUESTION: 277340082, // app ref → QB Multi Choice (16263017)
+  TEST: 277340083, // app ref → Tests (16243239)
+  QUESTION_ITEM_ID: 277340084, // plain number fallback / searchable
+  STUDENT: 277340085, // reporter name (text)
+  CONTACT_ID: 277340086, // reporter Podio contact item id (number)
+  ATTEMPT_ID: 277340087, // portal attempt id (number)
+  SOURCE: 277340088,
+} as const;
+
+// CCO-T068: category option ids, captured from the live app. Setting category
+// fields by id (not text) is deterministic — a relabel in Podio won't break the
+// write. Keys mirror FEEDBACK_ISSUE_TYPES / FEEDBACK_DIFFICULTIES ids.
+export const QUESTION_FEEDBACK_OPTIONS = {
+  // Keys mirror FEEDBACK_ISSUE_TYPES ids; values are the live Podio option ids
+  // (synced via scripts/update-question-feedback-options.mjs 2026-06-25).
+  ISSUE_TYPE: {
+    praise: 6,
+    suggestion: 7,
+    answer_key: 1,
+    unclear: 3,
+    typo: 2,
+    outdated: 4,
+    other: 5,
+  } as Record<string, number>,
+  DIFFICULTY: { easy: 1, medium: 2, hard: 3 } as Record<string, number>,
+  STATUS_NEW: 1,
 } as const;
 
 export const TEST_FIELDS = {
