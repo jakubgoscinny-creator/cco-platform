@@ -196,7 +196,14 @@ async function podioFetch(
 export async function getItem(itemId: number): Promise<PodioItem> {
   const res = await podioFetch(`/item/${itemId}`);
   if (!res.ok) {
-    throw new Error(`Podio getItem ${itemId} failed (${res.status})`);
+    // Attach the HTTP status so callers can distinguish a 404 (item deleted in
+    // Podio) from a genuine failure — e.g. CCO-T063 syncOneTest skips a 404
+    // (a late item.update racing an item.delete) instead of erroring.
+    const err = new Error(
+      `Podio getItem ${itemId} failed (${res.status})`
+    ) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
   }
   return res.json();
 }
@@ -279,6 +286,32 @@ export async function createItem(
   }
 
   return res.json();
+}
+
+/**
+ * CCO-T063: activate a Podio webhook after the verify handshake.
+ *
+ * When a hook is (re)created, Podio POSTs `type=hook.verify` + a `code` to the
+ * hook URL. The receiver echoes that code back here to flip the hook to active.
+ * Endpoint: `POST /hook/{hook_id}/verify/validate` body `{ code }`
+ * (https://developers.podio.com/doc/hooks/validate-hook-verificated-215241).
+ * Server-side only — goes through podioFetch so it shares the rate-limit breaker.
+ */
+export async function verifyPodioHook(
+  hookId: number,
+  code: string
+): Promise<void> {
+  const res = await podioFetch(`/hook/${hookId}/verify/validate`, {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(
+      `Podio verifyPodioHook ${hookId} failed (${res.status}): ${text}`
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   "/api/health",
   "/api/sso/",
   "/api/cron/", // CCO-T045: secret-guarded resync trigger (self-authorizes via CRON_SECRET)
+  "/api/webhooks/", // CCO-T063: inbound Podio webhook (self-authorizes via PODIO_WEBHOOK_SECRET)
 ];
 
 export function proxy(request: NextRequest) {

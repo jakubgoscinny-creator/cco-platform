@@ -23,7 +23,7 @@ import {
   withPodioFallback,
   type PodioItem,
 } from "./podio";
-import { eq, inArray, arrayContains } from "drizzle-orm";
+import { eq, inArray, arrayContains, notInArray } from "drizzle-orm";
 
 const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -140,6 +140,28 @@ export async function syncTestsFromPodio(): Promise<void> {
         set: { ...record, syncedAt: new Date() },
       });
   }
+
+  await pruneMissing(tests, allItems);
+}
+
+/**
+ * CCO-T063 reconcile-prune: drop mirror rows whose Podio item is gone, so the
+ * full sync (cron safety-net + background refresh) is a true delete safety-net.
+ * The per-item webhook deletes in real time, but a DROPPED item.delete (transient
+ * error / breaker-open / missed delivery) would otherwise leave a deleted Test
+ * live in the catalog forever, because upsert never prunes.
+ *
+ * GUARDED: prunes only when we actually fetched a non-empty set. A partial/failed
+ * pagination throws before reaching here, and an anomalous empty Podio response
+ * is ignored — neither can wipe the live mirror.
+ */
+async function pruneMissing(
+  table: typeof tests | typeof domains,
+  fetchedItems: PodioItem[]
+): Promise<void> {
+  if (fetchedItems.length === 0) return;
+  const seenIds = fetchedItems.map((i) => i.item_id);
+  await db.delete(table).where(notInArray(table.podioItemId, seenIds));
 }
 
 function mapPodioTest(item: PodioItem): Omit<Test, "syncedAt"> | null {
@@ -261,6 +283,8 @@ export async function syncDomainsFromPodio(): Promise<void> {
         set: { ...record, syncedAt: new Date() },
       });
   }
+
+  await pruneMissing(domains, allItems);
 }
 
 function mapPodioDomain(item: PodioItem): Omit<Domain, "syncedAt"> | null {
@@ -275,6 +299,85 @@ function mapPodioDomain(item: PodioItem): Omit<Domain, "syncedAt"> | null {
     cpcQuestionCount: getNumberValue(item, DOMAIN_FIELDS.CPC_QUESTION_COUNT),
     payload: item.fields as unknown as Record<string, unknown>,
   };
+}
+
+// ---------------------------------------------------------------------------
+// CCO-T063: per-item event-driven sync.
+//
+// The Podio→portal webhook receiver (POST /api/webhooks/podio) calls these to
+// propagate a SINGLE changed item in seconds, instead of relying on the
+// fire-and-forget background refresh (which Vercel suspends on response — the
+// root cause of Mary's "I changed it in Podio but the portal doesn't show it"
+// bug). These reuse the SAME mappers as the full sync above — field mapping is
+// never re-implemented, so the two paths can never diverge. A dropped event of
+// ANY kind (create/update AND delete) self-heals on the next full sync: upserts
+// re-converge changed rows and pruneMissing reconciles deletes.
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch ONE Podio item, returning null if it 404s (deleted in Podio — e.g. a
+ * late item.update racing an item.delete). Other errors (incl. rate-limit)
+ * propagate so the route can log + drop them.
+ */
+async function getItemOrNull(itemId: number): Promise<PodioItem | null> {
+  try {
+    return await getItem(itemId);
+  } catch (err) {
+    if ((err as { status?: number }).status === 404) return null;
+    throw err;
+  }
+}
+
+/**
+ * Upsert ONE Test from Podio into the Neon mirror. Returns false when the item
+ * is gone (404) or doesn't map to a record (e.g. no name) — the caller treats
+ * either as a no-op, not an error. Mirrors the syncTestsFromPodio loop body.
+ */
+export async function syncOneTest(itemId: number): Promise<boolean> {
+  const item = await getItemOrNull(itemId);
+  if (!item) return false;
+  const record = mapPodioTest(item);
+  if (!record) return false;
+
+  await db
+    .insert(tests)
+    .values(record)
+    .onConflictDoUpdate({
+      target: tests.podioItemId,
+      set: { ...record, syncedAt: new Date() },
+    });
+  return true;
+}
+
+/**
+ * Remove ONE Test from the Neon mirror (Podio item.delete). Idempotent — a
+ * missing row is a no-op. Driven by the webhook's `item.delete` branch, where
+ * the Podio item is already gone so getItem can't be used.
+ */
+export async function deleteTest(itemId: number): Promise<void> {
+  await db.delete(tests).where(eq(tests.podioItemId, itemId));
+}
+
+/** Upsert ONE Domain from Podio into the Neon mirror. See syncOneTest. */
+export async function syncOneDomain(itemId: number): Promise<boolean> {
+  const item = await getItemOrNull(itemId);
+  if (!item) return false;
+  const record = mapPodioDomain(item);
+  if (!record) return false;
+
+  await db
+    .insert(domains)
+    .values(record)
+    .onConflictDoUpdate({
+      target: domains.podioItemId,
+      set: { ...record, syncedAt: new Date() },
+    });
+  return true;
+}
+
+/** Remove ONE Domain from the Neon mirror (Podio item.delete). See deleteTest. */
+export async function deleteDomain(itemId: number): Promise<void> {
+  await db.delete(domains).where(eq(domains.podioItemId, itemId));
 }
 
 // ---------------------------------------------------------------------------
