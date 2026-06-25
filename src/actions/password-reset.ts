@@ -87,6 +87,15 @@ export async function forgotPasswordAction(
     if (!contact && emailAsTyped !== email) {
       contact = await findContactByEmail(email);
     }
+    // ALL-CAPS legacy/Thrivecart Contacts (e.g. "AMANDAS.OLSEN1@GMAIL.COM")
+    // won't match a lowercase filter — Podio's email filter is case-sensitive.
+    // Try uppercase last so those members can actually reset (2026-06 report).
+    if (!contact) {
+      const upper = emailAsTyped.toUpperCase();
+      if (upper !== emailAsTyped && upper !== email) {
+        contact = await findContactByEmail(upper);
+      }
+    }
 
     if (contact) {
       // CCO-T048: the single-use jti lives on the Neon mirror row — but a
@@ -160,10 +169,17 @@ export async function forgotPasswordAction(
       // outside-visible response shape + timing matches a hit. The
       // workflow's "Recipient Contact blank → Skipped" rule prevents
       // any email from being sent.
+      //
+      // resetUrl MUST be non-empty: the Podio "Reset URL" field is min-1-char,
+      // so createItem 400s on "" — which used to throw and surface the generic
+      // "Something went wrong sending the reset link" to every unrecognised
+      // email (incl. Thrivecart-migrated members not yet keyed to a Contact,
+      // e.g. the 2026-06-22 helpdesk report). This item is Skipped by the
+      // workflow (blank Recipient Contact), so the value is never emailed.
       await createPasswordResetItem({
         recipientEmail: email,
         contactItemId: null,
-        resetUrl: "",
+        resetUrl: "https://portal.cco.us/forgot-password",
         expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_SECONDS * 1000),
       });
     }
@@ -174,7 +190,16 @@ export async function forgotPasswordAction(
     // Detect Podio rate-limit (HTTP 420) so the user gets an honest
     // wait time instead of "try again in a minute" for an hour.
     const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("(420)") || msg.toLowerCase().includes("rate_limit")) {
+    const lower = msg.toLowerCase();
+    // podioFetch throws "Podio rate limited. Retry after Xs" on a 420 — match
+    // that wording too (the old check only caught "(420)"/"rate_limit", so a
+    // real Podio rate-limit also fell through to the generic message below).
+    if (
+      lower.includes("(420)") ||
+      lower.includes("rate_limit") ||
+      lower.includes("rate limited") ||
+      lower.includes("retry after")
+    ) {
       return {
         error:
           "Our reset service is temporarily rate-limited. Please try again in about 30 minutes.",

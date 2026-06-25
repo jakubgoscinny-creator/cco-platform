@@ -114,13 +114,20 @@ export async function fetchContactFromPodio(
   try {
     // Contacts email-type fields filter on a string array, not a bare string.
     // CCO-T028: Podio's email-field filter is CASE-SENSITIVE on the stored
-    // value. Try the email as typed first (handles Contacts stored with
-    // mixed case, e.g. "Jodi.Vongunten@gmail.com"); fall back to lowercase
-    // so we still match Contacts stored all-lowercase when the user typed
-    // mixed case. The Neon mirror still stores lowercase below — only the
-    // Podio-side lookup preserves case.
+    // value, so we walk a case ladder. Try the email as typed first (handles
+    // Contacts stored mixed-case, e.g. "Jodi.Vongunten@gmail.com"); then
+    // lowercase (Contacts stored all-lowercase, the norm); then UPPERCASE —
+    // a large block of legacy/Thrivecart-imported Contacts are stored
+    // ALL-CAPS (e.g. "AMANDAS.OLSEN1@GMAIL.COM"), and without this attempt
+    // those members can't sign in OR reset (2026-06 helpdesk report). The
+    // attempt is additive + the password check still gates auth, so it can
+    // only ever find MORE valid Contacts, never mis-authenticate. The Neon
+    // mirror still stores lowercase below — only the Podio-side lookup
+    // preserves case. (The CCO-T0xx email-case normalization migration
+    // lowercases stored emails so this ladder becomes belt-and-suspenders.)
     const trimmed = email.trim();
     const lower = trimmed.toLowerCase();
+    const upper = trimmed.toUpperCase();
     let result = await filterItems(
       PODIO_APPS.CONTACTS,
       { [CONTACT_FIELDS.EMAIL]: [trimmed] },
@@ -130,6 +137,13 @@ export async function fetchContactFromPodio(
       result = await filterItems(
         PODIO_APPS.CONTACTS,
         { [CONTACT_FIELDS.EMAIL]: [lower] },
+        { limit: 1 }
+      );
+    }
+    if ((result.items?.length ?? 0) === 0 && upper !== trimmed && upper !== lower) {
+      result = await filterItems(
+        PODIO_APPS.CONTACTS,
+        { [CONTACT_FIELDS.EMAIL]: [upper] },
         { limit: 1 }
       );
     }
