@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import { QuestionImages } from "@/components/shared/QuestionImages";
 
 interface QuestionBodyProps {
   questionPodioId: number;
@@ -27,11 +28,14 @@ interface QuestionBodyProps {
  */
 function QuestionBodyImpl({ questionPodioId, html }: QuestionBodyProps) {
   return (
-    <div
-      id={`tp-question-text-${questionPodioId}`}
-      className="text-cco-ink leading-relaxed prose prose-sm max-w-none"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+    <>
+      <div
+        id={`tp-question-text-${questionPodioId}`}
+        className="text-cco-ink leading-relaxed prose prose-sm max-w-none question-html"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+      <QuestionImages key={questionPodioId} podioItemId={questionPodioId} />
+    </>
   );
 }
 

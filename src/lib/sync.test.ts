@@ -28,6 +28,9 @@ const h = vi.hoisted(() => {
   const onConflictDoUpdate = vi.fn(() => Promise.resolve());
   const values = vi.fn(() => ({ onConflictDoUpdate }));
   const insert = vi.fn(() => ({ values }));
+  const updateWhere = vi.fn(() => Promise.resolve());
+  const set = vi.fn(() => ({ where: updateWhere }));
+  const update = vi.fn(() => ({ set }));
   return {
     select,
     from,
@@ -37,13 +40,16 @@ const h = vi.hoisted(() => {
     insert,
     values,
     onConflictDoUpdate,
+    update,
+    set,
+    updateWhere,
     rows,
     setSelectResults: (results: unknown[]) => {
       selectResults = results;
     },
   };
 });
-vi.mock("./db", () => ({ db: { select: h.select, insert: h.insert } }));
+vi.mock("./db", () => ({ db: { select: h.select, insert: h.insert, update: h.update } }));
 
 const podioMocks = vi.hoisted(() => ({
   filterItems: vi.fn(),
@@ -58,6 +64,7 @@ import {
   mapPodioQuestion,
   getMirroredQuestionsForTest,
   getCeuItemsForTest,
+  resolveQuestionImages,
 } from "./sync";
 
 // Reset call counts between every test in this file — several describe
@@ -73,6 +80,9 @@ beforeEach(() => {
   h.insert.mockClear();
   h.values.mockClear();
   h.onConflictDoUpdate.mockClear();
+  h.update.mockClear();
+  h.set.mockClear();
+  h.updateWhere.mockClear();
   podioMocks.filterItems.mockReset();
   podioMocks.getItem.mockReset();
 });
@@ -176,6 +186,51 @@ describe("getCeuItemsForTest reverse-link fallback (CCO-T078)", () => {
     await getCeuItemsForTest(999);
 
     expect(podioMocks.filterItems).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolveQuestionImages (CCO-T077)", () => {
+  it("returns the cached value without a Podio call when already resolved (even if empty)", async () => {
+    h.setSelectResults([[{ imageFiles: [] }]]);
+
+    const result = await resolveQuestionImages(555);
+
+    expect(result).toEqual([]);
+    expect(podioMocks.getItem).not.toHaveBeenCalled();
+    expect(h.update).not.toHaveBeenCalled();
+  });
+
+  it("fetches the full item and extracts only Podio-hosted image files when unresolved (null)", async () => {
+    h.setSelectResults([[{ imageFiles: null }]]);
+    podioMocks.getItem.mockResolvedValue({
+      item_id: 555,
+      files: [
+        { file_id: 1, name: "embedded.jpg", mimetype: "image/jpeg", hosted_by: "podio" },
+        { file_id: 2, name: "drive-link.jpg", mimetype: "image/jpeg", hosted_by: "google" },
+        { file_id: 3, name: "spec.pdf", mimetype: "application/pdf", hosted_by: "podio" },
+      ],
+    });
+
+    const result = await resolveQuestionImages(555);
+
+    expect(podioMocks.getItem).toHaveBeenCalledWith(555);
+    // Google-hosted files and non-image mimetypes are excluded — only the
+    // Podio-hosted image survives (files.podio.com requires a Podio login,
+    // so only these need the proxy route; the Google link already renders
+    // fine as a normal <a> inside the question's own HTML).
+    expect(result).toEqual([{ fileId: 1, mimetype: "image/jpeg", name: "embedded.jpg" }]);
+    expect(h.update).toHaveBeenCalled();
+    expect(h.set).toHaveBeenCalledWith({ imageFiles: result });
+  });
+
+  it("returns an empty array without throwing when the Podio fetch fails", async () => {
+    h.setSelectResults([[{ imageFiles: null }]]);
+    podioMocks.getItem.mockRejectedValue(new Error("Podio rate limited. Retry after 60s"));
+
+    const result = await resolveQuestionImages(555);
+
+    expect(result).toEqual([]);
+    expect(h.update).not.toHaveBeenCalled();
   });
 });
 

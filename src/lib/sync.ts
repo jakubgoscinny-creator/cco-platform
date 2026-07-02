@@ -5,7 +5,7 @@
 
 import { db } from "./db";
 import { tests, domains, questions, ceuItems } from "./schema";
-import type { Test, Domain, Question, CeuItem } from "./schema";
+import type { Test, Domain, Question, CeuItem, QuestionImageFile } from "./schema";
 import {
   filterItems,
   getItem,
@@ -469,17 +469,59 @@ export async function syncQuestionsForTest(
         set: { ...record, syncedAt: new Date() },
       });
 
-    records.push({ ...record, syncedAt: new Date() });
+    // imageFiles isn't resolved by this bulk path (see mapPodioQuestion) —
+    // null here just satisfies the Question shape; nothing reads it off this
+    // in-memory array (images are fetched separately, see resolveQuestionImages).
+    records.push({ ...record, imageFiles: null, syncedAt: new Date() });
   }
 
   return records;
+}
+
+/**
+ * CCO-T077: resolve (and cache) a single question's Podio-hosted image
+ * attachments, on demand — called from the /api/question-images/[id] route
+ * as a question is actually viewed, NOT from the exam-start hot path. A
+ * non-null `imageFiles` in the mirror (even an empty array) means "already
+ * checked, nothing more to do"; only a NULL value triggers a live Podio
+ * getItem() call. This bounds the extra Podio cost to once per question ever
+ * (or once again if it's later deleted and re-synced), rather than once per
+ * exam-start for every question in a test.
+ */
+export async function resolveQuestionImages(
+  podioItemId: number
+): Promise<QuestionImageFile[]> {
+  const [row] = await db
+    .select({ imageFiles: questions.imageFiles })
+    .from(questions)
+    .where(eq(questions.podioItemId, podioItemId))
+    .limit(1);
+
+  if (row?.imageFiles != null) return row.imageFiles;
+
+  const item = await getItem(podioItemId).catch((err) => {
+    console.error(`CCO-T077: resolveQuestionImages getItem(${podioItemId}) failed:`, err);
+    return null;
+  });
+  if (!item) return [];
+
+  const images: QuestionImageFile[] = (item.files ?? [])
+    .filter((f) => f.hosted_by === "podio" && /^image\//.test(f.mimetype ?? ""))
+    .map((f) => ({ fileId: f.file_id, mimetype: f.mimetype, name: f.name }));
+
+  await db
+    .update(questions)
+    .set({ imageFiles: images })
+    .where(eq(questions.podioItemId, podioItemId));
+
+  return images;
 }
 
 // Exported for unit testing (the test linkage + correct-answer mapping are the
 // load-bearing fields the exam-start fallback depends on). CCO-T065.
 export function mapPodioQuestion(
   item: PodioItem
-): Omit<Question, "syncedAt"> | null {
+): Omit<Question, "syncedAt" | "imageFiles"> | null {
   const questionText = getTextValue(item, QUESTION_FIELDS.QUESTION_TEXT);
   if (!questionText) return null;
 
@@ -515,6 +557,14 @@ export function mapPodioQuestion(
     // by test (getMirroredQuestionsForTest). Without this the exam-start Neon
     // fallback has nothing to read on a Podio outage.
     testPodioIds: getAppReferenceIds(item, QUESTION_FIELDS.TESTS),
+    // CCO-T077: imageFiles is deliberately NOT set here. syncQuestionsForTest
+    // (below) calls this mapper with items from a bulk filterItems() response,
+    // which never includes `files` — resolving images would need a second,
+    // full getItem() fetch per question, doubling Podio calls on the
+    // exam-start hot path (every attempt start). Instead imageFiles is
+    // resolved lazily per-question by resolveQuestionImages(), and omitting
+    // the key here means the upsert's onConflictDoUpdate leaves an
+    // already-resolved value untouched (see resolveQuestionImages docs).
     payload: item.fields as unknown as Record<string, unknown>,
   };
 }
