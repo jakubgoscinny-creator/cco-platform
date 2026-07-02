@@ -254,6 +254,8 @@ export default async function CatalogPage({
       built.push({
         key: meta.key,
         title: meta.title,
+        // Only reached when locked === false — a fully-locked category tile
+        // merges into the Explore grid above instead (see addExplore).
         subtitle:
           meta.category === "blitz"
             ? "Rapid review blitz exams — take the ones you've unlocked"
@@ -295,6 +297,8 @@ export default async function CatalogPage({
     } else if (meta.kind === "category") {
       subtitle = "Blitz & practice exams for your enrolled courses";
     } else {
+      // Only reached when locked === false — a fully-locked course-module
+      // tile merges into the Explore grid above instead (see addExplore).
       subtitle = "Chapter exams for your enrolled course";
     }
 
@@ -330,7 +334,7 @@ export default async function CatalogPage({
       defaultOpen: false,
       count: counts.courseModules + counts.blitz + counts.practiceExams,
       cards: [],
-      upsell: { href: unlockUrl, label: "Enrol to unlock" },
+      upsell: { href: unlockUrl, label: "Enroll to unlock" },
       kind: "course" as GroupKind,
     }))
     .sort((a, b) => a.title.localeCompare(b.title));

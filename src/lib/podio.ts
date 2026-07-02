@@ -784,6 +784,11 @@ export interface PodioFile {
   mimetype: string;
   size?: number;
   link?: string;
+  // "podio" = Podio-hosted (e.g. inserted via Supermenu) — files.podio.com
+  // requires a Podio login, so these can't be linked to directly from the
+  // portal (CCO-T077); anything else (e.g. "google") is a normal public/
+  // permissioned external link already rendered as an <a> in the field HTML.
+  hosted_by?: string;
 }
 
 export interface PodioField {

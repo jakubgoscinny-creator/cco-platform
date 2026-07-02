@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle, Flag } from "lucide-react";
+import { QuestionImages } from "@/components/shared/QuestionImages";
 import { QuestionFeedback } from "@/components/exam/QuestionFeedback";
 
 export interface ResultQuestion {
@@ -129,9 +130,10 @@ export function ResultsReview({ questions, scratchPad, attemptId }: ResultsRevie
         </div>
 
         <div
-          className="text-[15px] text-cco-ink leading-relaxed prose prose-sm max-w-none mb-5"
+          className="text-[15px] text-cco-ink leading-relaxed prose prose-sm max-w-none mb-5 question-html"
           dangerouslySetInnerHTML={{ __html: current.questionText }}
         />
+        <QuestionImages key={current.podioItemId} podioItemId={current.podioItemId} />
 
         {/* Options with correct/incorrect highlighting */}
         <div className="space-y-2 mb-5">
@@ -211,7 +213,7 @@ export function ResultsReview({ questions, scratchPad, attemptId }: ResultsRevie
               Rationale
             </p>
             <div
-              className="text-sm text-cco-ink prose prose-sm max-w-none leading-relaxed"
+              className="text-sm text-cco-ink prose prose-sm max-w-none leading-relaxed question-html"
               dangerouslySetInnerHTML={{ __html: current.rationale }}
             />
           </div>

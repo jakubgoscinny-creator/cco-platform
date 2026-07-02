@@ -48,6 +48,14 @@ export const tests = pgTable("tests", {
   syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
 });
 
+// CCO-T077: a Podio-hosted image file attached to a question item (see
+// `questions.imageFiles` below for why this can't just be an inline <img>).
+export interface QuestionImageFile {
+  fileId: number;
+  mimetype: string;
+  name: string;
+}
+
 export const questions = pgTable(
   "questions",
   {
@@ -68,6 +76,15 @@ export const questions = pgTable(
     // A question can belong to multiple tests, so this is an array; GIN-indexed
     // for the `test_podio_ids @> ARRAY[testId]` containment lookup.
     testPodioIds: bigint("test_podio_ids", { mode: "number" }).array(),
+    // CCO-T077: Podio-hosted image attachments (e.g. embedded via the
+    // Supermenu) captured from item.files. These are NOT referenced inline
+    // in questionText's HTML at all (Podio's Supermenu attaches the file to
+    // the item rather than inserting a real <img> tag) and files.podio.com
+    // requires a Podio login, so they must be proxied through
+    // /api/podio-file/[fileId] and rendered below the question text.
+    // Google-hosted attachments are excluded — those already render as a
+    // normal <a> link inside questionText's HTML.
+    imageFiles: jsonb("image_files").$type<QuestionImageFile[]>(),
     payload: jsonb("payload"),
     syncedAt: timestamp("synced_at", { withTimezone: true }).defaultNow(),
   },

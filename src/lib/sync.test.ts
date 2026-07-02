@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { QUESTION_FIELDS, type PodioItem } from "./podio";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { CEU_ITEM_FIELDS, QUESTION_FIELDS, type PodioItem } from "./podio";
 
 // CCO-T065 unit coverage for the heart of the exam-start fallback: the test
 // linkage that mapPodioQuestion persists, and the mirror read that uses it.
@@ -9,17 +9,83 @@ import { QUESTION_FIELDS, type PodioItem } from "./podio";
 
 // Mock the Neon-backed db so importing sync.ts doesn't open a connection.
 // getMirroredQuestionsForTest chains db.select().from().where().orderBy().
+// getCeuItemsForTest chains db.select().from().where().limit() (tests lookup)
+// then db.select().from().where() again (ceuItems cache lookup) — both must
+// resolve through the same mocked `select`, so each test configures the
+// queue of results select() should return in call order.
 const h = vi.hoisted(() => {
   const rows = [{ podioItemId: 7 }];
+  let selectResults: unknown[] = [];
+  const limit = vi.fn(() => Promise.resolve(selectResults.shift() ?? []));
   const orderBy = vi.fn(() => Promise.resolve(rows));
-  const where = vi.fn(() => ({ orderBy }));
+  const where = vi.fn(() => ({
+    orderBy,
+    limit,
+    then: (resolve: (v: unknown) => void) => resolve(selectResults.shift() ?? []),
+  }));
   const from = vi.fn(() => ({ where }));
   const select = vi.fn(() => ({ from }));
-  return { select, from, where, orderBy, rows };
+  const onConflictDoUpdate = vi.fn(() => Promise.resolve());
+  const values = vi.fn(() => ({ onConflictDoUpdate }));
+  const insert = vi.fn(() => ({ values }));
+  const updateWhere = vi.fn(() => Promise.resolve());
+  const set = vi.fn(() => ({ where: updateWhere }));
+  const update = vi.fn(() => ({ set }));
+  return {
+    select,
+    from,
+    where,
+    orderBy,
+    limit,
+    insert,
+    values,
+    onConflictDoUpdate,
+    update,
+    set,
+    updateWhere,
+    rows,
+    setSelectResults: (results: unknown[]) => {
+      selectResults = results;
+    },
+  };
 });
-vi.mock("./db", () => ({ db: { select: h.select } }));
+vi.mock("./db", () => ({ db: { select: h.select, insert: h.insert, update: h.update } }));
 
-import { mapPodioQuestion, getMirroredQuestionsForTest } from "./sync";
+const podioMocks = vi.hoisted(() => ({
+  filterItems: vi.fn(),
+  getItem: vi.fn(),
+}));
+vi.mock("./podio", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./podio")>();
+  return { ...actual, filterItems: podioMocks.filterItems, getItem: podioMocks.getItem };
+});
+
+import {
+  mapPodioQuestion,
+  getMirroredQuestionsForTest,
+  getCeuItemsForTest,
+  resolveQuestionImages,
+} from "./sync";
+
+// Reset call counts between every test in this file — several describe
+// blocks share the hoisted `h` mock, and an uncleared count from one test
+// would silently pollute the call-count assertions of the next.
+beforeEach(() => {
+  h.setSelectResults([]);
+  h.select.mockClear();
+  h.from.mockClear();
+  h.where.mockClear();
+  h.orderBy.mockClear();
+  h.limit.mockClear();
+  h.insert.mockClear();
+  h.values.mockClear();
+  h.onConflictDoUpdate.mockClear();
+  h.update.mockClear();
+  h.set.mockClear();
+  h.updateWhere.mockClear();
+  podioMocks.filterItems.mockReset();
+  podioMocks.getItem.mockReset();
+});
 
 // external_id is a non-numeric tag (like real Podio data, e.g. "tests"), so the
 // numeric-field-id lookup can't accidentally match on external_id.
@@ -64,6 +130,107 @@ describe("mapPodioQuestion test linkage (CCO-T065)", () => {
     } as unknown as PodioItem;
     const rec = mapPodioQuestion(item);
     expect(rec!.testPodioIds).toEqual([]);
+  });
+});
+
+// A CEU item (like real item 1271 / app_item_id 1271) that links to a Test
+// only via its own RELATED_TEST field — the Test has no reverse link back.
+const CEU_ITEM_ONLY_REVERSE_LINKED = {
+  item_id: 3323430049,
+  app_item_id: 1271,
+  title: "ceu",
+  created_on: "",
+  last_event_on: "",
+  fields: [
+    field(CEU_ITEM_FIELDS.TITLE, [{ value: "CCO Club Q&A #1737 Jun" }]),
+    field(CEU_ITEM_FIELDS.RELATED_TEST, [{ value: { item_id: 3326365902 } }]),
+  ],
+  files: [
+    { file_id: 111, name: "certificate.pdf", mimetype: "application/pdf" },
+  ],
+} as unknown as PodioItem;
+
+describe("getCeuItemsForTest reverse-link fallback (CCO-T078)", () => {
+  it("falls back to a live CEU_ITEM_FIELDS.RELATED_TEST filter when the Test's own ceuItemIds is empty", async () => {
+    // tests-table lookup returns a row with no ceuItemIds (the real-world gap:
+    // Mary set CEU item 1271's "Related CCO Test" but never set the Test's own
+    // "CEU Items" field).
+    h.setSelectResults([[{ ceuItemIds: null }]]);
+    podioMocks.filterItems.mockResolvedValue({
+      items: [{ item_id: 3323430049 }],
+      total: 1,
+      filtered: 1,
+    });
+    podioMocks.getItem.mockResolvedValue(CEU_ITEM_ONLY_REVERSE_LINKED);
+
+    const result = await getCeuItemsForTest(3326365902);
+
+    // Queried the CEU Items app filtered by the reverse RELATED_TEST field —
+    // this is the load-bearing predicate; a wrong field id silently returns
+    // nothing and the cert button stays missing.
+    expect(podioMocks.filterItems).toHaveBeenCalledWith(
+      expect.any(Number),
+      { [CEU_ITEM_FIELDS.RELATED_TEST]: [3326365902] }
+    );
+    expect(podioMocks.getItem).toHaveBeenCalledWith(3323430049);
+    expect(result).toHaveLength(1);
+    expect(result[0].title).toBe("CCO Club Q&A #1737 Jun");
+    expect(result[0].certificateTemplateFileId).toBe(111);
+    // The resolved item was persisted into the ceuItems mirror.
+    expect(h.insert).toHaveBeenCalled();
+  });
+
+  it("does not call the reverse-link fallback when the forward link already resolves", async () => {
+    h.setSelectResults([[{ ceuItemIds: [42] }], [{ podioItemId: 42, syncedAt: new Date() }]]);
+
+    await getCeuItemsForTest(999);
+
+    expect(podioMocks.filterItems).not.toHaveBeenCalled();
+  });
+});
+
+describe("resolveQuestionImages (CCO-T077)", () => {
+  it("returns the cached value without a Podio call when already resolved (even if empty)", async () => {
+    h.setSelectResults([[{ imageFiles: [] }]]);
+
+    const result = await resolveQuestionImages(555);
+
+    expect(result).toEqual([]);
+    expect(podioMocks.getItem).not.toHaveBeenCalled();
+    expect(h.update).not.toHaveBeenCalled();
+  });
+
+  it("fetches the full item and extracts only Podio-hosted image files when unresolved (null)", async () => {
+    h.setSelectResults([[{ imageFiles: null }]]);
+    podioMocks.getItem.mockResolvedValue({
+      item_id: 555,
+      files: [
+        { file_id: 1, name: "embedded.jpg", mimetype: "image/jpeg", hosted_by: "podio" },
+        { file_id: 2, name: "drive-link.jpg", mimetype: "image/jpeg", hosted_by: "google" },
+        { file_id: 3, name: "spec.pdf", mimetype: "application/pdf", hosted_by: "podio" },
+      ],
+    });
+
+    const result = await resolveQuestionImages(555);
+
+    expect(podioMocks.getItem).toHaveBeenCalledWith(555);
+    // Google-hosted files and non-image mimetypes are excluded — only the
+    // Podio-hosted image survives (files.podio.com requires a Podio login,
+    // so only these need the proxy route; the Google link already renders
+    // fine as a normal <a> inside the question's own HTML).
+    expect(result).toEqual([{ fileId: 1, mimetype: "image/jpeg", name: "embedded.jpg" }]);
+    expect(h.update).toHaveBeenCalled();
+    expect(h.set).toHaveBeenCalledWith({ imageFiles: result });
+  });
+
+  it("returns an empty array without throwing when the Podio fetch fails", async () => {
+    h.setSelectResults([[{ imageFiles: null }]]);
+    podioMocks.getItem.mockRejectedValue(new Error("Podio rate limited. Retry after 60s"));
+
+    const result = await resolveQuestionImages(555);
+
+    expect(result).toEqual([]);
+    expect(h.update).not.toHaveBeenCalled();
   });
 });
 
