@@ -121,11 +121,43 @@ describe("submitQuestionFeedbackAction (CCO-T068)", () => {
     expect(h.createItem).not.toHaveBeenCalled();
   });
 
-  it("rejects an empty comment", async () => {
+  it("rejects a submit with no comment AND no rating AND no issue type", async () => {
     h.selectQueue.push([OWNER]);
-    const r = await submitQuestionFeedbackAction({ ...VALID, comment: "   " });
+    const r = await submitQuestionFeedbackAction({
+      attemptId: 1,
+      questionPodioId: 42,
+      comment: "   ",
+      difficulty: null,
+      issueType: null,
+    });
     expect(r).toHaveProperty("error");
     expect(h.insertValues).not.toHaveBeenCalled();
+  });
+
+  it("CCO-T081: accepts a one-tap difficulty rating with no comment", async () => {
+    h.selectQueue.push([OWNER], [{ fullName: "Renee" }]);
+    const r = await submitQuestionFeedbackAction({
+      attemptId: 1,
+      questionPodioId: 42,
+      comment: "",
+      difficulty: "easy",
+    });
+
+    expect(r).toEqual({ ok: true });
+
+    // Neon row: comment stored as null (not ""), difficulty captured.
+    expect(h.insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({
+        comment: null,
+        difficultyRating: "easy",
+        issueType: null,
+      })
+    );
+
+    // Podio item: difficulty by option id, and the COMMENT field is omitted.
+    const [, fields] = h.createItem.mock.calls[0];
+    expect(fields[FIELDS.DIFFICULTY]).toBe(1); // easy → option id 1
+    expect(fields[FIELDS.COMMENT]).toBeUndefined();
   });
 
   it("writes Neon + Podio on the happy path and stamps the podio item id", async () => {

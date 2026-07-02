@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, CheckCircle, XCircle, MinusCircle, Flag } from "lucide-react";
+import { QuestionFeedback } from "@/components/exam/QuestionFeedback";
 
 export interface ResultQuestion {
   podioItemId: number;
@@ -17,9 +18,12 @@ export interface ResultQuestion {
 interface ResultsReviewProps {
   questions: ResultQuestion[];
   scratchPad: string | null;
+  /** CCO-T081: the attempt being reviewed — lets feedback/rating be submitted
+   *  from the review view, not just live exam-taking. */
+  attemptId: number;
 }
 
-export function ResultsReview({ questions, scratchPad }: ResultsReviewProps) {
+export function ResultsReview({ questions, scratchPad, attemptId }: ResultsReviewProps) {
   const [index, setIndex] = useState(0);
   const current = questions[index];
 
@@ -109,6 +113,18 @@ export function ResultsReview({ questions, scratchPad }: ResultsReviewProps) {
             isCorrect={currentIsCorrect}
             isIncorrect={currentIsIncorrect}
             isSkipped={currentIsSkipped}
+          />
+        </div>
+
+        {/* CCO-T081: rating + feedback controls, reachable during review too.
+            Keyed by question so the transient rating/modal state resets when you
+            navigate between questions. */}
+        <div className="mb-4 flex justify-end rounded-2xl border border-cco-border/70 bg-cco-bg-soft/50 px-3.5 py-2.5">
+          <QuestionFeedback
+            key={current.podioItemId}
+            attemptId={attemptId}
+            questionPodioId={current.podioItemId}
+            questionNumber={index + 1}
           />
         </div>
 

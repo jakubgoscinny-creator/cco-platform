@@ -301,6 +301,7 @@ export default async function ExamResultsPage({
       <ResultsReview
         questions={reviewQuestions}
         scratchPad={attempt.scratchPad}
+        attemptId={attemptId}
       />
 
       <div className="mt-10 text-center">
