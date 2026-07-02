@@ -274,11 +274,17 @@ export async function submitQuestionFeedbackAction(input: {
 
   // Validate / normalize.
   const comment = (input.comment ?? "").trim().slice(0, FEEDBACK_COMMENT_MAX);
-  if (!comment) return { error: "Please add a short note about the problem." };
   const difficulty = isFeedbackDifficulty(input.difficulty)
     ? input.difficulty
     : null;
   const issueType = isFeedbackIssueType(input.issueType) ? input.issueType : null;
+  // CCO-T081: a one-tap difficulty rating submits with no comment, so require at
+  // least ONE meaningful signal (comment, difficulty, or issue type) instead of
+  // forcing a comment. The write contract is otherwise unchanged — same Neon
+  // columns, same Podio app/fields, same resilience + ownership guard.
+  if (!comment && !difficulty && !issueType) {
+    return { error: "Add a note or pick a rating so we know what you mean 🙂" };
+  }
 
   // 1) Durable capture to Neon (the source of truth for recovery).
   let feedbackRowId: number | null = null;
@@ -288,7 +294,7 @@ export async function submitQuestionFeedbackAction(input: {
       .values({
         attemptId,
         questionPodioId,
-        comment,
+        comment: comment || null, // CCO-T081: null (not "") for a rating-only submit
         difficultyRating: difficulty,
         issueType,
         contactId: session.contactId,
@@ -316,7 +322,6 @@ export async function submitQuestionFeedbackAction(input: {
   // 2) Best-effort Podio mirror. Failures keep the Neon row + log only.
   try {
     const fields: Record<string, unknown> = {
-      [QUESTION_FEEDBACK_FIELDS.COMMENT]: comment,
       [QUESTION_FEEDBACK_FIELDS.QUESTION]: [questionPodioId], // app-ref → QB item
       [QUESTION_FEEDBACK_FIELDS.QUESTION_ITEM_ID]: questionPodioId,
       [QUESTION_FEEDBACK_FIELDS.ATTEMPT_ID]: attemptId,
@@ -324,6 +329,9 @@ export async function submitQuestionFeedbackAction(input: {
       [QUESTION_FEEDBACK_FIELDS.STATUS]: QUESTION_FEEDBACK_OPTIONS.STATUS_NEW,
       [QUESTION_FEEDBACK_FIELDS.SOURCE]: "CCO Portal",
     };
+    // CCO-T081: omit the comment field entirely for a rating-only submit
+    // (rather than writing an empty string into the Podio triage app).
+    if (comment) fields[QUESTION_FEEDBACK_FIELDS.COMMENT] = comment;
     if (attempt.testPodioId) {
       fields[QUESTION_FEEDBACK_FIELDS.TEST] = [Number(attempt.testPodioId)];
     }

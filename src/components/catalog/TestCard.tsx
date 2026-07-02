@@ -15,6 +15,9 @@ export interface TestCardProps {
   domainNames: string[];
   /** CCO-T006: true when the current user can't take this test (Member tier + non-subscriber). */
   locked?: boolean;
+  /** CCO-T088: where a padlocked card's "Unlock" links (e.g. that course's
+   *  sales page for an unpurchased practice exam). Defaults to the CCO Club page. */
+  unlockUrl?: string;
   /** CCO-T046: the student's best result for this exam (completion display). */
   passed?: boolean;
   attempted?: boolean;

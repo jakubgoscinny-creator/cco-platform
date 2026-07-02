@@ -1,6 +1,11 @@
 import { Suspense } from "react";
 import { getActiveTests, getDomainNames } from "@/lib/sync";
-import { CatalogGroups, type CatalogGroup, type GroupAccent } from "@/components/catalog/CatalogGroups";
+import {
+  CatalogGroups,
+  type CatalogGroup,
+  type CatalogSection,
+  type GroupAccent,
+} from "@/components/catalog/CatalogGroups";
 import { CatalogFilters } from "@/components/catalog/CatalogFilters";
 import { CatalogHero } from "@/components/catalog/CatalogHero";
 import { DataLineage } from "@/components/shared/DataLineage";
@@ -9,26 +14,66 @@ import { getSessionContact } from "@/lib/auth";
 import { getLegacyResultsForContact } from "@/lib/legacy-results";
 import { canAccessTest, normalizeAccessTier } from "@/lib/circle-access";
 import { CLUB_URL, courseEnrolUrl } from "@/lib/course-links";
+import {
+  classifyTestCategory,
+  courseGroupTitle,
+  deriveCourseKey,
+  type TestCategory,
+} from "@/lib/test-categories";
 import type { TestCardProps } from "@/components/catalog/TestCard";
 import type { Test } from "@/lib/schema";
 
-type GroupKind = "course" | "free" | "club";
+type GroupKind = "course" | "free" | "club" | "category";
 type GroupMeta = {
   key: string;
   title: string;
   accent: GroupAccent;
   kind: GroupKind;
-  order: number;
+  /** For kind "category": which Blitz/PE bucket this tile belongs to. */
+  category?: TestCategory;
+  /** For a per-course category tile (blitz / practice_exam): the course key. */
+  courseKey?: string;
 };
 
+// CCO-T088: the catalog is organised (6/25 call) as three top-level categories —
+// Courses, Review Blitzes, Practice Exams — driven by the test-level category
+// field (Podio "Type" → tests.testType). Within Blitz/PE, a course's tests are
+// grouped into one tile (e.g. the PBC gemstones Ruby/Sapphire/Topaz under "PBC
+// Practice Exams"), individually padlocked. The old combined "Blitz/Practice
+// Exam" category is kept as a fallback bucket for any test not yet re-tagged.
+// Gating is unchanged — canAccessTest still decides access per test.
 function groupFor(test: Test): GroupMeta {
   const tier = normalizeAccessTier(test.accessTier);
   if (tier === "Free")
-    return { key: "free", title: "Free CEU Quizzes", accent: "green", kind: "free", order: 3 };
+    return { key: "free", title: "Free CEU Quizzes", accent: "green", kind: "free" };
   if (tier === "Club")
-    return { key: "club", title: "CCO Club", accent: "gold", kind: "club", order: 2 };
+    return { key: "club", title: "CCO Club", accent: "gold", kind: "club" };
+
+  const category = classifyTestCategory(test.testType);
+  if (category === "blitz_practice_combo") {
+    // Fallback: untagged combo tests share one flat tile rather than scattering.
+    return {
+      key: "category:combo",
+      title: "Blitz & Practice Exams",
+      accent: "purple",
+      kind: "category",
+      category,
+    };
+  }
+  if (category === "blitz" || category === "practice_exam") {
+    const courseKey = deriveCourseKey(test.studentTrackerType) ?? "Other";
+    return {
+      key: `category:${category}:${courseKey}`,
+      title: courseGroupTitle(courseKey, category),
+      accent: "purple",
+      kind: "category",
+      category,
+      courseKey,
+    };
+  }
+
   const code = test.studentTrackerType || "Course";
-  return { key: `course:${code}`, title: code, accent: "purple", kind: "course", order: 1 };
+  return { key: `course:${code}`, title: code, accent: "purple", kind: "course" };
 }
 
 export default async function CatalogPage({
@@ -94,7 +139,10 @@ export default async function CatalogPage({
   const completionFor = (t: Test): Done | undefined =>
     byId.get(t.podioItemId) ?? byName.get(t.testName.trim().toLowerCase());
 
-  const toCard = (t: Test): TestCardProps => {
+  const toCard = (
+    t: Test,
+    opts?: { locked?: boolean; unlockUrl?: string }
+  ): TestCardProps => {
     const d = completionFor(t);
     return {
       id: t.podioItemId,
@@ -107,20 +155,19 @@ export default async function CatalogPage({
       domainNames: (t.domainIds ?? [])
         .map((id) => domainNameMap.get(id))
         .filter((n): n is string => !!n),
-      locked: false,
+      locked: opts?.locked ?? false,
+      unlockUrl: opts?.unlockUrl,
       passed: d?.passed ?? false,
       attempted: d?.attempted ?? false,
       scorePercent: d?.score ?? null,
     };
   };
 
-  // CCO-T044 (2026-05-29 evolution): show EVERY section as a folder. A section
-  // the viewer can access opens to its exam rows; one they can't is locked
-  // behind a padlock + upsell (no rows revealed). The server action still
-  // enforces access, so a locked folder can't be bypassed.
+  // Accumulate each visible test into its group, remembering whether the viewer
+  // can actually take it (canAccessTest — the single gating source of truth).
   const acc = new Map<
     string,
-    { meta: GroupMeta; count: number; cards: TestCardProps[] }
+    { meta: GroupMeta; entries: { test: Test; allowed: boolean }[] }
   >();
   for (const t of allTests) {
     if (!t.testName || !matches(t)) continue;
@@ -134,76 +181,131 @@ export default async function CatalogPage({
     const meta = groupFor(t);
     let g = acc.get(meta.key);
     if (!g) {
-      g = { meta, count: 0, cards: [] };
+      g = { meta, entries: [] };
       acc.set(meta.key, g);
     }
-    g.count += 1;
-    if (canAccessTest(t, userForGating) === "allowed") g.cards.push(toCard(t));
+    g.entries.push({
+      test: t,
+      allowed: canAccessTest(t, userForGating) === "allowed",
+    });
   }
 
-  const groups: CatalogGroup[] = [...acc.values()]
-    .sort((a, b) => {
-      // Your unlocked (accessible) sections first, then the locked upsells.
-      const al = a.cards.length === 0 ? 1 : 0;
-      const bl = b.cards.length === 0 ? 1 : 0;
-      return (
-        al - bl ||
-        a.meta.order - b.meta.order ||
-        a.meta.title.localeCompare(b.meta.title)
-      );
-    })
-    .map(({ meta, count, cards }) => {
-      // Homogeneous sections: if no card is accessible, the whole folder locks.
-      const locked = cards.length === 0;
-      const sorted = [...cards].sort((a, b) => a.name.localeCompare(b.name));
+  type BuiltGroup = CatalogGroup & {
+    kind: GroupKind;
+    category?: TestCategory;
+  };
 
-      let subtitle: string;
-      let upsell: CatalogGroup["upsell"];
-      if (meta.kind === "free") {
-        subtitle = "Open to everyone — no membership needed";
-      } else if (meta.kind === "club") {
-        subtitle = locked ? "CCO Club members only" : "Included with your membership";
-        if (locked) upsell = { href: CLUB_URL, label: "Join CCO Club" };
-      } else {
-        subtitle = locked
-          ? "Enrol to unlock this course's chapter exams"
-          : "Chapter exams for your enrolled course";
-        // meta.title is the Progress-Tracker-Type code for course folders;
-        // deep-link the lock to that course's cco.us sales page (CCO-T061).
-        if (locked) upsell = { href: courseEnrolUrl(meta.title), label: "Enrol to unlock" };
-      }
+  const built: BuiltGroup[] = [];
+  for (const { meta, entries } of acc.values()) {
+    const accessible = entries.filter((e) => e.allowed);
+    const total = entries.length;
 
-      const done = sorted.filter((c) => c.passed).length;
-
-      return {
+    // Per-course Blitz / Practice-Exam tile (CCO-T088): show EVERY test in the
+    // course's tile with individual padlocks (bought Ruby → Ruby open,
+    // Sapphire/Topaz padlocked), but only once the viewer can take at least one
+    // — otherwise hide the tile rather than show a lonely locked mega-tile (the
+    // per-course sales page is the upsell surface for the unenrolled).
+    if (meta.kind === "category" && meta.category !== "blitz_practice_combo") {
+      if (accessible.length === 0) continue;
+      const unlockUrl = courseEnrolUrl(meta.courseKey ?? null);
+      const cards = entries
+        .map((e) => toCard(e.test, { locked: !e.allowed, unlockUrl }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      const done = cards.filter((c) => c.passed).length;
+      built.push({
         key: meta.key,
         title: meta.title,
-        subtitle,
+        subtitle:
+          meta.category === "blitz"
+            ? "Rapid review blitz exams — take the ones you've unlocked"
+            : "Full-length practice exams — take the ones you've unlocked",
         accent: meta.accent,
-        locked,
-        // Big course folders + locked sections stay collapsed; auto-open only
-        // small, takeable sections (e.g. the couple of free CEUs).
-        defaultOpen: !locked && count <= 6,
-        count,
-        cards: sorted,
-        upsell,
-        progress:
-          !locked && sorted.length > 0 ? { done, total: sorted.length } : undefined,
-      };
-    });
+        locked: false,
+        defaultOpen: total <= 6,
+        count: total,
+        cards,
+        progress: cards.length > 0 ? { done, total: cards.length } : undefined,
+        kind: meta.kind,
+        category: meta.category,
+      });
+      continue;
+    }
 
-  // CCO-T046: section layout. Locked COURSES go to the compact "Explore more
-  // courses" grid; everything else (your course folders, CCO Club, Free CEUs)
-  // stays a full-width section in tier order — your courses, then Club (above
-  // Free, so the hierarchy reads), then Free.
-  const rank: Record<GroupAccent, number> = { purple: 1, gold: 2, green: 3 };
-  const isLockedCourse = (g: CatalogGroup) => g.accent === "purple" && g.locked;
-  const lockedCourses = groups
-    .filter(isLockedCourse)
-    .sort((a, b) => a.title.localeCompare(b.title));
-  const topSections = groups
-    .filter((g) => !isLockedCourse(g))
-    .sort((a, b) => rank[a.accent] - rank[b.accent] || a.title.localeCompare(b.title));
+    // Course / Club / Free / combo-fallback: homogeneous all-or-nothing lock —
+    // accessible cards shown, an inaccessible section locks behind its upsell.
+    const locked = accessible.length === 0;
+    // The combo fallback is a safety bucket, not an upsell — hide when empty.
+    if (meta.kind === "category" && locked) continue;
+
+    const sorted = accessible
+      .map((e) => toCard(e.test))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    let subtitle: string;
+    let upsell: CatalogGroup["upsell"];
+    if (meta.kind === "free") {
+      subtitle = "Open to everyone — no membership needed";
+    } else if (meta.kind === "club") {
+      subtitle = locked ? "CCO Club members only" : "Included with your membership";
+      if (locked) upsell = { href: CLUB_URL, label: "Join CCO Club" };
+    } else if (meta.kind === "category") {
+      subtitle = "Blitz & practice exams for your enrolled courses";
+    } else {
+      subtitle = locked
+        ? "Enrol to unlock this course's chapter exams"
+        : "Chapter exams for your enrolled course";
+      // meta.title is the Progress-Tracker-Type code for course folders;
+      // deep-link the lock to that course's cco.us sales page (CCO-T061).
+      if (locked) upsell = { href: courseEnrolUrl(meta.title), label: "Enrol to unlock" };
+    }
+
+    const done = sorted.filter((c) => c.passed).length;
+    built.push({
+      key: meta.key,
+      title: meta.title,
+      subtitle,
+      accent: meta.accent,
+      locked,
+      // Big course folders + locked sections stay collapsed; auto-open only
+      // small, takeable sections (e.g. the couple of free CEUs).
+      defaultOpen: !locked && total <= 6,
+      count: total,
+      cards: sorted,
+      upsell,
+      progress:
+        !locked && sorted.length > 0 ? { done, total: sorted.length } : undefined,
+      kind: meta.kind,
+      category: meta.category,
+    });
+  }
+
+  const byTitle = (a: CatalogGroup, b: CatalogGroup) =>
+    a.title.localeCompare(b.title);
+
+  // CCO-T088 layout: three purple category bands (Your Courses → Review Blitzes
+  // → Practice Exams), then the combo fallback, then Club / Free tiers; locked
+  // COURSES drop into the compact "Explore more courses" grid below.
+  const courseGroups = built.filter((g) => g.kind === "course");
+  const enrolledCourses = courseGroups.filter((g) => !g.locked).sort(byTitle);
+  const lockedCourses = courseGroups.filter((g) => g.locked).sort(byTitle);
+  const blitzTiles = built.filter((g) => g.category === "blitz").sort(byTitle);
+  const peTiles = built.filter((g) => g.category === "practice_exam").sort(byTitle);
+  const comboTiles = built
+    .filter((g) => g.category === "blitz_practice_combo")
+    .sort(byTitle);
+
+  const sections: CatalogSection[] = [
+    {
+      key: "courses",
+      title: enrolledCourses.length ? "Your Courses" : undefined,
+      groups: enrolledCourses,
+    },
+    { key: "blitzes", title: "Review Blitzes", groups: blitzTiles },
+    { key: "practice-exams", title: "Practice Exams", groups: peTiles },
+    { key: "combo", title: "Blitz & Practice Exams", groups: comboTiles },
+    { key: "club", groups: built.filter((g) => g.kind === "club") },
+    { key: "free", groups: built.filter((g) => g.kind === "free") },
+  ];
 
   const latestSync = allTests.reduce<Date | null>((latest, t) => {
     if (!t.syncedAt) return latest;
@@ -224,7 +326,7 @@ export default async function CatalogPage({
         <CatalogFilters />
       </Suspense>
 
-      <CatalogGroups top={topSections} lockedCourses={lockedCourses} />
+      <CatalogGroups sections={sections} lockedCourses={lockedCourses} />
     </div>
   );
 }

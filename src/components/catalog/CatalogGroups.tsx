@@ -177,19 +177,33 @@ function LockedCard({ g }: { g: CatalogGroup }) {
 }
 
 /**
- * Catalog layout. Full-width sections in tier order (your courses → CCO Club →
- * Free) render as bold gradient folders — or, when locked (e.g. Club for a
- * non-subscriber), a prominent locked card. Locked COURSES drop into a compact
- * "Explore more courses" upsell grid below.
+ * CCO-T088: a labelled band of folders/cards. Courses / Review Blitzes /
+ * Practice Exams each get their own titled section (the 6/25 call's three
+ * top-level categories); CCO Club and Free CEUs render as untitled sections
+ * (their gradient headers already name them).
+ */
+export interface CatalogSection {
+  key: string;
+  /** Eyebrow heading; omit for tiers that name themselves in-folder. */
+  title?: string;
+  groups: CatalogGroup[];
+}
+
+/**
+ * Catalog layout. Titled category sections (Courses → Review Blitzes → Practice
+ * Exams) and the CCO Club / Free tiers render as bold gradient folders — or,
+ * when locked (e.g. Club for a non-subscriber), a prominent locked card. Locked
+ * COURSES drop into a compact "Explore more courses" upsell grid below.
  */
 export function CatalogGroups({
-  top,
+  sections,
   lockedCourses,
 }: {
-  top: CatalogGroup[];
+  sections: CatalogSection[];
   lockedCourses: CatalogGroup[];
 }) {
-  if (!top.length && !lockedCourses.length) {
+  const visible = sections.filter((s) => s.groups.length > 0);
+  if (!visible.length && !lockedCourses.length) {
     return (
       <div className="py-16 text-center">
         <p className="text-lg text-cco-muted">No exams found</p>
@@ -202,9 +216,10 @@ export function CatalogGroups({
 
   return (
     <div className="space-y-9">
-      {top.length > 0 && (
-        <section className="space-y-4">
-          {top.map((g) =>
+      {visible.map((section) => (
+        <section key={section.key} className="space-y-4">
+          {section.title && <Eyebrow>{section.title}</Eyebrow>}
+          {section.groups.map((g) =>
             g.locked ? (
               <LockedCard key={g.key} g={g} />
             ) : (
@@ -212,7 +227,7 @@ export function CatalogGroups({
             )
           )}
         </section>
-      )}
+      ))}
 
       {lockedCourses.length > 0 && (
         <section>

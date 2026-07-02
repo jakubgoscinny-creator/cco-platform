@@ -443,11 +443,11 @@ export function ExamClient({
                     />
                   )}
                 </div>
-                <QuestionBody
-                  questionPodioId={currentQuestion.podioItemId}
-                  html={questionHtml}
-                />
-                <div className="mt-4 flex items-start justify-between gap-3 flex-wrap rounded-2xl border border-cco-border/70 bg-cco-bg-soft/50 px-3.5 py-3">
+                {/* CCO-T081: study tools (highlight + difficulty/feedback) sit
+                    directly under the question number, so the question body
+                    renders immediately above the answer options — not below the
+                    controls. */}
+                <div className="mb-4 flex items-start justify-between gap-3 flex-wrap rounded-2xl border border-cco-border/70 bg-cco-bg-soft/50 px-3.5 py-3">
                   <HighlightTools
                     questionId={currentQuestion.podioItemId}
                     onHighlight={handleHighlight}
@@ -457,11 +457,16 @@ export function ExamClient({
                     }
                   />
                   <QuestionFeedback
+                    key={currentQuestion.podioItemId}
                     attemptId={attemptId}
                     questionPodioId={currentQuestion.podioItemId}
                     questionNumber={state.currentIndex + 1}
                   />
                 </div>
+                <QuestionBody
+                  questionPodioId={currentQuestion.podioItemId}
+                  html={questionHtml}
+                />
               </div>
 
               {/* Options */}
