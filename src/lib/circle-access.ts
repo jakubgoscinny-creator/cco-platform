@@ -72,6 +72,8 @@ export function normalizeAccessTier(raw: string | null | undefined): AccessTier 
   }
 }
 
+import { parseTrackerType } from "./test-categories";
+
 /** Normalize a progress-tracker-type token for comparison (trim + upper). */
 function normalizeTrackerType(t: string | null | undefined): string {
   return (t ?? "").trim().toUpperCase();
@@ -135,7 +137,35 @@ function studentEnrollmentMatches(
   const want = normalizeTrackerType(testTrackerType);
   if (!want) return false; // Student test with no tracker type → never matches
   if (!enrolledTrackerTypes?.length) return false;
-  return enrolledTrackerTypes.some((t) => normalizeTrackerType(t) === want);
+
+  // 1) Exact match — an individual enrollment (incl. an individual gemstone PT
+  //    like "PBC PE - Ruby"). Unchanged from T033.
+  if (enrolledTrackerTypes.some((t) => normalizeTrackerType(t) === want)) {
+    return true;
+  }
+
+  // 2) CCO-T088 bundle expansion (safety net). A bundle purchase currently
+  //    lands as a SINGLE tracker type that names the bundle, e.g.
+  //    "PBC PE Bundle (Ruby, Sapphire, Topaz)" — which matches none of the
+  //    individual test tracker types, so a paying bundle buyer would otherwise
+  //    see their exams padlocked. Grant a bundle enrollment access to every
+  //    test of the SAME course + category.
+  //
+  //    Narrow by construction — it can't over-grant:
+  //      · only a bundle enrollment (isBundle) ever expands;
+  //      · only to its own course AND category;
+  //      · a test with no derivable category (course-module content) is never
+  //        matched (the guard below), so a PE bundle can't leak into a course.
+  //    Long-term the Podio side should create 3 individual PTs per bundle (6/25
+  //    call decision); this keeps existing bundle buyers working meanwhile.
+  const test = parseTrackerType(testTrackerType);
+  if (!test.course || !test.category) return false;
+  return enrolledTrackerTypes.some((t) => {
+    const e = parseTrackerType(t);
+    return (
+      e.isBundle && e.course === test.course && e.category === test.category
+    );
+  });
 }
 
 /**
