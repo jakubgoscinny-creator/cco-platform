@@ -166,11 +166,11 @@ export default async function CatalogPage({
         if (locked) upsell = { href: CLUB_URL, label: "Join CCO Club" };
       } else {
         subtitle = locked
-          ? "Enrol to unlock this course's chapter exams"
+          ? "Enroll to unlock this course's chapter exams"
           : "Chapter exams for your enrolled course";
         // meta.title is the Progress-Tracker-Type code for course folders;
         // deep-link the lock to that course's cco.us sales page (CCO-T061).
-        if (locked) upsell = { href: courseEnrolUrl(meta.title), label: "Enrol to unlock" };
+        if (locked) upsell = { href: courseEnrolUrl(meta.title), label: "Enroll to unlock" };
       }
 
       const done = sorted.filter((c) => c.passed).length;
