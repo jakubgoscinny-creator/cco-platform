@@ -16,8 +16,10 @@ import { canAccessTest, normalizeAccessTier } from "@/lib/circle-access";
 import { CLUB_URL, courseEnrolUrl } from "@/lib/course-links";
 import {
   classifyTestCategory,
+  courseBadgeLabel,
   courseGroupTitle,
   deriveCourseKey,
+  type CourseExploreCounts,
   type TestCategory,
 } from "@/lib/test-categories";
 import type { TestCardProps } from "@/components/catalog/TestCard";
@@ -195,22 +197,56 @@ export default async function CatalogPage({
     category?: TestCategory;
   };
 
+  // CCO-T088 catalog redesign (2026-07-02): a course you own NOTHING in — no
+  // Course Module, no Blitz, no Practice Exam — merges into ONE "Explore more
+  // courses" grid card instead of up to 3 separate full-width accordion
+  // tiles. (The first T088 cut showed every category as its own always-open
+  // accordion regardless of ownership: 16-18 tiles stacked ~3000px tall for a
+  // non-enrolled visitor. Jakub: "we had a lovely catalog, and now it's a
+  // little bit shit... a lot of clicking.") A course you own SOMETHING in
+  // keeps the rich accordion treatment for that owned slice — unaffected.
+  const exploreCounts = new Map<
+    string,
+    { title: string; unlockUrl: string; counts: CourseExploreCounts }
+  >();
+  const addExplore = (
+    courseKey: string,
+    unlockUrl: string,
+    field: keyof CourseExploreCounts,
+    n: number
+  ) => {
+    let e = exploreCounts.get(courseKey);
+    if (!e) {
+      e = {
+        title: courseKey,
+        unlockUrl,
+        counts: { courseModules: 0, blitz: 0, practiceExams: 0 },
+      };
+      exploreCounts.set(courseKey, e);
+    }
+    e.counts[field] += n;
+  };
+
   const built: BuiltGroup[] = [];
   for (const { meta, entries } of acc.values()) {
     const accessible = entries.filter((e) => e.allowed);
     const total = entries.length;
+    const locked = accessible.length === 0;
 
-    // Per-course Blitz / Practice-Exam tile (CCO-T088): show EVERY test in the
-    // course's tile with individual padlocks (bought Ruby → Ruby open,
-    // Sapphire/Topaz padlocked). CCO-T044 (2026-05-29) established that every
-    // section shows as a folder — a fully-locked one stays visible as an
-    // upsell, never hidden. (Regression found 2026-07-02: an earlier version
-    // of this block hid the tile entirely when accessible.length === 0,
-    // silently dropping whole courses like PBB from view for anyone not
-    // enrolled — reverted to match the established pattern.)
+    // Per-course Blitz / Practice-Exam tile: only rendered as its own
+    // accordion when the viewer owns at least one test in it — otherwise it
+    // merges into the Explore grid (below).
     if (meta.kind === "category" && meta.category !== "blitz_practice_combo") {
-      const locked = accessible.length === 0;
       const unlockUrl = courseEnrolUrl(meta.courseKey ?? null);
+      if (locked) {
+        addExplore(
+          meta.courseKey ?? "Other",
+          unlockUrl,
+          meta.category === "blitz" ? "blitz" : "practiceExams",
+          total
+        );
+        continue;
+      }
       const cards = entries
         .map((e) => toCard(e.test, { locked: !e.allowed, unlockUrl }))
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -218,19 +254,13 @@ export default async function CatalogPage({
       built.push({
         key: meta.key,
         title: meta.title,
-        subtitle: locked
-          ? meta.category === "blitz"
-            ? "Enrol to unlock these review blitz exams"
-            : "Enrol to unlock these practice exams"
-          : meta.category === "blitz"
+        subtitle:
+          meta.category === "blitz"
             ? "Rapid review blitz exams — take the ones you've unlocked"
             : "Full-length practice exams — take the ones you've unlocked",
         accent: meta.accent,
-        // Always an open folder (never LockedCard) — individual per-card
-        // padlocks (toCard above) already carry the enrol link, even when
-        // every card in the tile is locked.
         locked: false,
-        defaultOpen: !locked && total <= 6,
+        defaultOpen: total <= 6,
         count: total,
         cards,
         progress: cards.length > 0 ? { done, total: cards.length } : undefined,
@@ -240,10 +270,15 @@ export default async function CatalogPage({
       continue;
     }
 
-    // Course / Club / Free / combo-fallback: homogeneous all-or-nothing lock —
-    // accessible cards shown, an inaccessible section locks behind its upsell.
-    const locked = accessible.length === 0;
-    // The combo fallback is a safety bucket, not an upsell — hide when empty.
+    // Course (Course Module) tiles: same rule — locked ones merge into the
+    // Explore grid instead of the old per-course locked accordion/card.
+    if (meta.kind === "course" && locked) {
+      addExplore(meta.title, courseEnrolUrl(meta.title), "courseModules", total);
+      continue;
+    }
+
+    // The combo fallback (untagged Blitz/PE data) is a safety bucket, not an
+    // upsell surface — hide entirely when nothing in it is accessible.
     if (meta.kind === "category" && locked) continue;
 
     const sorted = accessible
@@ -260,12 +295,7 @@ export default async function CatalogPage({
     } else if (meta.kind === "category") {
       subtitle = "Blitz & practice exams for your enrolled courses";
     } else {
-      subtitle = locked
-        ? "Enrol to unlock this course's chapter exams"
-        : "Chapter exams for your enrolled course";
-      // meta.title is the Progress-Tracker-Type code for course folders;
-      // deep-link the lock to that course's cco.us sales page (CCO-T061).
-      if (locked) upsell = { href: courseEnrolUrl(meta.title), label: "Enrol to unlock" };
+      subtitle = "Chapter exams for your enrolled course";
     }
 
     const done = sorted.filter((c) => c.passed).length;
@@ -288,15 +318,30 @@ export default async function CatalogPage({
     });
   }
 
+  // One card per course, badge-labelled by what's inside (e.g. "17 chapters
+  // · 9 blitz · 4 practice"), for the Explore grid.
+  const lockedCourses: BuiltGroup[] = [...exploreCounts.entries()]
+    .map(([courseKey, { title, unlockUrl, counts }]) => ({
+      key: `explore:${courseKey}`,
+      title,
+      subtitle: courseBadgeLabel(counts),
+      accent: "purple" as GroupAccent,
+      locked: true,
+      defaultOpen: false,
+      count: counts.courseModules + counts.blitz + counts.practiceExams,
+      cards: [],
+      upsell: { href: unlockUrl, label: "Enrol to unlock" },
+      kind: "course" as GroupKind,
+    }))
+    .sort((a, b) => a.title.localeCompare(b.title));
+
   const byTitle = (a: CatalogGroup, b: CatalogGroup) =>
     a.title.localeCompare(b.title);
 
   // CCO-T088 layout: three purple category bands (Your Courses → Review Blitzes
-  // → Practice Exams), then the combo fallback, then Club / Free tiers; locked
-  // COURSES drop into the compact "Explore more courses" grid below.
-  const courseGroups = built.filter((g) => g.kind === "course");
-  const enrolledCourses = courseGroups.filter((g) => !g.locked).sort(byTitle);
-  const lockedCourses = courseGroups.filter((g) => g.locked).sort(byTitle);
+  // → Practice Exams) hold ONLY owned content now; every locked course — Course
+  // Module, Blitz, or Practice Exam alike — merged into `lockedCourses` above.
+  const enrolledCourses = built.filter((g) => g.kind === "course").sort(byTitle);
   const blitzTiles = built.filter((g) => g.category === "blitz").sort(byTitle);
   const peTiles = built.filter((g) => g.category === "practice_exam").sort(byTitle);
   const comboTiles = built

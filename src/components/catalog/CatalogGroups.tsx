@@ -111,31 +111,51 @@ function OpenFolder({ g }: { g: CatalogGroup }) {
   );
 }
 
-// A section you can't take yet: a bold gradient "course card" upsell tile.
+// A course you don't have (yet): a light, scannable card — not a heavy
+// gradient block. CCO-T088 catalog redesign (2026-07-02): this is the "you
+// don't own this, here's what exists" surface, so it stays quiet and dense —
+// colour is reserved for the small icon chip and the CTA, not a full fill.
+// (Previously a full bg-gradient tile per course; with a dozen-plus of these
+// stacked in a grid that read as "too dark" — Jakub, 2026-07-02.)
+const ICON_CHIP: Record<GroupAccent, string> = {
+  purple: "bg-cco-purple/10 text-cco-purple",
+  green: "bg-cco-green/15 text-cco-green-600",
+  gold: "bg-cco-gold/20 text-cco-gold-dark",
+};
+const CTA_TEXT: Record<GroupAccent, string> = {
+  purple: "text-cco-purple",
+  green: "text-cco-green-600",
+  gold: "text-cco-gold-dark",
+};
+
 function LockedTile({ g }: { g: CatalogGroup }) {
-  const a = ACCENT[g.accent];
   return (
     <a
       href={g.upsell?.href ?? "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className={`group/tile relative flex flex-col overflow-hidden rounded-2xl bg-gradient-to-br ${a.grad} ${a.text} p-5 no-underline shadow-[0_4px_16px_rgba(15,23,42,0.10)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(15,23,42,0.18)]`}
+      className="group/tile relative flex flex-col gap-3 rounded-xl border border-cco-border/70 bg-cco-card p-4 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-cco-border hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-heading text-xl font-extrabold leading-tight">{g.title}</h3>
-        <Lock size={16} className="mt-1 shrink-0 opacity-70" />
-      </div>
-      <p className="mt-2 font-heading text-3xl font-black leading-none">
-        {g.count}
-        <span className="ml-1.5 align-baseline text-sm font-semibold opacity-75">
-          {g.count === 1 ? "exam" : "exams"}
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${ICON_CHIP[g.accent]}`}
+        >
+          <Lock size={16} />
         </span>
-      </p>
+      </div>
+      <div>
+        <h3 className="font-heading text-base font-bold leading-tight text-cco-ink">
+          {g.title}
+        </h3>
+        {g.subtitle && (
+          <p className="mt-1 text-xs font-medium text-cco-muted">{g.subtitle}</p>
+        )}
+      </div>
       <span
-        className={`mt-5 inline-flex items-center gap-1.5 self-start rounded-full px-4 py-1.5 text-xs font-bold shadow-sm transition-all group-hover/tile:gap-2.5 ${a.cta}`}
+        className={`mt-auto inline-flex items-center gap-1 self-start text-xs font-bold transition-all group-hover/tile:gap-1.5 ${CTA_TEXT[g.accent]}`}
       >
         {g.upsell?.label ?? "Locked"}
-        <ArrowRight size={13} />
+        <ArrowRight size={12} />
       </span>
     </a>
   );

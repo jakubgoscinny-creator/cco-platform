@@ -4,6 +4,7 @@ import {
   parseTrackerType,
   deriveCourseKey,
   courseGroupTitle,
+  courseBadgeLabel,
   TEST_CATEGORY_LABELS,
   type TestCategory,
 } from "./test-categories";
@@ -173,5 +174,29 @@ describe("deriveCourseKey + courseGroupTitle", () => {
   it("titles per-course tiles for each category", () => {
     expect(courseGroupTitle("PBC", "practice_exam")).toBe("PBC Practice Exams");
     expect(courseGroupTitle("FBC", "blitz")).toBe("FBC Review Blitz");
+  });
+});
+
+describe("courseBadgeLabel (CCO-T088 catalog redesign — Explore grid card badge)", () => {
+  it("joins all three counts with the middle dot, singular/plural correct", () => {
+    expect(courseBadgeLabel({ courseModules: 17, blitz: 9, practiceExams: 4 })).toBe(
+      "17 chapters · 9 blitz · 4 practice"
+    );
+    expect(courseBadgeLabel({ courseModules: 1, blitz: 1, practiceExams: 1 })).toBe(
+      "1 chapter · 1 blitz · 1 practice"
+    );
+  });
+
+  it("omits any zero count instead of showing '0 blitz'", () => {
+    expect(courseBadgeLabel({ courseModules: 0, blitz: 9, practiceExams: 4 })).toBe(
+      "9 blitz · 4 practice"
+    );
+    expect(courseBadgeLabel({ courseModules: 17, blitz: 0, practiceExams: 0 })).toBe(
+      "17 chapters"
+    );
+  });
+
+  it("returns an empty string when every count is zero", () => {
+    expect(courseBadgeLabel({ courseModules: 0, blitz: 0, practiceExams: 0 })).toBe("");
   });
 });

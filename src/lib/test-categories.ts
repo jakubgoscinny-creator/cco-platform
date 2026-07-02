@@ -138,3 +138,36 @@ export function courseGroupTitle(courseKey: string, category: TestCategory): str
         : "Blitz & Practice";
   return `${courseKey} ${suffix}`;
 }
+
+/**
+ * CCO-T088 catalog redesign (2026-07-02): counts of a course's tests by kind,
+ * used to build the ONE merged "Explore more courses" grid card for a course
+ * the viewer has zero access to (regression fix — a prior version of this
+ * catalog scattered a locked course's Course Module / Blitz / Practice Exam
+ * content across up to 3 separate full-width accordion tiles instead of one
+ * scannable card; see catalog/page.tsx).
+ */
+export interface CourseExploreCounts {
+  courseModules: number;
+  blitz: number;
+  practiceExams: number;
+}
+
+/**
+ * Format a course's locked-content counts into a compact badge, e.g.
+ * "17 chapters · 9 blitz · 4 practice". Omits zero counts; empty counts
+ * yields an empty string (caller should not render a badge in that case).
+ */
+export function courseBadgeLabel(counts: CourseExploreCounts): string {
+  const parts: string[] = [];
+  if (counts.courseModules > 0) {
+    parts.push(`${counts.courseModules} chapter${counts.courseModules === 1 ? "" : "s"}`);
+  }
+  if (counts.blitz > 0) {
+    parts.push(`${counts.blitz} blitz`);
+  }
+  if (counts.practiceExams > 0) {
+    parts.push(`${counts.practiceExams} practice`);
+  }
+  return parts.join(" · ");
+}
