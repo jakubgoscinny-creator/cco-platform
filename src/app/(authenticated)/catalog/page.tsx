@@ -382,20 +382,27 @@ export default async function CatalogPage({
     .filter((g) => g.category === "blitz_practice_combo")
     .sort(byTitle);
 
+  // 2026-07-02: no transcript instruction covers stacking order between owned
+  // and locked content — this wasn't discussed on the 6/25 call. Jakub's own
+  // read after seeing it live: interleaving bold colour-banner sections with
+  // quiet Explore grids felt "busy". Grouped instead — every colour-banner
+  // section (owned + Club/Free, all OpenFolder/LockedCard) together first,
+  // every quiet Explore grid together after, so the page reads as one clear
+  // "this is yours" zone then one "here's what else exists" zone.
   const sections: CatalogSection[] = [
     {
       key: "courses",
       title: enrolledCourses.length ? "Your Courses" : undefined,
       groups: enrolledCourses,
     },
-    { key: "explore-courses", title: "Explore more courses", groups: exploreCourseSection, isExplore: true },
     { key: "blitzes", title: "Review Blitzes", groups: blitzTiles },
-    { key: "explore-blitzes", title: "Explore more Blitz", groups: exploreBlitzSection, isExplore: true },
     { key: "practice-exams", title: "Practice Exams", groups: peTiles },
-    { key: "explore-practice", title: "Explore more Practice Exams", groups: explorePracticeSection, isExplore: true },
     { key: "combo", title: "Blitz & Practice Exams", groups: comboTiles },
     { key: "club", groups: built.filter((g) => g.kind === "club") },
     { key: "free", groups: built.filter((g) => g.kind === "free") },
+    { key: "explore-courses", title: "Explore more courses", groups: exploreCourseSection, isExplore: true },
+    { key: "explore-blitzes", title: "Explore more Blitz", groups: exploreBlitzSection, isExplore: true },
+    { key: "explore-practice", title: "Explore more Practice Exams", groups: explorePracticeSection, isExplore: true },
   ];
 
   const latestSync = allTests.reduce<Date | null>((latest, t) => {
