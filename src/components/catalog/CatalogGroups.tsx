@@ -221,31 +221,33 @@ function LockedCard({ g }: { g: CatalogGroup }) {
 /**
  * CCO-T088: a labelled band of folders/cards. Courses / Review Blitzes /
  * Practice Exams each get their own titled section (the 6/25 call's three
- * top-level categories); CCO Club and Free CEUs render as untitled sections
+ * top-level categories, [27:51]: "I'd add two more categories for blitzes
+ * and practice exams"); CCO Club and Free CEUs render as untitled sections
  * (their gradient headers already name them).
+ *
+ * 2026-07-02: `isExplore` marks a section's locked content as a compact,
+ * collapsed-by-default grid of expandable cards (LockedTile) rather than
+ * always-open accordions — one Explore section per TYPE (courses / blitz /
+ * practice), directly under its owned counterpart, not merged across types.
  */
 export interface CatalogSection {
   key: string;
   /** Eyebrow heading; omit for tiers that name themselves in-folder. */
   title?: string;
   groups: CatalogGroup[];
+  isExplore?: boolean;
 }
 
 /**
- * Catalog layout. Titled category sections (Courses → Review Blitzes → Practice
- * Exams) and the CCO Club / Free tiers render as bold gradient folders — or,
- * when locked (e.g. Club for a non-subscriber), a prominent locked card. Locked
- * COURSES drop into a compact "Explore more courses" upsell grid below.
+ * Catalog layout. Owned category sections (Courses → Review Blitzes →
+ * Practice Exams) render as bold gradient folders — or, when locked (e.g.
+ * Club for a non-subscriber), a prominent locked card. Explore sections
+ * render as a compact grid of expandable cards, one per type, so a course
+ * you don't own is scannable without dead-ending its individual products.
  */
-export function CatalogGroups({
-  sections,
-  lockedCourses,
-}: {
-  sections: CatalogSection[];
-  lockedCourses: CatalogGroup[];
-}) {
+export function CatalogGroups({ sections }: { sections: CatalogSection[] }) {
   const visible = sections.filter((s) => s.groups.length > 0);
-  if (!visible.length && !lockedCourses.length) {
+  if (!visible.length) {
     return (
       <div className="py-16 text-center">
         <p className="text-lg text-cco-muted">No exams found</p>
@@ -258,28 +260,28 @@ export function CatalogGroups({
 
   return (
     <div className="space-y-9">
-      {visible.map((section) => (
-        <section key={section.key} className="space-y-4">
-          {section.title && <Eyebrow>{section.title}</Eyebrow>}
-          {section.groups.map((g) =>
-            g.locked ? (
-              <LockedCard key={g.key} g={g} />
-            ) : (
-              <OpenFolder key={g.key} g={g} />
-            )
-          )}
-        </section>
-      ))}
-
-      {lockedCourses.length > 0 && (
-        <section>
-          <Eyebrow>Explore more courses</Eyebrow>
-          <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-3">
-            {lockedCourses.map((g) => (
-              <LockedTile key={g.key} g={g} />
-            ))}
-          </div>
-        </section>
+      {visible.map((section) =>
+        section.isExplore ? (
+          <section key={section.key} className="space-y-4">
+            {section.title && <Eyebrow>{section.title}</Eyebrow>}
+            <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-3">
+              {section.groups.map((g) => (
+                <LockedTile key={g.key} g={g} />
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section key={section.key} className="space-y-4">
+            {section.title && <Eyebrow>{section.title}</Eyebrow>}
+            {section.groups.map((g) =>
+              g.locked ? (
+                <LockedCard key={g.key} g={g} />
+              ) : (
+                <OpenFolder key={g.key} g={g} />
+              )
+            )}
+          </section>
+        )
       )}
     </div>
   );

@@ -197,47 +197,69 @@ export default async function CatalogPage({
     category?: TestCategory;
   };
 
-  // CCO-T088 catalog redesign (2026-07-02): a course you own NOTHING in — no
-  // Course Module, no Blitz, no Practice Exam — merges into ONE "Explore more
-  // courses" grid card instead of up to 3 separate full-width accordion
-  // tiles. (The first T088 cut showed every category as its own always-open
-  // accordion regardless of ownership: 16-18 tiles stacked ~3000px tall for a
-  // non-enrolled visitor. Jakub: "we had a lovely catalog, and now it's a
-  // little bit shit... a lot of clicking.") A course you own SOMETHING in
-  // keeps the rich accordion treatment for that owned slice — unaffected.
+  // CCO-T088 catalog redesign (2026-07-02): a course you own NOTHING in a
+  // given TYPE — Course Module, Blitz, or Practice Exam — collapses into ONE
+  // grid card per course within that type's own "Explore" section, instead
+  // of an always-open accordion. (The first T088 cut showed every category
+  // as its own always-open accordion regardless of ownership: 16-18 tiles
+  // stacked ~3000px tall for a non-enrolled visitor. Jakub: "we had a lovely
+  // catalog, and now it's a little bit shit... a lot of clicking.") A course
+  // you own SOMETHING in keeps the rich accordion for that owned slice.
   //
-  // The merged card stays COLLAPSED by default (the density win) but is
-  // itself expandable, carrying every individual test by name — never a
-  // dead-end count-only card. (Audit 2026-07-02: yesterday's catalog gave
-  // each distinct product, e.g. "PBC PE - Ruby", its own visible locked
-  // tile; a pure aggregate count here would have silently hidden 33 named
-  // products behind 9 generic course cards. Jakub: "I really need this to
-  // work the way we discussed... don't want anyone missing out on
-  // potentially buying stuff." Named-product visibility is preserved on
-  // expand — density and discoverability, not one traded for the other.)
-  const exploreCounts = new Map<
-    string,
-    { title: string; unlockUrl: string; counts: CourseExploreCounts; cards: TestCardProps[] }
-  >();
+  // 2026-07-02 correction: Explore is split by TYPE — "Explore more courses"
+  // / "Explore more Blitz" / "Explore more Practice Exams" — matching the
+  // SAME 3-category structure the owned sections already use (Laureen,
+  // 6/25 call [27:51]: "I'd add two more categories for blitzes and practice
+  // exams"). An earlier pass merged all 3 types into one per-course card,
+  // which lost that separation for locked content. Each card stays
+  // COLLAPSED by default (the density win) but is itself expandable,
+  // carrying every individual test by name — never a dead-end count-only
+  // card. (Audit 2026-07-02: yesterday's catalog gave each distinct
+  // product, e.g. "PBC PE - Ruby", its own visible locked tile; an
+  // aggregate-only card would silently hide named products behind a count.
+  // Jakub: "I really need this to work the way we discussed... don't want
+  // anyone missing out on potentially buying stuff.")
+  const exploreCourseModules = new Map<string, { unlockUrl: string; cards: TestCardProps[] }>();
+  const exploreBlitz = new Map<string, { unlockUrl: string; cards: TestCardProps[] }>();
+  const explorePracticeExams = new Map<string, { unlockUrl: string; cards: TestCardProps[] }>();
   const addExplore = (
+    target: Map<string, { unlockUrl: string; cards: TestCardProps[] }>,
     courseKey: string,
     unlockUrl: string,
-    field: keyof CourseExploreCounts,
     newCards: TestCardProps[]
   ) => {
-    let e = exploreCounts.get(courseKey);
+    let e = target.get(courseKey);
     if (!e) {
-      e = {
-        title: courseKey,
-        unlockUrl,
-        counts: { courseModules: 0, blitz: 0, practiceExams: 0 },
-        cards: [],
-      };
-      exploreCounts.set(courseKey, e);
+      e = { unlockUrl, cards: [] };
+      target.set(courseKey, e);
     }
-    e.counts[field] += newCards.length;
     e.cards.push(...newCards);
   };
+  // One card per course within a single type's Explore section, e.g. "17
+  // chapters" / "1 blitz" / "3 practice" — courseBadgeLabel naturally
+  // reduces to a single term since only one of its three counts is nonzero.
+  const buildExploreSection = (
+    map: Map<string, { unlockUrl: string; cards: TestCardProps[] }>,
+    countsField: keyof CourseExploreCounts
+  ): BuiltGroup[] =>
+    [...map.entries()]
+      .map(([courseKey, { unlockUrl, cards }]) => {
+        const counts: CourseExploreCounts = { courseModules: 0, blitz: 0, practiceExams: 0 };
+        counts[countsField] = cards.length;
+        return {
+          key: `explore:${countsField}:${courseKey}`,
+          title: courseKey,
+          subtitle: courseBadgeLabel(counts),
+          accent: "purple" as GroupAccent,
+          locked: true,
+          defaultOpen: false,
+          count: cards.length,
+          cards: cards.sort((a, b) => a.name.localeCompare(b.name)),
+          upsell: { href: unlockUrl, label: "Enroll to unlock" },
+          kind: "course" as GroupKind,
+        };
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
 
   const built: BuiltGroup[] = [];
   for (const { meta, entries } of acc.values()) {
@@ -252,9 +274,9 @@ export default async function CatalogPage({
       const unlockUrl = courseEnrolUrl(meta.courseKey ?? null);
       if (locked) {
         addExplore(
+          meta.category === "blitz" ? exploreBlitz : explorePracticeExams,
           meta.courseKey ?? "Other",
           unlockUrl,
-          meta.category === "blitz" ? "blitz" : "practiceExams",
           entries.map((e) => toCard(e.test, { locked: true, unlockUrl }))
         );
         continue;
@@ -289,9 +311,9 @@ export default async function CatalogPage({
     if (meta.kind === "course" && locked) {
       const unlockUrl = courseEnrolUrl(meta.title);
       addExplore(
+        exploreCourseModules,
         meta.title,
         unlockUrl,
-        "courseModules",
         entries.map((e) => toCard(e.test, { locked: true, unlockUrl }))
       );
       continue;
@@ -340,32 +362,19 @@ export default async function CatalogPage({
     });
   }
 
-  // One card per course, badge-labelled by what's inside (e.g. "17 chapters
-  // · 9 blitz · 4 practice"), for the Explore grid — collapsed by default,
-  // but carries every individual test by name (`cards`) so expanding it
-  // never dead-ends; nothing that named a specific product yesterday is
-  // unreachable today, just one click deeper.
-  const lockedCourses: BuiltGroup[] = [...exploreCounts.entries()]
-    .map(([courseKey, { title, unlockUrl, counts, cards }]) => ({
-      key: `explore:${courseKey}`,
-      title,
-      subtitle: courseBadgeLabel(counts),
-      accent: "purple" as GroupAccent,
-      locked: true,
-      defaultOpen: false,
-      count: counts.courseModules + counts.blitz + counts.practiceExams,
-      cards: cards.sort((a, b) => a.name.localeCompare(b.name)),
-      upsell: { href: unlockUrl, label: "Enroll to unlock" },
-      kind: "course" as GroupKind,
-    }))
-    .sort((a, b) => a.title.localeCompare(b.title));
+  // Three separate Explore sections — one per type, matching the same split
+  // used for owned content — each collapsed-by-default but individually
+  // expandable (see buildExploreSection above).
+  const exploreCourseSection = buildExploreSection(exploreCourseModules, "courseModules");
+  const exploreBlitzSection = buildExploreSection(exploreBlitz, "blitz");
+  const explorePracticeSection = buildExploreSection(explorePracticeExams, "practiceExams");
 
   const byTitle = (a: CatalogGroup, b: CatalogGroup) =>
     a.title.localeCompare(b.title);
 
   // CCO-T088 layout: three purple category bands (Your Courses → Review Blitzes
-  // → Practice Exams) hold ONLY owned content now; every locked course — Course
-  // Module, Blitz, or Practice Exam alike — merged into `lockedCourses` above.
+  // → Practice Exams) hold ONLY owned content; each has its own Explore
+  // section directly below it for locked content of that SAME type.
   const enrolledCourses = built.filter((g) => g.kind === "course").sort(byTitle);
   const blitzTiles = built.filter((g) => g.category === "blitz").sort(byTitle);
   const peTiles = built.filter((g) => g.category === "practice_exam").sort(byTitle);
@@ -379,8 +388,11 @@ export default async function CatalogPage({
       title: enrolledCourses.length ? "Your Courses" : undefined,
       groups: enrolledCourses,
     },
+    { key: "explore-courses", title: "Explore more courses", groups: exploreCourseSection, isExplore: true },
     { key: "blitzes", title: "Review Blitzes", groups: blitzTiles },
+    { key: "explore-blitzes", title: "Explore more Blitz", groups: exploreBlitzSection, isExplore: true },
     { key: "practice-exams", title: "Practice Exams", groups: peTiles },
+    { key: "explore-practice", title: "Explore more Practice Exams", groups: explorePracticeSection, isExplore: true },
     { key: "combo", title: "Blitz & Practice Exams", groups: comboTiles },
     { key: "club", groups: built.filter((g) => g.kind === "club") },
     { key: "free", groups: built.filter((g) => g.kind === "free") },
@@ -405,7 +417,7 @@ export default async function CatalogPage({
         <CatalogFilters />
       </Suspense>
 
-      <CatalogGroups sections={sections} lockedCourses={lockedCourses} />
+      <CatalogGroups sections={sections} />
     </div>
   );
 }
