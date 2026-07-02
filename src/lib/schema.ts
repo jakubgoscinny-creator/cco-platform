@@ -68,6 +68,15 @@ export const questions = pgTable(
     difficulty: text("difficulty"), // 'Foundational' | 'Intermediate' | 'Advanced'
     disposition: text("disposition"), // 'Course Exam' | 'Practice Exam' | etc.
     status: text("status"),
+    // CCO-T079: the "Question status" gate field (Podio field 276090193 —
+    // NOT the same as `status` above, which mirrors the unrelated
+    // "Management Status" field 126284767 that nothing filters on). Option
+    // ids: 1 Current | 2 Updated-see-latest-version | 3 Draft | 4 Under
+    // Review | 5 Archived — stored by id, not label, per QUESTION_GATE_STATUS
+    // in podio.ts (labels can be relabelled in Podio; ids are stable). NULL =
+    // never gated (test-wide default-visible; see filterQuestionsByGateStatus
+    // in sync.ts for the per-test opt-in filtering rule).
+    gateStatusOptionId: integer("gate_status_option_id"),
     // CCO-T065: the Podio Tests (16243239) item_ids this question is linked to,
     // mirrored from the QB Multi Choice "Tests" app-ref field (137526907) at
     // sync time. This is the linkage that makes the questions mirror queryable

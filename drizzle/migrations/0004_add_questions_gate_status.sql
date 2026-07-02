@@ -1,0 +1,12 @@
+-- CCO-T079: the real Live/Draft portal-visibility gate field (Podio "Question
+-- status" 276090193 -- NOT the pre-existing `status` column, which mirrors
+-- the unrelated "Management Status" field 126284767 that nothing filters on).
+-- Stored by option id (1 Current | 2 Updated-see-latest-version | 3 Draft |
+-- 4 Under Review | 5 Archived), not label -- labels can be relabelled in
+-- Podio without notice. NULL = never gated (see filterQuestionsByGateStatus
+-- in src/lib/sync.ts for the per-test opt-in filtering rule).
+--
+-- Hand-trimmed to only the new column, following the 0001/0002/0003
+-- convention (this project applies schema via idempotent scripts/apply-*.mjs,
+-- never `drizzle-kit migrate`). Apply path: scripts/apply-t079-gate-status.mjs.
+ALTER TABLE "questions" ADD COLUMN IF NOT EXISTS "gate_status_option_id" integer;

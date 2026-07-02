@@ -65,7 +65,9 @@ import {
   getMirroredQuestionsForTest,
   getCeuItemsForTest,
   resolveQuestionImages,
+  filterQuestionsByGateStatus,
 } from "./sync";
+import { QUESTION_GATE_STATUS } from "./podio";
 
 // Reset call counts between every test in this file — several describe
 // blocks share the hoisted `h` mock, and an uncleared count from one test
@@ -130,6 +132,60 @@ describe("mapPodioQuestion test linkage (CCO-T065)", () => {
     } as unknown as PodioItem;
     const rec = mapPodioQuestion(item);
     expect(rec!.testPodioIds).toEqual([]);
+  });
+
+  it("CCO-T079: captures the gate-status option id from field 276090193 (by id, not label)", () => {
+    const item = {
+      ...QUESTION_ITEM,
+      fields: [
+        ...QUESTION_ITEM.fields,
+        field(QUESTION_FIELDS.GATE_STATUS, [{ value: { id: 1, text: "Current" } }]),
+      ],
+    } as unknown as PodioItem;
+    const rec = mapPodioQuestion(item);
+    expect(rec!.gateStatusOptionId).toBe(1);
+  });
+
+  it("CCO-T079: an ungated question (no gate-status value in Podio) maps to null, not undefined", () => {
+    const rec = mapPodioQuestion(QUESTION_ITEM);
+    expect(rec!.gateStatusOptionId).toBeNull();
+  });
+});
+
+describe("filterQuestionsByGateStatus (CCO-T079)", () => {
+  const q = (id: number, gateStatusOptionId: number | null) => ({
+    podioItemId: id,
+    gateStatusOptionId,
+  });
+
+  it("leaves an entirely-ungated test untouched — every question serves, exactly as before this feature existed", () => {
+    const list = [q(1, null), q(2, null), q(3, null)];
+    expect(filterQuestionsByGateStatus(list)).toEqual(list);
+  });
+
+  it("once ANY question in the test is gated, keeps ONLY Current — Draft/Under-Review/Archived AND still-ungated siblings all drop", () => {
+    const list = [
+      q(1, QUESTION_GATE_STATUS.CURRENT),
+      q(2, QUESTION_GATE_STATUS.DRAFT),
+      q(3, QUESTION_GATE_STATUS.UNDER_REVIEW),
+      q(4, QUESTION_GATE_STATUS.ARCHIVED),
+      q(5, QUESTION_GATE_STATUS.UPDATED),
+      q(6, null), // never touched — still excluded once the test is gated
+    ];
+    expect(filterQuestionsByGateStatus(list)).toEqual([q(1, QUESTION_GATE_STATUS.CURRENT)]);
+  });
+
+  it("a gated test with nothing marked Current correctly returns empty (matches the real MTA shape: 30 Current out of 374 linked)", () => {
+    const list = [q(1, QUESTION_GATE_STATUS.DRAFT), q(2, QUESTION_GATE_STATUS.UNDER_REVIEW)];
+    expect(filterQuestionsByGateStatus(list)).toEqual([]);
+  });
+
+  it("real MTA shape: 30 Current + 344 ungated → only the 30 Current serve", () => {
+    const current = Array.from({ length: 30 }, (_, i) => q(i, QUESTION_GATE_STATUS.CURRENT));
+    const ungated = Array.from({ length: 344 }, (_, i) => q(1000 + i, null));
+    const result = filterQuestionsByGateStatus([...current, ...ungated]);
+    expect(result).toHaveLength(30);
+    expect(result.every((r) => r.gateStatusOptionId === QUESTION_GATE_STATUS.CURRENT)).toBe(true);
   });
 });
 

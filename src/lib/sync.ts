@@ -12,6 +12,7 @@ import {
   getTextValue,
   getCategoryValue,
   getCategoryValues,
+  getCategoryOptionId,
   getNumberValue,
   getDateValue,
   getAppReferenceIds,
@@ -20,6 +21,7 @@ import {
   CEU_ITEM_FIELDS,
   DOMAIN_FIELDS,
   QUESTION_FIELDS,
+  QUESTION_GATE_STATUS,
   withPodioFallback,
   type PodioItem,
 } from "./podio";
@@ -406,6 +408,35 @@ export async function getDomainNames(
 // ---------------------------------------------------------------------------
 
 /**
+ * CCO-T079: per-test opt-in Live/Draft gating. A test where NOBODY has ever
+ * touched the "Question status" gate field (every question's
+ * gateStatusOptionId is null) is completely unaffected — every question
+ * still serves, exactly as before this feature existed. Only once a test has
+ * at least ONE explicitly-gated question does it switch to strict mode:
+ * ONLY QUESTION_GATE_STATUS.CURRENT questions serve; Draft / Under Review /
+ * Updated-see-latest-version / Archived / still-ungated siblings in that
+ * SAME test are all excluded.
+ *
+ * This is deliberately per-TEST, not global — Mary curates one chapter at a
+ * time (verified live 2026-07-02: MTA already has exactly 30 questions
+ * marked Current, matching her stated "~30 questions Live" cap), and a
+ * global "hide anything not explicitly Current" rule would have hidden the
+ * ~88% of the ENTIRE question bank that has never had this field touched.
+ *
+ * Exported for unit testing — this is the load-bearing safety rule for a
+ * student-facing hot path (exam question selection).
+ */
+export function filterQuestionsByGateStatus<
+  T extends { gateStatusOptionId: number | null },
+>(list: T[]): T[] {
+  const isGated = list.some((q) => q.gateStatusOptionId != null);
+  if (!isGated) return list;
+  return list.filter(
+    (q) => q.gateStatusOptionId === QUESTION_GATE_STATUS.CURRENT
+  );
+}
+
+/**
  * CCO-T065: read the last-synced questions for a test straight from the Neon
  * mirror — NO Podio call. This is the exam-start fallback for when a live Podio
  * sync fails (e.g. an HTTP 420 rate-limit, the 2026-06-24 outage): every other
@@ -428,11 +459,12 @@ export async function getDomainNames(
 export async function getMirroredQuestionsForTest(
   testPodioId: number
 ): Promise<Question[]> {
-  return db
+  const rows = await db
     .select()
     .from(questions)
     .where(arrayContains(questions.testPodioIds, [testPodioId]))
     .orderBy(questions.podioItemId);
+  return filterQuestionsByGateStatus(rows);
 }
 
 export async function syncQuestionsForTest(
@@ -475,7 +507,7 @@ export async function syncQuestionsForTest(
     records.push({ ...record, imageFiles: null, syncedAt: new Date() });
   }
 
-  return records;
+  return filterQuestionsByGateStatus(records);
 }
 
 /**
@@ -533,6 +565,7 @@ export function mapPodioQuestion(
   const rationale = getTextValue(item, QUESTION_FIELDS.RATIONALE);
   const disposition = getCategoryValue(item, QUESTION_FIELDS.DISPOSITION);
   const status = getCategoryValue(item, QUESTION_FIELDS.STATUS);
+  const gateStatusOptionId = getCategoryOptionId(item, QUESTION_FIELDS.GATE_STATUS);
 
   const options = [
     { key: "A", text: optA },
@@ -553,6 +586,11 @@ export function mapPodioQuestion(
     difficulty: null, // not reliably populated
     disposition: disposition || null,
     status: status || null,
+    // CCO-T079: the real Live/Draft gate (see QUESTION_FIELDS.GATE_STATUS
+    // docs). NULL means never gated — filterQuestionsByGateStatus treats
+    // that as "this test isn't curated yet, serve everything" so tests
+    // nobody has touched are completely unaffected.
+    gateStatusOptionId,
     // CCO-T065: persist the test linkage so the questions mirror is queryable
     // by test (getMirroredQuestionsForTest). Without this the exam-start Neon
     // fallback has nothing to read on a Podio outage.

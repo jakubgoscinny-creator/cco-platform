@@ -675,8 +675,28 @@ export const QUESTION_FIELDS = {
   CORRECT_ANSWER: 126153579,
   RATIONALE: 126153582,
   TESTS: 137526907,
-  STATUS: 126284767,
+  STATUS: 126284767, // "Management Status" — captured, unused by any filter
   DISPOSITION: 273026086,
+  // CCO-T079: "Question status" — the ACTUAL Live/Draft portal-visibility
+  // gate (Laureen, 2026-07-02: "this is the gate Question status: Draft
+  // Under Review Current Updated-see latest version Archived"). Confirmed
+  // live 2026-07-02: the QB Multi Choice app has 21 fields all labeled
+  // "Question status" — 20 are `status:"deleted"` legacy duplicates; this
+  // is the one `status:"active"` field with exactly those 5 live options.
+  GATE_STATUS: 276090193,
+} as const;
+
+/**
+ * CCO-T079: option ids for QUESTION_FIELDS.GATE_STATUS, by id not label
+ * (Podio labels can be relabelled without notice — see the option-id-not-
+ * label lesson from CCO-T064 §10 P2#8). Verified live 2026-07-02.
+ */
+export const QUESTION_GATE_STATUS = {
+  CURRENT: 1,
+  UPDATED: 2, // "Updated-see latest version" — superseded, deliberately excluded
+  DRAFT: 3,
+  UNDER_REVIEW: 4,
+  ARCHIVED: 5,
 } as const;
 
 // Podio Platform Profiles has TWO password-related fields:
