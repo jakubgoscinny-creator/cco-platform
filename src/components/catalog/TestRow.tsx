@@ -16,7 +16,7 @@ function shortLabel(name: string): string {
  * not started — so a 27-chapter course reads as a progress board, not a scroll.
  */
 export function TestRow({ test }: { test: TestCardProps }) {
-  const { id, name, questionCount, locked, passed, attempted, scorePercent } = test;
+  const { id, name, questionCount, locked, unlockUrl, passed, attempted, scorePercent } = test;
   const done = passed === true;
   const score = scorePercent != null ? Math.round(scorePercent) : null;
   const label = shortLabel(name);
@@ -56,7 +56,7 @@ export function TestRow({ test }: { test: TestCardProps }) {
 
         {locked ? (
           <a
-            href={CLUB_URL}
+            href={unlockUrl ?? CLUB_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 inline-flex items-center gap-1 rounded-full bg-cco-gold/15 px-3 py-1 text-xs font-semibold text-cco-gold-dark no-underline transition hover:bg-cco-gold/25"

@@ -149,6 +149,60 @@ describe("canAccessTest — Student tier", () => {
   });
 });
 
+describe("canAccessTest — CCO-T088 bundle expansion", () => {
+  // A bundle purchase lands as a single tracker type naming the bundle.
+  const pbcPeBundleBuyer = {
+    subscriptionStatus: null,
+    enrolledTrackerTypes: ["PBC PE Bundle (Ruby, Sapphire, Topaz)"],
+  };
+  const icd10gBundleBuyer = {
+    subscriptionStatus: null,
+    enrolledTrackerTypes: ["ICD10G PE Bundle"], // no gemstone list
+  };
+
+  const pbcRuby = { accessTier: "Student", studentTrackerType: "PBC PE  -  Ruby" };
+  const pbcTopaz = { accessTier: "Student", studentTrackerType: "PBC PE  - Topaz" };
+  const pbcBlitz = { accessTier: "Student", studentTrackerType: "PBC - Review Blitz" };
+  const pbcCourseModule = { accessTier: "Student", studentTrackerType: "PBC" };
+  const fbcPe = { accessTier: "Student", studentTrackerType: "FBC PE  -  Alexandrite" };
+  const icd10gPe = { accessTier: "Student", studentTrackerType: "ICD10G PE - Peridot" };
+
+  it("unlocks every practice exam of the bundle's course", () => {
+    expect(canAccessTest(pbcRuby, pbcPeBundleBuyer)).toBe("allowed");
+    expect(canAccessTest(pbcTopaz, pbcPeBundleBuyer)).toBe("allowed");
+  });
+
+  it("unlocks even when the bundle names no gemstones", () => {
+    expect(canAccessTest(icd10gPe, icd10gBundleBuyer)).toBe("allowed");
+  });
+
+  it("does NOT leak into the same course's OTHER category (blitz) or course modules", () => {
+    expect(canAccessTest(pbcBlitz, pbcPeBundleBuyer)).toBe("members_only");
+    // Critical: a PE bundle must never unlock course-module content.
+    expect(canAccessTest(pbcCourseModule, pbcPeBundleBuyer)).toBe("members_only");
+  });
+
+  it("does NOT leak into a different course's practice exams", () => {
+    expect(canAccessTest(fbcPe, pbcPeBundleBuyer)).toBe("members_only");
+  });
+
+  it("still unlocks an individually-purchased gemstone (exact match unchanged)", () => {
+    expect(
+      canAccessTest(pbcRuby, {
+        subscriptionStatus: null,
+        enrolledTrackerTypes: ["PBC PE  -  Ruby"],
+      })
+    ).toBe("allowed");
+    // …but only that one — the sibling gemstone stays locked.
+    expect(
+      canAccessTest(pbcTopaz, {
+        subscriptionStatus: null,
+        enrolledTrackerTypes: ["PBC PE  -  Ruby"],
+      })
+    ).toBe("members_only");
+  });
+});
+
 describe("isEntitledTrackerStatus (CCO-T056c)", () => {
   it("treats unknown/null/undefined status as entitled (fail-open)", () => {
     expect(isEntitledTrackerStatus(null)).toBe(true);
