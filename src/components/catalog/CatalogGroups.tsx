@@ -128,36 +128,58 @@ const CTA_TEXT: Record<GroupAccent, string> = {
   gold: "text-cco-gold-dark",
 };
 
+// Collapsed by default (the density win), but expands in place to name every
+// individual test — never a dead-end aggregate. Spans the full grid row when
+// open so a long expanded list doesn't cramp its row-mates.
 function LockedTile({ g }: { g: CatalogGroup }) {
   return (
-    <a
-      href={g.upsell?.href ?? "#"}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group/tile relative flex flex-col gap-3 rounded-xl border border-cco-border/70 bg-cco-card p-4 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:border-cco-border hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)]"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${ICON_CHIP[g.accent]}`}
-        >
-          <Lock size={16} />
-        </span>
-      </div>
-      <div>
-        <h3 className="font-heading text-base font-bold leading-tight text-cco-ink">
-          {g.title}
-        </h3>
-        {g.subtitle && (
-          <p className="mt-1 text-xs font-medium text-cco-muted">{g.subtitle}</p>
-        )}
-      </div>
-      <span
-        className={`mt-auto inline-flex items-center gap-1 self-start text-xs font-bold transition-all group-hover/tile:gap-1.5 ${CTA_TEXT[g.accent]}`}
+    <details className="group/tile open:col-span-2 open:lg:col-span-3">
+      <summary
+        className="flex cursor-pointer list-none select-none flex-col gap-3 rounded-xl border border-cco-border/70 bg-cco-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-cco-border hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)] group-open/tile:rounded-b-none [&::-webkit-details-marker]:hidden"
       >
-        {g.upsell?.label ?? "Locked"}
-        <ArrowRight size={12} />
-      </span>
-    </a>
+        <div className="flex items-start justify-between gap-2">
+          <span
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${ICON_CHIP[g.accent]}`}
+          >
+            <Lock size={16} />
+          </span>
+          <ChevronDown
+            size={16}
+            className="mt-1.5 shrink-0 text-cco-muted transition-transform duration-200 group-open/tile:rotate-180"
+          />
+        </div>
+        <div>
+          <h3 className="font-heading text-base font-bold leading-tight text-cco-ink">
+            {g.title}
+          </h3>
+          {g.subtitle && (
+            <p className="mt-1 text-xs font-medium text-cco-muted">{g.subtitle}</p>
+          )}
+        </div>
+        <span className={`inline-flex items-center gap-1 self-start text-xs font-bold ${CTA_TEXT[g.accent]}`}>
+          See what's inside
+          <ArrowRight size={12} />
+        </span>
+      </summary>
+      <div className="rounded-b-xl border border-t-0 border-cco-border/70 bg-cco-bg-soft/40 p-3">
+        {g.upsell && (
+          <a
+            href={g.upsell.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold shadow-sm transition hover:-translate-y-px hover:shadow-md ${ACCENT[g.accent].cta}`}
+          >
+            <Lock size={12} />
+            {g.upsell.label}
+          </a>
+        )}
+        <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          {g.cards.map((c) => (
+            <TestRow key={c.id} test={c} />
+          ))}
+        </div>
+      </div>
+    </details>
   );
 }
 

@@ -205,15 +205,25 @@ export default async function CatalogPage({
   // non-enrolled visitor. Jakub: "we had a lovely catalog, and now it's a
   // little bit shit... a lot of clicking.") A course you own SOMETHING in
   // keeps the rich accordion treatment for that owned slice — unaffected.
+  //
+  // The merged card stays COLLAPSED by default (the density win) but is
+  // itself expandable, carrying every individual test by name — never a
+  // dead-end count-only card. (Audit 2026-07-02: yesterday's catalog gave
+  // each distinct product, e.g. "PBC PE - Ruby", its own visible locked
+  // tile; a pure aggregate count here would have silently hidden 33 named
+  // products behind 9 generic course cards. Jakub: "I really need this to
+  // work the way we discussed... don't want anyone missing out on
+  // potentially buying stuff." Named-product visibility is preserved on
+  // expand — density and discoverability, not one traded for the other.)
   const exploreCounts = new Map<
     string,
-    { title: string; unlockUrl: string; counts: CourseExploreCounts }
+    { title: string; unlockUrl: string; counts: CourseExploreCounts; cards: TestCardProps[] }
   >();
   const addExplore = (
     courseKey: string,
     unlockUrl: string,
     field: keyof CourseExploreCounts,
-    n: number
+    newCards: TestCardProps[]
   ) => {
     let e = exploreCounts.get(courseKey);
     if (!e) {
@@ -221,10 +231,12 @@ export default async function CatalogPage({
         title: courseKey,
         unlockUrl,
         counts: { courseModules: 0, blitz: 0, practiceExams: 0 },
+        cards: [],
       };
       exploreCounts.set(courseKey, e);
     }
-    e.counts[field] += n;
+    e.counts[field] += newCards.length;
+    e.cards.push(...newCards);
   };
 
   const built: BuiltGroup[] = [];
@@ -243,7 +255,7 @@ export default async function CatalogPage({
           meta.courseKey ?? "Other",
           unlockUrl,
           meta.category === "blitz" ? "blitz" : "practiceExams",
-          total
+          entries.map((e) => toCard(e.test, { locked: true, unlockUrl }))
         );
         continue;
       }
@@ -275,7 +287,13 @@ export default async function CatalogPage({
     // Course (Course Module) tiles: same rule — locked ones merge into the
     // Explore grid instead of the old per-course locked accordion/card.
     if (meta.kind === "course" && locked) {
-      addExplore(meta.title, courseEnrolUrl(meta.title), "courseModules", total);
+      const unlockUrl = courseEnrolUrl(meta.title);
+      addExplore(
+        meta.title,
+        unlockUrl,
+        "courseModules",
+        entries.map((e) => toCard(e.test, { locked: true, unlockUrl }))
+      );
       continue;
     }
 
@@ -323,9 +341,12 @@ export default async function CatalogPage({
   }
 
   // One card per course, badge-labelled by what's inside (e.g. "17 chapters
-  // · 9 blitz · 4 practice"), for the Explore grid.
+  // · 9 blitz · 4 practice"), for the Explore grid — collapsed by default,
+  // but carries every individual test by name (`cards`) so expanding it
+  // never dead-ends; nothing that named a specific product yesterday is
+  // unreachable today, just one click deeper.
   const lockedCourses: BuiltGroup[] = [...exploreCounts.entries()]
-    .map(([courseKey, { title, unlockUrl, counts }]) => ({
+    .map(([courseKey, { title, unlockUrl, counts, cards }]) => ({
       key: `explore:${courseKey}`,
       title,
       subtitle: courseBadgeLabel(counts),
@@ -333,7 +354,7 @@ export default async function CatalogPage({
       locked: true,
       defaultOpen: false,
       count: counts.courseModules + counts.blitz + counts.practiceExams,
-      cards: [],
+      cards: cards.sort((a, b) => a.name.localeCompare(b.name)),
       upsell: { href: unlockUrl, label: "Enroll to unlock" },
       kind: "course" as GroupKind,
     }))
