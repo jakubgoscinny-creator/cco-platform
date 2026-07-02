@@ -533,7 +533,7 @@ export async function getCeuItemsForTest(
     .limit(1);
 
   const ids = test?.ceuItemIds ?? [];
-  if (!ids.length) return [];
+  if (!ids.length) return getCeuItemsForTestByReverseLink(testPodioId);
 
   // Check cache
   const cached = await db
@@ -554,6 +554,36 @@ export async function getCeuItemsForTest(
   }
 
   return cached;
+}
+
+/**
+ * CCO-T078: fallback for when a Test's own "CEU Items" reference field
+ * (TEST_FIELDS.CEU_ITEMS) is empty. Mary's content-authoring habit links the
+ * CEU Item -> Test direction (CEU_ITEM_FIELDS.RELATED_TEST) without always
+ * also setting the reverse Test -> CEU Item link — Podio does not keep these
+ * two independent reference fields in sync automatically. A live probe found
+ * this in 5/22 (~23%) of recently CEU-linked tests, including item 1271 /
+ * "CCO Club Q&A #1737" — each one would otherwise silently show no cert
+ * download button despite having a real, cert-attached CEU item. This does
+ * one live Podio filter call (only reached when the fast forward-link path
+ * comes up empty, i.e. right after a CEU exam submission for an
+ * under-linked test — infrequent, not a hot path) and syncs anything found
+ * into the ceuItems mirror so subsequent reads for the same test are fast.
+ */
+async function getCeuItemsForTestByReverseLink(
+  testPodioId: number
+): Promise<CeuItem[]> {
+  const result = await filterItems(PODIO_APPS.CEU_ITEMS, {
+    [CEU_ITEM_FIELDS.RELATED_TEST]: [testPodioId],
+  }).catch((err) => {
+    console.error(
+      `CCO-T078: reverse-link CEU lookup failed for test ${testPodioId}:`,
+      err
+    );
+    return null;
+  });
+  if (!result?.items.length) return [];
+  return syncCeuItems(result.items.map((it) => it.item_id));
 }
 
 async function syncCeuItems(itemIds: number[]): Promise<CeuItem[]> {
