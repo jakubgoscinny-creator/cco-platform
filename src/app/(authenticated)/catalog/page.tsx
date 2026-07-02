@@ -202,11 +202,14 @@ export default async function CatalogPage({
 
     // Per-course Blitz / Practice-Exam tile (CCO-T088): show EVERY test in the
     // course's tile with individual padlocks (bought Ruby → Ruby open,
-    // Sapphire/Topaz padlocked), but only once the viewer can take at least one
-    // — otherwise hide the tile rather than show a lonely locked mega-tile (the
-    // per-course sales page is the upsell surface for the unenrolled).
+    // Sapphire/Topaz padlocked). CCO-T044 (2026-05-29) established that every
+    // section shows as a folder — a fully-locked one stays visible as an
+    // upsell, never hidden. (Regression found 2026-07-02: an earlier version
+    // of this block hid the tile entirely when accessible.length === 0,
+    // silently dropping whole courses like PBB from view for anyone not
+    // enrolled — reverted to match the established pattern.)
     if (meta.kind === "category" && meta.category !== "blitz_practice_combo") {
-      if (accessible.length === 0) continue;
+      const locked = accessible.length === 0;
       const unlockUrl = courseEnrolUrl(meta.courseKey ?? null);
       const cards = entries
         .map((e) => toCard(e.test, { locked: !e.allowed, unlockUrl }))
@@ -215,13 +218,19 @@ export default async function CatalogPage({
       built.push({
         key: meta.key,
         title: meta.title,
-        subtitle:
-          meta.category === "blitz"
+        subtitle: locked
+          ? meta.category === "blitz"
+            ? "Enrol to unlock these review blitz exams"
+            : "Enrol to unlock these practice exams"
+          : meta.category === "blitz"
             ? "Rapid review blitz exams — take the ones you've unlocked"
             : "Full-length practice exams — take the ones you've unlocked",
         accent: meta.accent,
+        // Always an open folder (never LockedCard) — individual per-card
+        // padlocks (toCard above) already carry the enrol link, even when
+        // every card in the tile is locked.
         locked: false,
-        defaultOpen: total <= 6,
+        defaultOpen: !locked && total <= 6,
         count: total,
         cards,
         progress: cards.length > 0 ? { done, total: cards.length } : undefined,
